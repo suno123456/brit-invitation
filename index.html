@@ -27,16 +27,13 @@
 
   <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden text-center border-t-4 border-invitation-gold my-4">
     
-    <!-- תמונת ההזמנה שלכם עם הסיומת המדויקת -->
     <img src="invitation.jpeg" alt="הזמנה לברית" class="w-full h-auto object-cover border-b border-gray-100">
 
     <div class="p-6 md:p-8">
       
-      <!-- אזור הטופס והפרטים (יוסתר לאחר השליחה) -->
       <div id="mainContent">
         <h2 class="text-2xl font-bold text-invitation-blue mb-4">נשמח לראותכם! 💙</h2>
 
-        <!-- בלוק פרטי האירוע -->
         <div class="bg-slate-50 rounded-2xl p-4 mb-6 border border-gray-100">
           <div class="flex justify-center items-center space-x-8 space-x-reverse text-invitation-blue mb-4">
             <div class="text-center">
@@ -55,12 +52,11 @@
             <p class="text-xs text-gray-500">רחוב ערבה 1, גבעת שמואל</p>
           </div>
 
-          <a href="https://waze.com/ul?q=אפטאון+אורבן+גבעת+שמואל" target="_blank" class="flex items-center justify-center w-full border border-invitation-gold text-invitation-gold hover:bg-invitation-gold hover:text-white font-bold py-2 rounded-xl transition duration-300 text-sm">
+          <a href="https://waze.com/ul?q=ערבה+1+גבעת+שמואל" target="_blank" class="flex items-center justify-center w-full border border-invitation-gold text-invitation-gold hover:bg-invitation-gold hover:text-white font-bold py-2 rounded-xl transition duration-300 text-sm">
             ניווט לאירוע
           </a>
         </div>
 
-        <!-- טופס אישור הגעה -->
         <form id="rsvpForm" onsubmit="handleFormSubmit(event)" class="space-y-4 text-right">
           <div>
             <label class="block text-sm font-bold mb-1 text-invitation-blue">שם מלא:</label>
@@ -90,7 +86,6 @@
           </button>
         </form>
 
-        <!-- בלוק מתנה בביט בתחתית העמוד (מוגדל ובולט יותר) -->
         <div class="mt-8 pt-6 border-t border-gray-200 text-center">
           <p class="text-sm text-slate-500 mb-3 font-medium">רוצים לשמח את ההורים במתנה?</p>
           <a href="https://www.bitpay.co.il/app/me/0C86BE34-AB28-D2B4-7C68-20985CB784DEA397" target="_blank" class="inline-flex items-center justify-center border-2 border-invitation-gold text-invitation-gold hover:bg-invitation-gold hover:text-white font-bold py-3 px-8 rounded-xl transition duration-300 text-base shadow-sm w-full">
@@ -99,14 +94,11 @@
         </div>
       </div>
 
-      <!-- מסך הצלחה (יוצג רק אחרי שליחת הטופס) -->
       <div id="successMessage" class="hidden py-4 animate-fade-in">
         <div class="text-invitation-blue text-5xl mb-4">🎉</div>
         <h3 class="text-3xl font-bold text-invitation-blue mb-2">תודה רבה!</h3>
-        <!-- הטקסט כאן ישתנה אוטומטית לפי התשובה בטופס -->
         <p id="successText" class="text-slate-600 font-medium mb-6 text-lg">האישור התקבל בהצלחה!</p>
         
-        <!-- כפתור ביט מוגדל במסך התודה - מופיע תמיד לכולם -->
         <div class="bg-blue-50 rounded-2xl p-6 border border-blue-100 mt-4 shadow-sm">
           <p class="text-base text-slate-700 mb-4 font-bold">לנוחיותכם, ניתן להעביר מתנה בביט:</p>
           <a href="https://www.bitpay.co.il/app/me/0C86BE34-AB28-D2B4-7C68-20985CB784DEA397" target="_blank" class="flex items-center justify-center w-full bg-invitation-blue hover-bg-invitation-blue text-white font-bold py-4 rounded-xl shadow-md transition duration-300 text-lg">
@@ -119,7 +111,6 @@
   </div>
 
   <script>
-    // הקישור של גוגל סקריפט שלך
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsSD3yd67bsFQb-WwpnrLqugeqFE72Co8Wjo5kkyC546Sf-HsicQgiAVmRZEaYM3M/exec';
 
     function toggleGuestCount() {
@@ -153,7 +144,6 @@
       .then(() => {
         document.getElementById("mainContent").classList.add("hidden");
         
-        // עדכון טקסט התודה בהתאם להגעה
         var successText = document.getElementById("successText");
         if (isAttending) {
           successText.innerText = "האישור התקבל, נשמח מאוד לראותכם 💙";
