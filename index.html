@@ -25,74 +25,94 @@
 </head>
 <body class="text-slate-700 p-4 flex justify-center items-center min-h-screen">
 
-  <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden text-center border-t-4 border-invitation-gold">
+  <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden text-center border-t-4 border-invitation-gold my-4">
     
-    <img src="invitation.jpeg" alt="הזמנה לברית" class="w-full h-auto object-cover border-b border-gray-100">
+    <img src="invitation.jpg" alt="הזמנה לברית" class="w-full h-auto object-cover border-b border-gray-100">
 
     <div class="p-6 md:p-8">
-      <h2 class="text-2xl font-bold text-invitation-blue mb-4">נשמח לראותכם! 💙</h2>
+      
+      <div id="mainContent">
+        <h2 class="text-2xl font-bold text-invitation-blue mb-4">נשמח לראותכם! 💙</h2>
 
-      <div class="bg-slate-50 rounded-2xl p-4 mb-6 border border-gray-100">
-        <div class="flex justify-center items-center space-x-8 space-x-reverse text-invitation-blue mb-4">
-          <div class="text-center">
-            <p class="text-xs text-gray-500 mb-0.5">יום שישי</p>
-            <p class="font-bold text-lg">26.06.26</p>
+        <div class="bg-slate-50 rounded-2xl p-4 mb-6 border border-gray-100">
+          <div class="flex justify-center items-center space-x-8 space-x-reverse text-invitation-blue mb-4">
+            <div class="text-center">
+              <p class="text-xs text-gray-500 mb-0.5">יום שישי</p>
+              <p class="font-bold text-lg">26.06.26</p>
+            </div>
+            <div class="h-8 border-l border-invitation-gold opacity-50"></div>
+            <div class="text-center">
+              <p class="text-xs text-gray-500 mb-0.5">בשעה</p>
+              <p class="font-bold text-lg">12:30</p>
+            </div>
           </div>
-          <div class="h-8 border-l border-invitation-gold opacity-50"></div>
-          <div class="text-center">
-            <p class="text-xs text-gray-500 mb-0.5">בשעה</p>
-            <p class="font-bold text-lg">12:30</p>
+          
+          <div class="text-center mb-4">
+            <p class="text-sm font-bold text-invitation-blue">אולם אפטאון אורבן</p>
+            <p class="text-xs text-gray-500">רחוב ערבה 1, גבעת שמואל</p>
           </div>
+
+          <a href="https://waze.com/ul?q=אפטאון+אורבן+גבעת+שמואל" target="_blank" class="flex items-center justify-center w-full border border-invitation-gold text-invitation-gold hover:bg-invitation-gold hover:text-white font-bold py-2 rounded-xl transition duration-300 text-sm">
+            ניווט לאירוע
+          </a>
         </div>
+
+        <form id="rsvpForm" onsubmit="handleFormSubmit(event)" class="space-y-4 text-right">
+          <div>
+            <label class="block text-sm font-bold mb-1 text-invitation-blue">שם מלא:</label>
+            <input type="text" name="name" required class="w-full border border-gray-200 p-2.5 rounded-xl bg-slate-50 focus-ring-blue transition-all">
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold mb-1 text-invitation-blue">האם תגיעו?</label>
+            <select name="attending" id="attending" onchange="toggleGuestCount()" class="w-full border border-gray-200 p-2.5 rounded-xl bg-slate-50 focus-ring-blue transition-all cursor-pointer">
+              <option value="yes">כן, נגיע בשמחה! 🎉</option>
+              <option value="no">לצערי לא נוכל להגיע</option>
+            </select>
+          </div>
+
+          <div id="guestField">
+            <label class="block text-sm font-bold mb-1 text-invitation-blue">כמות מגיעים:</label>
+            <input type="number" name="guests" value="1" min="1" class="w-full border border-gray-200 p-2.5 rounded-xl bg-slate-50 focus-ring-blue transition-all text-center">
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold mb-1 text-invitation-blue">ברכה:</label>
+            <textarea name="blessing" rows="2" placeholder="מזל טוב! 💙" class="w-full border border-gray-200 p-2.5 rounded-xl bg-slate-50 focus-ring-blue transition-all resize-none"></textarea>
+          </div>
+
+          <button type="submit" id="submitBtn" class="w-full bg-invitation-blue hover-bg-invitation-blue text-white text-lg font-bold py-3.5 rounded-xl shadow-md transition duration-300 mt-2">
+            שליחת אישור
+          </button>
+        </form>
+
+        <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+          <p class="text-xs text-gray-400 mb-2">למעוניינים בלבד - לשליחת מתנה ואיחולים חמים:</p>
+          <a href="https://www.bitpay.co.il/app/me/0C86BE34-AB28-D2B4-7C68-20985CB784DEA397" target="_blank" class="inline-flex items-center justify-center border border-invitation-gold text-invitation-gold hover:bg-invitation-gold hover:text-white font-bold py-2 px-6 rounded-xl transition duration-300 text-xs">
+            🎁 שליחת מתנה בביט
+          </a>
+        </div>
+      </div>
+
+      <div id="successMessage" class="hidden py-4 animate-fade-in">
+        <div class="text-invitation-blue text-4xl mb-3">🎉</div>
+        <h3 class="text-2xl font-bold text-invitation-blue mb-2">תודה רבה!</h3>
+        <p class="text-gray-500 font-medium mb-6">האישור התקבל בהצלחה, נשמח לראותכם 💙</p>
         
-        <div class="text-center mb-4">
-          <p class="text-sm font-bold text-invitation-blue">אולם אפטאון אורבן</p>
-          <p class="text-xs text-gray-500">רחוב ערבה 1, גבעת שמואל</p>
+        <div class="bg-slate-50 rounded-2xl p-5 border border-gray-100 mt-4">
+          <p class="text-sm text-gray-600 mb-3 font-medium">לנוחיותכם, ניתן לשלוח מתנה להורים המאושרים גם ישירות בביט:</p>
+          <a href="https://www.bitpay.co.il/app/me/0C86BE34-AB28-D2B4-7C68-20985CB784DEA397" target="_blank" class="flex items-center justify-center w-full bg-invitation-blue hover-bg-invitation-blue text-white font-bold py-3 rounded-xl shadow-md transition duration-300 text-sm">
+            🎁 לחצו כאן לשליחת מתנה בביט
+          </a>
         </div>
-
-        <a href="https://waze.com/ul?q=אפטאון+אורבן+גבעת+שמואל" target="_blank" class="flex items-center justify-center w-full border border-invitation-gold text-invitation-gold hover:bg-invitation-gold hover:text-white font-bold py-2 rounded-xl transition duration-300">
-          ניווט לאירוע
-        </a>
       </div>
 
-      <form id="rsvpForm" onsubmit="handleFormSubmit(event)" class="space-y-4 text-right">
-        <div>
-          <label class="block text-sm font-bold mb-1 text-invitation-blue">שם מלא:</label>
-          <input type="text" name="name" required class="w-full border border-gray-200 p-2.5 rounded-xl bg-slate-50 focus-ring-blue transition-all">
-        </div>
-
-        <div>
-          <label class="block text-sm font-bold mb-1 text-invitation-blue">האם תגיעו?</label>
-          <select name="attending" id="attending" onchange="toggleGuestCount()" class="w-full border border-gray-200 p-2.5 rounded-xl bg-slate-50 focus-ring-blue transition-all cursor-pointer">
-            <option value="yes">כן, נגיע בשמחה! 🎉</option>
-            <option value="no">לצערי לא נוכל להגיע</option>
-          </select>
-        </div>
-
-        <div id="guestField">
-          <label class="block text-sm font-bold mb-1 text-invitation-blue">כמות מגיעים:</label>
-          <input type="number" name="guests" value="1" min="1" class="w-full border border-gray-200 p-2.5 rounded-xl bg-slate-50 focus-ring-blue transition-all text-center">
-        </div>
-
-        <div>
-          <label class="block text-sm font-bold mb-1 text-invitation-blue">ברכה:</label>
-          <textarea name="blessing" rows="2" placeholder="מזל טוב! 💙" class="w-full border border-gray-200 p-2.5 rounded-xl bg-slate-50 focus-ring-blue transition-all resize-none"></textarea>
-        </div>
-
-        <button type="submit" id="submitBtn" class="w-full bg-invitation-blue hover-bg-invitation-blue text-white text-lg font-bold py-3.5 rounded-xl shadow-md transition duration-300 mt-2">
-          שליחת אישור
-        </button>
-      </form>
-
-      <div id="successMessage" class="hidden text-invitation-blue font-bold text-xl mt-6">
-        תודה רבה! <br> נשמח לראותכם 💙
-      </div>
     </div>
   </div>
 
   <script>
-    // הדבק כאן את הקישור שהעתקת משלב 1 (מתוך Apps Script)
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbySD3yd67bsFQb-WwpnrLqUgeqFE72Co8Wjo5kkYC546Esk5F-HsicQgiAVmRZeAY3M/exec';
+    // הקישור של גוגל סקריפט שלך (סיום ב-/exec)
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsSD3yd67bsFQb-WwpnrLqugeqFE72Co8Wjo5kkyC546Sf-HsicQgiAVmRZEaYM3M/exec';
 
     function toggleGuestCount() {
       var attending = document.getElementById("attending").value;
@@ -114,15 +134,14 @@
         blessing: form.blessing.value
       };
 
-      // שליחת הנתונים באופן מאובטח ל-Google Sheet
       fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
-        mode: 'no-cors', // קריטי כדי לעקוף חסימות דפדפן
+        mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       })
       .then(() => {
-        form.classList.add("hidden");
+        document.getElementById("mainContent").classList.add("hidden");
         document.getElementById("successMessage").classList.remove("hidden");
       })
       .catch(error => {
