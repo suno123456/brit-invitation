@@ -23,11 +23,17 @@
       <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 text-center">
         <span class="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">שלב 1</span>
         <h3 class="text-lg font-bold text-blue-800 mt-3 mb-2">תשלום מאובטח ב-Bit</h3>
-        <p class="text-sm text-slate-600 mb-4">העבירו את התשלום עבור המערכת כדי להפעיל את החשבון שלכם.</p>
+        <p class="text-sm text-slate-600 mb-4">העבירו את התשלום המופחת עבור המערכת כדי להפעיל את החשבון שלכם.</p>
         
-        <a href="https://www.bitpay.co.il/app/me/D4AE99EF-ACE6-96F6-3BB9-0D9CC8616EC99B68" target="_blank" 
+        <div class="text-center mb-4">
+          <span class="text-slate-400 line-through text-sm">99 ₪</span>
+          <span class="text-2xl font-bold text-blue-600 mr-2">רק 79 ₪</span>
+          <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-md font-bold mr-2">לזמן מוגבל!</span>
+        </div>
+
+        <a href="https://www.bitpay.co.il/app/me/D4AE99EF-ACE6-96F6-3BB9-0D9CC8616EC99B68?a=79&amount=79" target="_blank" 
            class="inline-flex items-center justify-center w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition duration-300 shadow-md">
-          💳 מעבר לתשלום ב-Bit
+          💳 מעבר לתשלום 79 ₪ ב-Bit
         </a>
       </div>
 
@@ -63,7 +69,7 @@
           <div class="flex items-start gap-2 mt-4 bg-red-50 p-3 rounded-lg border border-red-100">
             <input type="checkbox" id="confirmPayment" required class="mt-1 w-4 h-4 cursor-pointer">
             <label for="confirmPayment" class="text-xs text-slate-700 font-medium cursor-pointer">
-              <span class="text-red-600 font-bold">חובה לסמן:</span> אני מאשר/ת שביצעתי כעת העברה בביט. ידוע לי שחשבונות שיפתחו ללא תשלום מאומת יימחקו לצמיתות מהמערכת בתוך מספר שעות.
+              <span class="text-red-600 font-bold">חובה לסמן:</span> אני מאשר/ת שביצעתי כעת העברה בביט על סך 79 ₪. ידוע לי שחשבונות שיפתחו ללא תשלום מאומת יימחקו לצמיתות מהמערכת בתוך מספר שעות.
             </label>
           </div>
           
@@ -85,7 +91,6 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
     const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // המפתח שהוצאת מ-Web3Forms
     const WEB3FORMS_ACCESS_KEY = '2733bd06-8639-4b9f-8a73-56195b1b4a3a';
 
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
@@ -106,7 +111,6 @@
       btn.disabled = true; btn.innerText = 'מקים מערכת...';
       errorMsg.classList.add('hidden');
 
-      // 1. יצירת המשתמש
       const { data, error } = await mySupabase.auth.signUp({ email: email, password: password });
 
       if (error) {
@@ -116,7 +120,6 @@
         return;
       } 
       
-      // 2. שמירת הפרופיל
       if (data.user) {
         await mySupabase.from('profiles').upsert([{ 
           id: data.user.id, 
@@ -126,23 +129,21 @@
         }]);
       }
 
-      // 3. שליחת התראת המייל אלייך
       try {
         await fetch('https://api.web3forms.com/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({
             access_key: WEB3FORMS_ACCESS_KEY,
-            subject: '🚀 לקוח חדש נרשם למערכת אישורי ההגעה!',
+            subject: '🚀 לקוח חדש שילם 79 ש"ח ונרשם!',
             from_name: 'מערכת המכירות',
-            message: `יש לך לקוח חדש שצריך אימות תשלום בביט!\n\nשם מלא: ${fullName}\nטלפון: ${phone}\nאימייל: ${email}\n\nכנס עכשיו לאפליקציית ביט וודא שהתשלום אכן נכנס.`
+            message: `יש לך לקוח חדש שביצע העברה של 79 ש"ח בביט!\n\nשם מלא: ${fullName}\nטלפון: ${phone}\nאימייל: ${email}\n\nודא כעת באפליקציית ביט שהסכום התקבל בהצלחה.`
           })
         });
       } catch (err) {
         console.error("שגיאה בשליחת המייל", err);
       }
       
-      // מעבר לדאשבורד
       window.location.href = 'dashboard.html';
     });
   </script>
