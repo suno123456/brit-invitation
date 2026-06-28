@@ -6,13 +6,12 @@
   <title>הזמנה לאירוע</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Assistant', sans-serif; background-color: #fcfbf8; }
     .theme-color { color: #6b8eb3; }
     .bg-theme { background-color: #6b8eb3; }
     .border-theme-light { border-color: #bfa473; }
-    /* אנימציית טעינה */
     .loader { border: 4px solid #f3f3f3; border-top: 4px solid #6b8eb3; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
@@ -30,10 +29,10 @@
 
     <div class="p-6 md:p-8 flex-1">
       
-      <div id="mainContent" class="hidden">
+      <div id="mainContent" class="hidden space-y-6">
         <h2 id="displayEventName" class="text-2xl font-bold theme-color mb-4">נשמח לראותכם! 💙</h2>
 
-        <div class="bg-slate-50 rounded-2xl p-4 mb-6 border border-gray-100">
+        <div class="bg-slate-50 rounded-2xl p-4 border border-gray-100">
           <div class="flex justify-center items-center space-x-8 space-x-reverse theme-color mb-4">
             <div class="text-center">
               <p class="text-xs text-gray-500 mb-0.5">תאריך</p>
@@ -42,6 +41,7 @@
             <div class="h-8 border-l border-theme-light opacity-50"></div>
             <div class="text-center">
               <p class="text-xs text-gray-500 mb-0.5">בשעה</p>
+              <p id="displayDate" class="font-bold text-lg">-</p>
               <p id="displayTime" class="font-bold text-lg">-</p>
             </div>
           </div>
@@ -55,7 +55,21 @@
           </a>
         </div>
 
-        <form id="rsvpForm" class="space-y-4 text-right">
+        <div id="dayOfEventSection" class="bg-amber-50/60 border border-amber-200 rounded-2xl p-4 text-right space-y-3 hidden">
+          <h4 class="text-sm font-bold text-amber-900">🧭 ברוכים הבאים לאולם! גלו את השולחן שלכם:</h4>
+          <div class="flex gap-2">
+            <input type="text" id="seatingSearchInput" placeholder="הקלידו שם מלא כפי שאישרתם..." class="flex-1 border border-amber-300 p-2 text-sm rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500 bg-white">
+            <button onclick="findMyTableAndMarkArrival()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-4 rounded-xl transition shadow-sm">חפש שולחן</button>
+          </div>
+          
+          <div id="seatingAlertBox" class="hidden p-4 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-xl shadow border border-emerald-500 text-center animate-fade-in">
+            <span class="text-2xl block mb-1">👑</span>
+            <p id="seatingAlertText" class="text-sm font-bold leading-relaxed"></p>
+          </div>
+        </div>
+
+        <form id="rsvpForm" class="space-y-4 text-right border-t pt-4">
+          <h4 class="text-sm font-bold theme-color mb-2">✍️ אישור הגעה לאירוע:</h4>
           <div>
             <label class="block text-sm font-bold mb-1 theme-color">שם מלא:</label>
             <input type="text" name="name" required class="w-full border p-2.5 rounded-xl bg-slate-50">
@@ -114,7 +128,7 @@
 
     window.addEventListener('DOMContentLoaded', async () => {
       if (!eventId) {
-        document.getElementById('loadingScreen').innerHTML = '<p class="text-red-500 font-bold p-6">שגיאה: חסר מזהה אירוע בקישור. נא להיכנס דרך הקישור המלא.</p>';
+        document.getElementById('loadingScreen').innerHTML = '<p class="text-red-500 font-bold p-6">שגיאה: חסר מזהה אירוע בקישור.</p>';
         return;
       }
 
@@ -133,13 +147,27 @@
       
       document.getElementById('displayEventName').innerText = event.event_name;
       
-      // תיקון התאריך! מבודד רק את התאריך לפני ההיפוך
+      // עיבוד ותצוגת תאריך האירוע
       let formattedDate = '-';
+      let isToday = false;
+
       if (event.event_date) {
-        const datePart = event.event_date.split('T')[0];
+        const datePart = event.event_date.split('T')[0]; // בידוד ה-YYYY-MM-DD
         formattedDate = datePart.split('-').reverse().join('.');
+        
+        // 🔒 בדיקה חכמה בזמן אמת: האם היום זה יום האירוע? 🔒
+        const todayStr = new Date().toLocaleDateString('he-IL', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('.').reverse().join('-');
+        // בדיקה ישירה של התאריכים בפורמט YYYY-MM-DD
+        if (datePart === todayStr) {
+          isToday = true;
+        }
       }
       document.getElementById('displayDate').innerText = formattedDate;
+
+      // 🔓 פתיחת חלונית החיפוש אך ורק אם מדובר ביום האירוע
+      if (isToday) {
+        document.getElementById('dayOfEventSection').classList.remove('hidden');
+      }
 
       document.getElementById('displayTime').innerText = event.event_time || '-';
       document.getElementById('displayLocation').innerText = event.location_name || '-';
@@ -160,6 +188,55 @@
       document.getElementById('loadingScreen').classList.add('hidden');
       document.getElementById('mainContent').classList.remove('hidden');
     });
+
+    // איתור שולחן וסימון הגעה אוטומטי (פועל רק ביום האירוע כשהחלון גלוי)
+    async function findMyTableAndMarkArrival() {
+      const searchInput = document.getElementById('seatingSearchInput');
+      const alertBox = document.getElementById('seatingAlertBox');
+      const alertText = document.getElementById('seatingAlertText');
+      const nameQuery = searchInput.value.trim();
+
+      if (!nameQuery) {
+        alert("אנא הקלידו שם מלא לחיפוש השולחן.");
+        return;
+      }
+
+      alertBox.classList.add('hidden');
+
+      const { data: guests, error } = await mySupabase
+        .from('guests')
+        .select('*')
+        .eq('event_id', eventId)
+        .eq('attending', true)
+        .ilike('guest_name', `%${nameQuery}%`);
+
+      if (error || !guests || guests.length === 0) {
+        alertText.innerText = `לא מצאנו אישור הגעה פעיל על השם "${nameQuery}". ודאו שהשם מאויית נכון.`;
+        alertBox.className = "p-4 bg-rose-100 text-rose-800 rounded-xl border border-rose-300 text-center";
+        alertBox.classList.remove('hidden');
+        return;
+      }
+
+      const guest = guests[0];
+
+      // עדכון הגעה אוטומטי לאולם
+      await mySupabase.from('guests').update({ arrived: true }).eq('id', guest.id);
+
+      if (guest.table_id) {
+        const { data: table } = await mySupabase.from('tables').select('table_name').eq('id', guest.table_id).single();
+        if (table) {
+          alertText.innerHTML = `ברוכים הבאים, <span class="font-extrabold">${guest.guest_name}</span>! 🎉<br>שובצתם ב-<span class="text-yellow-200 font-black text-lg underline">${table.table_name}</span>.<br><span class="text-xs opacity-90 font-medium">כניסתכם עודכנה אוטומטית במערכת האולם.</span>`;
+        } else {
+          alertText.innerHTML = `ברוכים הבאים, <span class="font-extrabold">${guest.guest_name}</span>!<br>נרשמה כניסתכם באולם, המארחת תפנה אתכם לשולחן.`;
+        }
+      } else {
+        alertText.innerHTML = `ברוכים הבאים, <span class="font-extrabold">${guest.guest_name}</span>!<br>כניסתכם עודכנה בהצלחה. צוות המארחות יכוון אתכם לשולחן פנוי.`;
+      }
+
+      alertBox.className = "p-4 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-xl shadow border border-emerald-500 text-center animate-fade-in";
+      alertBox.classList.remove('hidden');
+      alertBox.scrollIntoView({ behavior: 'smooth' });
+    }
 
     document.getElementById('rsvpForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -184,7 +261,6 @@
         document.getElementById("mainContent").classList.add("hidden");
         document.getElementById("successText").innerText = isAttending ? "האישור התקבל, נשמח לראותכם 💙" : "תודה שעדכנתם, ניפגש בשמחות 💙";
         document.getElementById("successMessage").classList.remove("hidden");
-        // גלילה חלקה למעלה כדי לראות את הודעת ההצלחה
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     });
