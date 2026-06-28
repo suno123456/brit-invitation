@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>התחברות למערכת אישורי הגעה</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Assistant', sans-serif; background-color: #f3f4f6; }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+  <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
+    <h2 class="text-2xl font-bold text-slate-700 mb-6">כניסת מנהלים</h2>
+    
+    <form id="loginForm" class="space-y-4">
+      <div>
+        <input type="email" id="email" required placeholder="אימייל" 
+               class="w-full border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right">
+      </div>
+      <div>
+        <input type="password" id="password" required placeholder="סיסמה" 
+               class="w-full border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right">
+      </div>
+      
+      <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition duration-300">
+        התחבר למערכת
+      </button>
+    </form>
+    
+    <p id="errorMsg" class="text-red-500 mt-4 hidden font-medium">פרטי ההתחברות שגויים, נסה שנית.</p>
+  </div>
+
+  <script>
+    // ----------------------------------------------------
+    // פה אתה תכניס את הכתובת והמפתח הארוך שתמצא בסופרבייס
+    // ----------------------------------------------------
+    const SUPABASE_URL = 'שים_פה_את_הכתובת_שמתחילה_ב_HTTPS';
+    const SUPABASE_ANON_KEY = 'שים_פה_את_המפתח_הארוך_שמתחיל_ב_EYJ';
+
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const SUPABASE_URL = 'https://ghfgqwslakjqmxuboobn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('submitBtn');
+      const errorMsg = document.getElementById('errorMsg');
+
+      btn.disabled = true;
+      btn.innerText = 'מתחבר...';
+      errorMsg.classList.add('hidden');
+
+      // פעולת ההתחברות מול סופרבייס
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
+
+      if (error) {
+        errorMsg.classList.remove('hidden');
+        errorMsg.innerText = error.message;
+        btn.disabled = false;
+        btn.innerText = 'התחבר למערכת';
+      } else {
+        // אם ההתחברות הצליחה, נעביר את הלקוח לפאנל הניהול (שנבנה בשלב הבא)
+        window.location.href = 'dashboard.html';
+      }
+    });
+  </script>
+</body>
+</html>
