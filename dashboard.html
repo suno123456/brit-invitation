@@ -6,6 +6,7 @@
   <title>פאנל ניהול - מערכת אישורי הגעה</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
   <style> body { font-family: 'Assistant', sans-serif; background-color: #f8fafc; } </style>
 </head>
@@ -38,7 +39,7 @@
             <input type="text" id="eventName" required class="w-full border p-2 rounded-lg bg-slate-50">
           </div>
           <div>
-            <label class="block font-bold mb-1">תמונת הזמנה (אפשרות מהנייד)</label>
+            <label class="block font-bold mb-1">תמונת הזמנה</label>
             <input type="file" id="imageUpload" accept="image/*" class="w-full border p-1.5 rounded-lg bg-slate-50">
             <input type="hidden" id="imageUrl">
             <p class="text-xs text-slate-500 mt-1">בחר תמונה לעדכון ההזמנה.</p>
@@ -59,11 +60,23 @@
             <label class="block font-bold mb-1">כתובת מדויקת (מייצר Waze אוטומטית)</label>
             <input type="text" id="address" placeholder="למשל: רחוב ערבה 1, גבעת שמואל" class="w-full border p-2 rounded-lg bg-slate-50">
           </div>
+          
           <div class="md:col-span-2 border-t pt-4 mt-2">
-            <label class="block font-bold mb-1 text-blue-600">קישור אישי לביט (Bit)</label>
-            <input type="text" id="bitLink" placeholder="הדבק כאן את הקישור..." class="w-full border p-2 rounded-lg text-left bg-blue-50" dir="ltr">
-            <p class="text-xs text-slate-500 mt-1">איך מוצאים? כנסו לאפליקציית ביט -> "בקשת כסף" -> "שתף קישור אישי". אין צורך ב-QR, הקישור מספיק.</p>
+            <label class="block font-bold mb-2 text-blue-600">קבלת מתנות ב-Bit</label>
+            <div class="flex flex-col md:flex-row gap-4 mb-2">
+              <div class="flex-1">
+                <input type="text" id="bitLink" placeholder="הקישור יופיע כאן אוטומטית לאחר סריקת ה-QR..." class="w-full border border-blue-200 p-3 rounded-lg text-left bg-blue-50" dir="ltr">
+              </div>
+              <div class="flex-1">
+                <label class="block w-full text-sm font-bold bg-blue-100 text-blue-800 p-3 rounded-lg cursor-pointer text-center hover:bg-blue-200 transition border border-blue-300">
+                  📷 העלה תמונת QR של ביט (זיהוי אוטומטי)
+                  <input type="file" id="bitQrUpload" accept="image/*" class="hidden">
+                </label>
+              </div>
+            </div>
+            <p class="text-xs text-slate-500 font-medium">איך מוצאים? כנסו לאפליקציית ביט -> לחצו על 3 נקודות (עוד) -> "קוד ה-QR הקבוע שלי לקבלת כסף" -> שמרו את התמונה והעלו לכאן.</p>
           </div>
+
         </div>
         <button type="submit" id="saveEventBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition mt-4 w-full md:w-auto">
           שמור עדכונים
@@ -124,6 +137,37 @@
       alert('הקישור הועתק! אפשר לשלוח לאורחים.');
     }
 
+    // מנגנון סריקת ה-QR מתמונה
+    document.getElementById('bitQrUpload').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          context.drawImage(img, 0, 0, img.width, img.height);
+          const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+          
+          // הפעלת פענוח ה-QR
+          const code = jsQR(imageData.data, imageData.width, imageData.height);
+          
+          if (code && code.data.includes('bitpay')) {
+            document.getElementById('bitLink').value = code.data;
+            alert('מעולה! הקישור חולץ בהצלחה מתוך התמונה.');
+          } else {
+            alert('לא הצלחנו לזהות קישור לביט בתמונה. ודאו שזו התמונה הנכונה ושהיא ברורה.');
+          }
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
     async function loadEventDetails() {
       let { data: events } = await mySupabase.from('events').select('*').eq('host_id', currentUser.id);
       
@@ -135,7 +179,6 @@
       const event = events[0];
       currentEventId = event.id;
       
-      // יצירת לינק לשיתוף אוטומטי
       const shareUrl = window.location.origin + '/?event=' + currentEventId;
       document.getElementById('shareLink').value = shareUrl;
 
@@ -146,7 +189,6 @@
       document.getElementById('locationName').value = event.location_name || '';
       document.getElementById('bitLink').value = event.bit_link || '';
       
-      // ננסה לפענח את הכתובת מתוך קישור הוויז אם קיים
       if (event.waze_link) {
          try { document.getElementById('address').value = decodeURIComponent(event.waze_link.split('q=')[1]); } catch(e){}
       }
@@ -162,7 +204,6 @@
       let finalImageUrl = document.getElementById('imageUrl').value;
       const fileInput = document.getElementById('imageUpload');
       
-      // העלאת תמונה אם נבחרה
       if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
         const fileName = `${Date.now()}_${file.name}`;
