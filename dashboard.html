@@ -35,14 +35,13 @@
       <form id="eventSettingsForm" class="p-6 space-y-4 text-sm">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block font-bold mb-1">שם האירוע (למשל: הברית של איתי)</label>
+            <label class="block font-bold mb-1">שם האירוע</label>
             <input type="text" id="eventName" required class="w-full border p-2 rounded-lg bg-slate-50">
           </div>
           <div>
             <label class="block font-bold mb-1">תמונת הזמנה</label>
             <input type="file" id="imageUpload" accept="image/*" class="w-full border p-1.5 rounded-lg bg-slate-50">
             <input type="hidden" id="imageUrl">
-            <p class="text-xs text-slate-500 mt-1">בחר תמונה לעדכון ההזמנה.</p>
           </div>
           <div>
             <label class="block font-bold mb-1">תאריך האירוע</label>
@@ -57,8 +56,8 @@
             <input type="text" id="locationName" required class="w-full border p-2 rounded-lg bg-slate-50">
           </div>
           <div>
-            <label class="block font-bold mb-1">כתובת מדויקת (מייצר Waze אוטומטית)</label>
-            <input type="text" id="address" placeholder="למשל: רחוב ערבה 1, גבעת שמואל" class="w-full border p-2 rounded-lg bg-slate-50">
+            <label class="block font-bold mb-1">כתובת (מייצר Waze אוטומטית)</label>
+            <input type="text" id="address" class="w-full border p-2 rounded-lg bg-slate-50">
           </div>
           
           <div class="md:col-span-2 border-t pt-4 mt-2">
@@ -111,15 +110,14 @@
         </table>
       </div>
     </div>
-    
   </div>
 
   <footer class="mt-8 mb-6 text-center p-4">
     <div class="bg-slate-200 h-px w-1/2 mx-auto mb-4"></div>
     <p class="text-sm font-bold text-slate-700">© כל הזכויות שמורות לסאן אורלביץ'.</p>
     <p class="text-xs text-slate-500 mt-1 max-w-lg mx-auto">
-      אין להעתיק, לשכפל או להעביר מערכת זו למשתמש או לאירוע נוסף ללא רכישה מוסדרת.<br>
-      <span class="text-red-500 font-semibold">שימו לב:</span> המערכת ורשימת המוזמנים יימחקו באופן אוטומטי כ-4 ימים לאחר תאריך האירוע המוגדר. אנא דאגו להוריד את רשימת המוזמנים לאקסל מבעוד מועד.
+      אין להעתיק, לשכפל או להעביר מערכת זו.<br>
+      <span class="text-red-500 font-semibold">שימו לב:</span> המערכת נמחקת אוטומטית כ-4 ימים לאחר האירוע.
     </p>
   </footer>
 
@@ -130,7 +128,7 @@
     const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let currentUser = null;
     let currentEventId = null;
-    let globalGuestsData = []; // משתנה גלובלי לשמירת הנתונים עבור האקסל
+    let globalGuestsData = [];
 
     async function init() {
       const { data: { user } } = await mySupabase.auth.getUser();
@@ -148,7 +146,7 @@
       const linkInput = document.getElementById('shareLink');
       linkInput.select();
       document.execCommand('copy');
-      alert('הקישור הועתק! אפשר לשלוח לאורחים.');
+      alert('הקישור הועתק!');
     }
 
     document.getElementById('bitQrUpload').addEventListener('change', function(e) {
@@ -169,7 +167,7 @@
             document.getElementById('bitLink').value = code.data;
             alert('הקישור חולץ בהצלחה מהתמונה.');
           } else {
-            alert('לא הצלחנו לזהות קישור לביט. ודאו שהתמונה ברורה.');
+            alert('לא זיהינו קישור לביט בתמונה.');
           }
         };
         img.src = event.target.result;
@@ -178,6 +176,9 @@
     });
 
     async function loadEventDetails() {
+      // התיקון הקריטי שבונה להם את הפרופיל!
+      await mySupabase.from('profiles').upsert([{ id: currentUser.id, email: currentUser.email }]);
+
       let { data: events } = await mySupabase.from('events').select('*').eq('host_id', currentUser.id);
       
       if (!events || events.length === 0) {
@@ -247,7 +248,7 @@
     async function loadGuests() {
       const { data: guests } = await mySupabase.from('guests').select('*').eq('event_id', currentEventId).order('created_at', { ascending: false });
       
-      globalGuestsData = guests || []; // שמירת הנתונים לאקסל
+      globalGuestsData = guests || []; 
       const tbody = document.getElementById('guestsTableBody');
       tbody.innerHTML = '';
       let totalCount = 0;
@@ -285,7 +286,7 @@
     }
 
     async function toggleAttending(id, currentStatus) {
-      if(confirm('לשנות את סטטוס ההגעה של אורח זה?')) {
+      if(confirm('לשנות את סטטוס ההגעה?')) {
         await mySupabase.from('guests').update({ attending: !currentStatus }).eq('id', id);
         loadGuests();
       }
@@ -300,33 +301,24 @@
     }
 
     async function deleteGuest(id) {
-      if(confirm('האם אתה בטוח שברצונך למחוק אורח זה לחלוטין?')) {
+      if(confirm('בטוח שברצונך למחוק אורח זה לחלוטין?')) {
         await mySupabase.from('guests').delete().eq('id', id);
         loadGuests();
       }
     }
 
-    // פונקציית ייצוא לאקסל
     function exportToExcel() {
-      if (globalGuestsData.length === 0) {
-        alert('אין אורחים לייצא');
-        return;
-      }
-
-      // הוספת BOM כדי שאקסל יקרא את העברית נכון
+      if (globalGuestsData.length === 0) { alert('אין אורחים לייצא'); return; }
       let csvContent = "\uFEFF"; 
       csvContent += "שם האורח,מגיע/ה?,כמות,ברכה,תאריך אישור\n";
-
       globalGuestsData.forEach(g => {
         const name = g.guest_name ? g.guest_name.replace(/,/g, '') : '';
         const attending = g.attending ? 'כן' : 'לא';
         const count = g.attending ? g.guests_count : 0;
         const blessing = g.blessing ? g.blessing.replace(/,/g, ' -').replace(/\n/g, ' ') : '';
         const date = new Date(g.created_at).toLocaleDateString('he-IL');
-        
         csvContent += `${name},${attending},${count},${blessing},${date}\n`;
       });
-
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
