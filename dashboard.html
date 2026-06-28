@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>פאנל ניהול אירועים</title>
+  <title>פאנל ניהול - מערכת אישורי הגעה</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
@@ -18,45 +18,55 @@
 
   <div class="max-w-4xl mx-auto p-4 mt-6 space-y-8">
     
+    <div class="bg-blue-50 rounded-2xl shadow-sm border border-blue-200 p-6 text-center">
+      <h3 class="text-lg font-bold text-blue-800 mb-2">הקישור שלכם לשליחה לאורחים:</h3>
+      <div class="flex flex-col md:flex-row justify-center items-center gap-4">
+        <input type="text" id="shareLink" readonly class="w-full md:w-2/3 bg-white border border-blue-300 rounded-lg p-3 text-left text-sm" dir="ltr">
+        <button onclick="copyLink()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition w-full md:w-auto">העתק קישור</button>
+      </div>
+    </div>
+
     <div class="bg-white rounded-2xl shadow-md overflow-hidden">
       <div class="p-6 bg-slate-50 border-b border-slate-100">
-        <h3 class="text-lg font-bold">הגדרות האירוע שלך</h3>
-        <p class="text-sm text-slate-500 mt-1">הפרטים שימולאו כאן יוצגו אוטומטית בדף ההזמנה שלכם.</p>
+        <h3 class="text-lg font-bold">הגדרות האירוע</h3>
       </div>
       
       <form id="eventSettingsForm" class="p-6 space-y-4 text-sm">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block font-bold mb-1">שם האירוע (למשל: הברית של איתי)</label>
-            <input type="text" id="eventName" class="w-full border p-2 rounded-lg bg-slate-50">
+            <input type="text" id="eventName" required class="w-full border p-2 rounded-lg bg-slate-50">
           </div>
           <div>
-            <label class="block font-bold mb-1">קישור לתמונה (URL של תמונה ברשת)</label>
-            <input type="text" id="imageUrl" placeholder="https://..." class="w-full border p-2 rounded-lg text-left bg-slate-50" dir="ltr">
+            <label class="block font-bold mb-1">תמונת הזמנה (אפשרות מהנייד)</label>
+            <input type="file" id="imageUpload" accept="image/*" class="w-full border p-1.5 rounded-lg bg-slate-50">
+            <input type="hidden" id="imageUrl">
+            <p class="text-xs text-slate-500 mt-1">בחר תמונה לעדכון ההזמנה.</p>
           </div>
           <div>
-            <label class="block font-bold mb-1">תאריך</label>
+            <label class="block font-bold mb-1">תאריך האירוע</label>
             <input type="date" id="eventDate" class="w-full border p-2 rounded-lg bg-slate-50">
           </div>
           <div>
-            <label class="block font-bold mb-1">שעה</label>
+            <label class="block font-bold mb-1">שעת קבלת פנים</label>
             <input type="time" id="eventTime" class="w-full border p-2 rounded-lg bg-slate-50">
           </div>
           <div>
             <label class="block font-bold mb-1">שם האולם/מקום</label>
-            <input type="text" id="locationName" class="w-full border p-2 rounded-lg bg-slate-50">
+            <input type="text" id="locationName" required class="w-full border p-2 rounded-lg bg-slate-50">
           </div>
           <div>
-            <label class="block font-bold mb-1">קישור לווייז (Waze)</label>
-            <input type="text" id="wazeLink" placeholder="https://waze.com/..." class="w-full border p-2 rounded-lg text-left bg-slate-50" dir="ltr">
+            <label class="block font-bold mb-1">כתובת מדויקת (מייצר Waze אוטומטית)</label>
+            <input type="text" id="address" placeholder="למשל: רחוב ערבה 1, גבעת שמואל" class="w-full border p-2 rounded-lg bg-slate-50">
           </div>
-          <div class="md:col-span-2">
-            <label class="block font-bold mb-1 text-blue-600">קישור ל-Bit (לקבלת מתנות)</label>
-            <input type="text" id="bitLink" placeholder="https://www.bitpay.co.il/app/me/..." class="w-full border p-2 rounded-lg text-left bg-blue-50" dir="ltr">
+          <div class="md:col-span-2 border-t pt-4 mt-2">
+            <label class="block font-bold mb-1 text-blue-600">קישור אישי לביט (Bit)</label>
+            <input type="text" id="bitLink" placeholder="הדבק כאן את הקישור..." class="w-full border p-2 rounded-lg text-left bg-blue-50" dir="ltr">
+            <p class="text-xs text-slate-500 mt-1">איך מוצאים? כנסו לאפליקציית ביט -> "בקשת כסף" -> "שתף קישור אישי". אין צורך ב-QR, הקישור מספיק.</p>
           </div>
         </div>
-        <button type="submit" id="saveEventBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition mt-4 w-full md:w-auto">
-          שמור שינויים
+        <button type="submit" id="saveEventBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition mt-4 w-full md:w-auto">
+          שמור עדכונים
         </button>
         <p id="saveMsg" class="text-green-600 font-bold hidden mt-2">הנתונים נשמרו בהצלחה!</p>
       </form>
@@ -64,7 +74,7 @@
 
     <div class="bg-white rounded-2xl shadow-md overflow-hidden">
       <div class="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
-        <h3 class="text-lg font-bold">רשימת אורחים</h3>
+        <h3 class="text-lg font-bold">ניהול אורחים</h3>
         <span id="totalGuests" class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">סה"כ מגיעים: 0</span>
       </div>
       
@@ -73,13 +83,14 @@
           <thead>
             <tr class="bg-slate-100 text-slate-600 text-sm">
               <th class="p-4 font-bold border-b">שם האורח</th>
-              <th class="p-4 font-bold border-b">מגיע?</th>
+              <th class="p-4 font-bold border-b">סטטוס</th>
               <th class="p-4 font-bold border-b text-center">כמות</th>
               <th class="p-4 font-bold border-b">ברכה</th>
+              <th class="p-4 font-bold border-b text-center">פעולות</th>
             </tr>
           </thead>
           <tbody id="guestsTableBody" class="text-sm">
-            <tr><td colspan="4" class="p-6 text-center text-slate-500">טוען אורחים...</td></tr>
+            <tr><td colspan="5" class="p-6 text-center text-slate-500">טוען אורחים...</td></tr>
           </tbody>
         </table>
       </div>
@@ -96,10 +107,7 @@
 
     async function init() {
       const { data: { user } } = await mySupabase.auth.getUser();
-      if (!user) {
-        window.location.href = 'login.html';
-        return;
-      }
+      if (!user) { window.location.href = 'login.html'; return; }
       currentUser = user;
       loadEventDetails();
     }
@@ -109,28 +117,39 @@
       window.location.href = 'login.html';
     });
 
+    function copyLink() {
+      const linkInput = document.getElementById('shareLink');
+      linkInput.select();
+      document.execCommand('copy');
+      alert('הקישור הועתק! אפשר לשלוח לאורחים.');
+    }
+
     async function loadEventDetails() {
-      let { data: events, error } = await mySupabase.from('events').select('*').eq('host_id', currentUser.id);
+      let { data: events } = await mySupabase.from('events').select('*').eq('host_id', currentUser.id);
       
       if (!events || events.length === 0) {
-        const { data: newEvent } = await mySupabase.from('events').insert([{ 
-           host_id: currentUser.id, 
-           event_name: 'האירוע שלי', 
-           slug: 'event-' + Math.floor(Math.random()*10000) 
-        }]).select();
+        const { data: newEvent } = await mySupabase.from('events').insert([{ host_id: currentUser.id, event_name: 'האירוע שלי', slug: 'event-' + Date.now() }]).select();
         events = newEvent;
       }
       
       const event = events[0];
       currentEventId = event.id;
       
+      // יצירת לינק לשיתוף אוטומטי
+      const shareUrl = window.location.origin + '/?event=' + currentEventId;
+      document.getElementById('shareLink').value = shareUrl;
+
       document.getElementById('eventName').value = event.event_name || '';
       document.getElementById('imageUrl').value = event.image_url || '';
       document.getElementById('eventDate').value = event.event_date ? event.event_date.split('T')[0] : '';
       document.getElementById('eventTime').value = event.event_time || '';
       document.getElementById('locationName').value = event.location_name || '';
-      document.getElementById('wazeLink').value = event.waze_link || '';
       document.getElementById('bitLink').value = event.bit_link || '';
+      
+      // ננסה לפענח את הכתובת מתוך קישור הוויז אם קיים
+      if (event.waze_link) {
+         try { document.getElementById('address').value = decodeURIComponent(event.waze_link.split('q=')[1]); } catch(e){}
+      }
       
       loadGuests();
     }
@@ -138,48 +157,51 @@
     document.getElementById('eventSettingsForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('saveEventBtn');
-      btn.innerText = 'שומר...';
-      btn.disabled = true;
+      btn.innerText = 'שומר...'; btn.disabled = true;
+
+      let finalImageUrl = document.getElementById('imageUrl').value;
+      const fileInput = document.getElementById('imageUpload');
+      
+      // העלאת תמונה אם נבחרה
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const fileName = `${Date.now()}_${file.name}`;
+        const { data, error } = await mySupabase.storage.from('invitations').upload(fileName, file);
+        if (data) {
+          finalImageUrl = SUPABASE_URL + '/storage/v1/object/public/invitations/' + fileName;
+          document.getElementById('imageUrl').value = finalImageUrl;
+        }
+      }
+
+      const address = document.getElementById('address').value;
+      const wazeLink = address ? 'https://waze.com/ul?q=' + encodeURIComponent(address) : '';
 
       const updates = {
         event_name: document.getElementById('eventName').value,
-        image_url: document.getElementById('imageUrl').value,
+        image_url: finalImageUrl,
         event_date: document.getElementById('eventDate').value,
         event_time: document.getElementById('eventTime').value,
         location_name: document.getElementById('locationName').value,
-        waze_link: document.getElementById('wazeLink').value,
+        waze_link: wazeLink,
         bit_link: document.getElementById('bitLink').value,
       };
 
-      const { error } = await mySupabase.from('events').update(updates).eq('id', currentEventId);
+      await mySupabase.from('events').update(updates).eq('id', currentEventId);
       
-      btn.innerText = 'שמור שינויים';
-      btn.disabled = false;
-      
-      if(!error) {
-        const msg = document.getElementById('saveMsg');
-        msg.classList.remove('hidden');
-        setTimeout(() => msg.classList.add('hidden'), 3000);
-      } else {
-        alert('אירעה שגיאה בשמירה');
-      }
+      btn.innerText = 'שמור עדכונים'; btn.disabled = false;
+      const msg = document.getElementById('saveMsg');
+      msg.classList.remove('hidden');
+      setTimeout(() => msg.classList.add('hidden'), 3000);
     });
 
     async function loadGuests() {
-      const { data: guests, error } = await mySupabase
-        .from('guests')
-        .select('*')
-        .eq('event_id', currentEventId)
-        .order('created_at', { ascending: false });
-
+      const { data: guests } = await mySupabase.from('guests').select('*').eq('event_id', currentEventId).order('created_at', { ascending: false });
       const tbody = document.getElementById('guestsTableBody');
       tbody.innerHTML = '';
       let totalCount = 0;
 
-      if (error) return;
-
-      if (guests.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-500">עדיין אין אישורי הגעה.</td></tr>';
+      if (!guests || guests.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-500">עדיין אין אישורי הגעה.</td></tr>';
         return;
       }
 
@@ -190,14 +212,45 @@
         row.innerHTML = `
           <td class="p-4 font-medium">${guest.guest_name}</td>
           <td class="p-4">
-            <span class="px-3 py-1 rounded-full text-xs font-bold ${guest.attending ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${guest.attending ? 'כן' : 'לא'}</span>
+            <button onclick="toggleAttending('${guest.id}', ${guest.attending})" class="px-3 py-1 rounded-full text-xs font-bold cursor-pointer hover:opacity-80 ${guest.attending ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+              ${guest.attending ? 'כן' : 'לא'} (שנה)
+            </button>
           </td>
-          <td class="p-4 text-center font-bold">${guest.attending ? guest.guests_count : '-'}</td>
-          <td class="p-4 text-slate-600">${guest.blessing || ''}</td>
+          <td class="p-4 text-center">
+            <span class="font-bold cursor-pointer text-blue-600 hover:underline" onclick="editCount('${guest.id}', ${guest.guests_count})">
+              ${guest.attending ? guest.guests_count + ' ✎' : '-'}
+            </span>
+          </td>
+          <td class="p-4 text-slate-600 text-xs">${guest.blessing || ''}</td>
+          <td class="p-4 text-center">
+            <button onclick="deleteGuest('${guest.id}')" class="text-red-500 hover:text-red-700 font-bold text-sm">מחק</button>
+          </td>
         `;
         tbody.appendChild(row);
       });
       document.getElementById('totalGuests').innerText = `סה"כ מגיעים: ${totalCount}`;
+    }
+
+    async function toggleAttending(id, currentStatus) {
+      if(confirm('לשנות את סטטוס ההגעה של אורח זה?')) {
+        await mySupabase.from('guests').update({ attending: !currentStatus }).eq('id', id);
+        loadGuests();
+      }
+    }
+
+    async function editCount(id, currentCount) {
+      const newCount = prompt('הכנס כמות מגיעים חדשה:', currentCount);
+      if(newCount !== null && !isNaN(newCount)) {
+        await mySupabase.from('guests').update({ guests_count: parseInt(newCount) }).eq('id', id);
+        loadGuests();
+      }
+    }
+
+    async function deleteGuest(id) {
+      if(confirm('האם אתה בטוח שברצונך למחוק אורח זה לחלוטין?')) {
+        await mySupabase.from('guests').delete().eq('id', id);
+        loadGuests();
+      }
     }
 
     window.addEventListener('DOMContentLoaded', init);
