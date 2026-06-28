@@ -48,29 +48,28 @@
   <script>
     const SUPABASE_URL = 'https://ghfgqwslakjqmxuboobn.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // שינוי השם גם כאן
+    const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // בדיקה אם המשתמש מחובר - אם לא, מעיף אותו למסך ההתחברות
     async function checkAuth() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await mySupabase.auth.getUser();
       if (!user) {
         window.location.href = 'login.html';
         return;
       }
       
       document.getElementById('welcomeMsg').innerText = `שלום, ${user.email}`;
-      loadGuests(); // טעינת האורחים מ-Supabase
+      loadGuests(); 
     }
 
-    // פונקציית התנתקות
     document.getElementById('logoutBtn').addEventListener('click', async () => {
-      await supabase.auth.signOut();
+      await mySupabase.auth.signOut();
       window.location.href = 'login.html';
     });
 
-    // פונקציה לשליפת אורחים (כרגע מביאה את כל האורחים, בהמשך נסנן לפי אירוע)
     async function loadGuests() {
-      const { data: guests, error } = await supabase
+      const { data: guests, error } = await mySupabase
         .from('guests')
         .select('*')
         .order('created_at', { ascending: false });
@@ -106,7 +105,6 @@
       });
     }
 
-    // הפעלת הבדיקה בעליית העמוד
     window.addEventListener('DOMContentLoaded', checkAuth);
   </script>
 </body>
