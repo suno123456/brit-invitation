@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>פאנל ניהול אירועים</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+  <style> body { font-family: 'Assistant', sans-serif; background-color: #f8fafc; } </style>
+</head>
+<body class="text-slate-800">
+
+  <nav class="bg-white shadow-sm p-4 flex justify-between items-center border-b-4 border-blue-500">
+    <h1 class="text-xl font-bold text-blue-600">מערכת אישורי הגעה</h1>
+    <button id="logoutBtn" class="text-sm bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-lg font-medium transition">התנתק</button>
+  </nav>
+
+  <div class="max-w-4xl mx-auto p-6 mt-6">
+    <div class="bg-white rounded-2xl shadow-md p-6 mb-8 text-center">
+      <h2 id="welcomeMsg" class="text-2xl font-bold mb-2">טוען נתונים...</h2>
+      <p class="text-slate-500">ברוך הבא לפאנל הניהול האישי שלך</p>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+      <div class="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+        <h3 class="text-lg font-bold">רשימת אורחים</h3>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="w-full text-right border-collapse">
+          <thead>
+            <tr class="bg-slate-100 text-slate-600 text-sm">
+              <th class="p-4 font-bold border-b">שם האורח</th>
+              <th class="p-4 font-bold border-b">מגיע?</th>
+              <th class="p-4 font-bold border-b text-center">כמות</th>
+              <th class="p-4 font-bold border-b">ברכה</th>
+            </tr>
+          </thead>
+          <tbody id="guestsTableBody" class="text-sm">
+            <tr><td colspan="4" class="p-6 text-center text-slate-500">טוען אורחים...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://ghfgqwslakjqmxuboobn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // בדיקה אם המשתמש מחובר - אם לא, מעיף אותו למסך ההתחברות
+    async function checkAuth() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      document.getElementById('welcomeMsg').innerText = `שלום, ${user.email}`;
+      loadGuests(); // טעינת האורחים מ-Supabase
+    }
+
+    // פונקציית התנתקות
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = 'login.html';
+    });
+
+    // פונקציה לשליפת אורחים (כרגע מביאה את כל האורחים, בהמשך נסנן לפי אירוע)
+    async function loadGuests() {
+      const { data: guests, error } = await supabase
+        .from('guests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      const tbody = document.getElementById('guestsTableBody');
+      tbody.innerHTML = '';
+
+      if (error) {
+        console.error(error);
+        tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-red-500">שגיאה בטעינת הנתונים</td></tr>';
+        return;
+      }
+
+      if (guests.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-500">עדיין אין אישורי הגעה.</td></tr>';
+        return;
+      }
+
+      guests.forEach(guest => {
+        const row = document.createElement('tr');
+        row.className = 'border-b hover:bg-slate-50 transition';
+        row.innerHTML = `
+          <td class="p-4 font-medium">${guest.guest_name}</td>
+          <td class="p-4">
+            <span class="px-3 py-1 rounded-full text-xs font-bold ${guest.attending ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+              ${guest.attending ? 'כן' : 'לא'}
+            </span>
+          </td>
+          <td class="p-4 text-center font-bold">${guest.attending ? guest.guests_count : '-'}</td>
+          <td class="p-4 text-slate-600">${guest.blessing || ''}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // הפעלת הבדיקה בעליית העמוד
+    window.addEventListener('DOMContentLoaded', checkAuth);
+  </script>
+</body>
+</html>
