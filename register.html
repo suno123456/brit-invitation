@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>הרשמה למערכת אישורי הגעה</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+  <style> body { font-family: 'Assistant', sans-serif; background-color: #f3f4f6; } </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+  <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center border-t-4 border-blue-500">
+    <h2 class="text-2xl font-bold text-slate-700 mb-2">ברוכים הבאים! 🎉</h2>
+    <p class="text-slate-500 mb-6 text-sm">יצירת חשבון למערכת ניהול האירוע</p>
+    
+    <form id="registerForm" class="space-y-4">
+      <div>
+        <input type="email" id="email" required placeholder="אימייל" 
+               class="w-full border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right">
+      </div>
+      <div>
+        <input type="password" id="password" required placeholder="בחר סיסמה (לפחות 6 תווים)" minlength="6"
+               class="w-full border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right">
+      </div>
+      
+      <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition duration-300">
+        צור חשבון והתחל
+      </button>
+    </form>
+    
+    <p id="errorMsg" class="text-red-500 mt-4 hidden font-medium text-sm"></p>
+    
+    <div class="mt-6 text-sm text-slate-500">
+      כבר יש לכם חשבון? <a href="login.html" class="text-blue-600 font-bold hover:underline">התחברו כאן</a>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://ghfgqwslakjqmxuboobn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
+    const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('submitBtn');
+      const errorMsg = document.getElementById('errorMsg');
+
+      btn.disabled = true;
+      btn.innerText = 'מקים מערכת...';
+      errorMsg.classList.add('hidden');
+
+      const { data, error } = await mySupabase.auth.signUp({
+        email: email,
+        password: password,
+      });
+
+      if (error) {
+        errorMsg.classList.remove('hidden');
+        errorMsg.innerText = error.message.includes('already registered') ? 'האימייל הזה כבר רשום במערכת.' : 'אירעה שגיאה. ודא שהסיסמה מעל 6 תווים.';
+        btn.disabled = false;
+        btn.innerText = 'צור חשבון והתחל';
+      } else {
+        // הרשמה הצליחה! נעביר אותו ישר לדאשבורד, והדאשבורד כבר ייצר לו אירוע לבד
+        window.location.href = 'dashboard.html';
+      }
+    });
+  </script>
+</body>
+</html>
