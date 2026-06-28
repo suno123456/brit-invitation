@@ -73,6 +73,7 @@
                 </label>
               </div>
             </div>
+            <p class="text-xs text-slate-500 font-medium">איך מוצאים? כנסו לאפליקציית ביט -> לחצו על 3 נקודות (עוד) -> "קוד ה-QR הקבוע שלי לקבלת כסף" -> שמרו את התמונה והעלו לכאן.</p>
           </div>
         </div>
         <button type="submit" id="saveEventBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition mt-4 w-full md:w-auto">
@@ -176,7 +177,6 @@
     });
 
     async function loadEventDetails() {
-      // התיקון הקריטי שבונה להם את הפרופיל!
       await mySupabase.from('profiles').upsert([{ id: currentUser.id, email: currentUser.email }]);
 
       let { data: events } = await mySupabase.from('events').select('*').eq('host_id', currentUser.id);
