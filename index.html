@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>אישורי הגעה לברית</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
   
   <style>
@@ -32,7 +33,7 @@
     <div class="p-6 md:p-8">
       
       <div id="mainContent">
-        <h2 class="text-2xl font-bold text-invitation-blue mb-4">נשמח לראותכם! 💙</h2>
+        <h2 id="mainHeading" class="text-2xl font-bold text-invitation-blue mb-4">נשמח לראותכם! 💙</h2>
 
         <div class="bg-slate-50 rounded-2xl p-4 mb-6 border border-gray-100">
           <div class="flex justify-center items-center space-x-8 space-x-reverse text-invitation-blue mb-4">
@@ -57,10 +58,10 @@
           </a>
         </div>
 
-        <form id="rsvpForm" onsubmit="handleFormSubmit(event)" class="space-y-4 text-right">
+        <form id="rsvpForm" class="space-y-4 text-right">
           <div>
             <label class="block text-sm font-bold mb-1 text-invitation-blue">שם מלא:</label>
-            <input type="text" name="name" required class="w-full border border-gray-200 p-2.5 rounded-xl bg-slate-50 focus-ring-blue transition-all">
+            <input type="text" name="name" id="nameField" required class="w-full border border-gray-200 p-2.5 rounded-xl bg-slate-50 focus-ring-blue transition-all">
           </div>
 
           <div>
@@ -111,8 +112,23 @@
   </div>
 
   <script>
-    // הקישור החדש שלך מוטמע כאן!
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbySD3yd67bsFQb-WwpnrLqUgeqFE72Co8Wjo5kkYC546Esk5F-HsicQgiAVmRZeAY3M/exec';
+    // הגדרות סופרבייס
+    const SUPABASE_URL = 'https://ghfgqwslakjqmxuboobn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
+    const EVENT_ID = 'c911b37d-50e3-45d6-b181-288253cdb979'; // ה-ID של האירוע שלך!
+
+    const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // מילוי אוטומטי של שם מתוך הקישור
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const guestName = urlParams.get('name');
+      
+      if (guestName) {
+        document.getElementById('mainHeading').innerText = guestName + ',\n נשמח לראותכם! 💙';
+        document.getElementById('nameField').value = guestName;
+      }
+    });
 
     function toggleGuestCount() {
       var attending = document.getElementById("attending").value;
@@ -120,8 +136,10 @@
       guestField.classList.toggle("hidden", attending === "no");
     }
 
-    function handleFormSubmit(event) {
+    // פונקציית שליחת הטופס ל-Supabase
+    document.getElementById('rsvpForm').addEventListener('submit', async (event) => {
       event.preventDefault();
+      
       var btn = document.getElementById("submitBtn");
       btn.disabled = true;
       btn.innerText = "שולח אישור...";
@@ -129,20 +147,27 @@
       var form = document.getElementById("rsvpForm");
       var isAttending = form.attending.value === "yes";
       
-      var formData = {
-        name: form.name.value,
-        attending: form.attending.value,
-        guests: isAttending ? parseInt(form.guests.value) : 0,
+      // הכנת הנתונים בדיוק לפי מבנה הטבלה שלנו
+      var guestData = {
+        event_id: EVENT_ID,
+        guest_name: form.name.value,
+        attending: isAttending,
+        guests_count: isAttending ? parseInt(form.guests.value) : 0,
         blessing: form.blessing.value
       };
 
-      fetch(GOOGLE_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
-      .then(() => {
+      // שליחה למסד הנתונים
+      const { data, error } = await mySupabase
+        .from('guests')
+        .insert([guestData]);
+
+      if (error) {
+        alert("אירעה שגיאה בשמירה. נסה שנית.");
+        btn.disabled = false;
+        btn.innerText = "שליחת אישור";
+        console.error(error);
+      } else {
+        // הצלחה! מציגים את מסך התודה
         document.getElementById("mainContent").classList.add("hidden");
         
         var successText = document.getElementById("successText");
@@ -153,14 +178,8 @@
         }
 
         document.getElementById("successMessage").classList.remove("hidden");
-      })
-      .catch(error => {
-        alert("אירעה שגיאה בשמירה. נסה שנית.");
-        btn.disabled = false;
-        btn.innerText = "שליחת אישור";
-        console.error(error);
-      });
-    }
+      }
+    });
   </script>
 </body>
 </html>
