@@ -85,6 +85,9 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
     const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // המפתח שהוצאת מ-Web3Forms
+    const WEB3FORMS_ACCESS_KEY = '2733bd06-8639-4b9f-8a73-56195b1b4a3a';
+
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
@@ -113,7 +116,7 @@
         return;
       } 
       
-      // 2. שמירת השם והטלפון בטבלת הפרופילים (כדי שתוכל לראות אותם!)
+      // 2. שמירת הפרופיל
       if (data.user) {
         await mySupabase.from('profiles').upsert([{ 
           id: data.user.id, 
@@ -123,8 +126,23 @@
         }]);
       }
 
-      // כאן בהמשך נוסיף את ההתראה לנייד שלך!
+      // 3. שליחת התראת המייל אלייך
+      try {
+        await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            access_key: WEB3FORMS_ACCESS_KEY,
+            subject: '🚀 לקוח חדש נרשם למערכת אישורי ההגעה!',
+            from_name: 'מערכת המכירות',
+            message: `יש לך לקוח חדש שצריך אימות תשלום בביט!\n\nשם מלא: ${fullName}\nטלפון: ${phone}\nאימייל: ${email}\n\nכנס עכשיו לאפליקציית ביט וודא שהתשלום אכן נכנס.`
+          })
+        });
+      } catch (err) {
+        console.error("שגיאה בשליחת המייל", err);
+      }
       
+      // מעבר לדאשבורד
       window.location.href = 'dashboard.html';
     });
   </script>
