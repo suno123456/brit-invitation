@@ -47,7 +47,7 @@
       <form id="eventSettingsForm" class="p-6 space-y-4 text-sm">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block font-bold mb-1">שם האירוע (למשל: החתונה של דני ומיכל / בר המצווה של נועם)</label>
+            <label class="block font-bold mb-1">שם האירוע (למשל: החתונה של דני ומיכל)</label>
             <input type="text" id="eventName" required class="w-full border p-2 rounded-lg bg-slate-50" oninput="updateTemplate()">
           </div>
           <div>
@@ -85,7 +85,6 @@
                 </label>
               </div>
             </div>
-            <p class="text-xs text-slate-500 font-medium">איך מוצאים? כנסו לאפליקציית ביט -> לחצו על 3 נקודות (עוד) -> "קוד ה-QR הקבוע שלי לקבלת כסף" -> שמרו את התמונה והעלו לכאן.</p>
           </div>
         </div>
         <button type="submit" id="saveEventBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition mt-4 w-full md:w-auto">
@@ -100,7 +99,7 @@
         <h3 class="text-lg font-bold">ניהול אורחים</h3>
         <div class="flex items-center gap-3">
           <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition shadow-sm">
-            📥 הורד לאקסל
+            📥 הורד רשימה לאקסל (כולל עמודת מתנות)
           </button>
           <span id="totalGuests" class="bg-blue-100 text-blue-800 text-sm font-bold px-4 py-2 rounded-full">סה"כ מגיעים: 0</span>
         </div>
@@ -128,10 +127,6 @@
   <footer class="mt-8 mb-6 text-center p-4">
     <div class="bg-slate-200 h-px w-1/2 mx-auto mb-4"></div>
     <p class="text-sm font-bold text-slate-700">© כל הזכויות שמורות לסאן אורלביץ'.</p>
-    <p class="text-xs text-slate-500 mt-1 max-w-lg mx-auto">
-      אין להעתיק, לשכפל או להעביר מערכת זו.<br>
-      <span class="text-red-500 font-semibold">שימו לב:</span> המערכת נמחקת אוטומטית כ-4 ימים לאחר האירוע.
-    </p>
   </footer>
 
   <script>
@@ -162,7 +157,6 @@
       alert('הקישור הועתק!');
     }
 
-    // פונקציה לעדכון הדינמי של תבנית ההודעה לוואטסאפ
     function updateTemplate() {
       const eventName = document.getElementById('eventName').value || '[שם האירוע]';
       const rawDate = document.getElementById('eventDate').value;
@@ -183,7 +177,7 @@
       const textarea = document.getElementById('whatsappTemplate');
       textarea.select();
       document.execCommand('copy');
-      alert('ההודעה הועתקה! עכשיו אתם יכולים להדביק אותה ולשלוח בוואטסאפ לאורחים ✨');
+      alert('ההודעה הועתקה!');
     }
 
     document.getElementById('bitQrUpload').addEventListener('change', function(e) {
@@ -202,8 +196,7 @@
           const code = jsQR(imageData.data, imageData.width, imageData.height);
           if (code && code.data.includes('bitpay')) {
             document.getElementById('bitLink').value = code.data;
-            updateTemplate();
-            alert('הקישור חולץ בהצלחה מהתמונה.');
+            alert('הקישור חולץ בהצלחה!');
           } else {
             alert('לא זיהינו קישור לביט בתמונה.');
           }
@@ -214,21 +207,15 @@
     });
 
     async function loadEventDetails() {
-      await mySupabase.from('profiles').upsert([{ id: currentUser.id, email: currentUser.email }]);
-
       let { data: events } = await mySupabase.from('events').select('*').eq('host_id', currentUser.id);
-      
       if (!events || events.length === 0) {
         const { data: newEvent } = await mySupabase.from('events').insert([{ host_id: currentUser.id, event_name: 'האירוע שלנו', slug: 'event-' + Date.now() }]).select();
         events = newEvent;
       }
-      
       const event = events[0];
       currentEventId = event.id;
       
-      const shareUrl = window.location.origin + '/?event=' + currentEventId;
-      document.getElementById('shareLink').value = shareUrl;
-
+      document.getElementById('shareLink').value = window.location.origin + '/?event=' + currentEventId;
       document.getElementById('eventName').value = event.event_name || '';
       document.getElementById('imageUrl').value = event.image_url || '';
       document.getElementById('eventDate').value = event.event_date ? event.event_date.split('T')[0] : '';
@@ -240,7 +227,7 @@
          try { document.getElementById('address').value = decodeURIComponent(event.waze_link.split('q=')[1]); } catch(e){}
       }
       
-      updateTemplate(); // עדכון הודעת הוואטסאפ בטעינה הראשונה
+      updateTemplate();
       loadGuests();
     }
 
@@ -255,17 +242,16 @@
       if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
         const fileName = `${Date.now()}_${file.name}`;
-        const { data, error } = await mySupabase.storage.from('invitations').upload(fileName, file);
+        const { data } = await mySupabase.storage.from('invitations').upload(fileName, file);
         if (data) {
           finalImageUrl = SUPABASE_URL + '/storage/v1/object/public/invitations/' + fileName;
-          document.getElementById('imageUrl').value = finalImageUrl;
         }
       }
 
       const address = document.getElementById('address').value;
       const wazeLink = address ? 'https://waze.com/ul?q=' + encodeURIComponent(address) : '';
 
-      const updates = {
+      await mySupabase.from('events').update({
         event_name: document.getElementById('eventName').value,
         image_url: finalImageUrl,
         event_date: document.getElementById('eventDate').value,
@@ -273,20 +259,16 @@
         location_name: document.getElementById('locationName').value,
         waze_link: wazeLink,
         bit_link: document.getElementById('bitLink').value,
-      };
-
-      await mySupabase.from('events').update(updates).eq('id', currentEventId);
+      }).eq('id', currentEventId);
       
       btn.innerText = 'שמור עדכונים'; btn.disabled = false;
       const msg = document.getElementById('saveMsg');
       msg.classList.remove('hidden');
       setTimeout(() => msg.classList.add('hidden'), 3000);
-      updateTemplate();
     });
 
     async function loadGuests() {
       const { data: guests } = await mySupabase.from('guests').select('*').eq('event_id', currentEventId).order('created_at', { ascending: false });
-      
       globalGuestsData = guests || []; 
       const tbody = document.getElementById('guestsTableBody');
       tbody.innerHTML = '';
@@ -294,7 +276,6 @@
 
       if (globalGuestsData.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-500">עדיין אין אישורי הגעה.</td></tr>';
-        document.getElementById('totalGuests').innerText = `סה"כ מגיעים: 0`;
         return;
       }
 
@@ -305,18 +286,14 @@
         row.innerHTML = `
           <td class="p-4 font-medium">${guest.guest_name}</td>
           <td class="p-4">
-            <button onclick="toggleAttending('${guest.id}', ${guest.attending})" class="px-3 py-1 rounded-full text-xs font-bold cursor-pointer hover:opacity-80 ${guest.attending ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
-              ${guest.attending ? 'כן' : 'לא'} (שנה)
-            </button>
-          </td>
-          <td class="p-4 text-center">
-            <span class="font-bold cursor-pointer text-blue-600 hover:underline" onclick="editCount('${guest.id}', ${guest.guests_count})">
-              ${guest.attending ? guest.guests_count + ' ✎' : '-'}
+            <span class="px-3 py-1 rounded-full text-xs font-bold ${guest.attending ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+              ${guest.attending ? 'כן' : 'לא'}
             </span>
           </td>
+          <td class="p-4 text-center font-bold">${guest.attending ? guest.guests_count : '-'}</td>
           <td class="p-4 text-slate-600 text-xs">${guest.blessing || ''}</td>
           <td class="p-4 text-center">
-            <button onclick="deleteGuest('${guest.id}')" class="text-red-500 hover:text-red-700 font-bold text-sm">מחק</button>
+            <button onclick="deleteGuest('${guest.id}')" class="text-red-500 hover:text-red-700 text-sm font-bold">מחק</button>
           </td>
         `;
         tbody.appendChild(row);
@@ -324,45 +301,31 @@
       document.getElementById('totalGuests').innerText = `סה"כ מגיעים: ${totalCount}`;
     }
 
-    async function toggleAttending(id, currentStatus) {
-      if(confirm('לשנות את סטטוס ההגעה?')) {
-        await mySupabase.from('guests').update({ attending: !currentStatus }).eq('id', id);
-        loadGuests();
-      }
-    }
-
-    async function editCount(id, currentCount) {
-      const newCount = prompt('הכנס כמות מגיעים חדשה:', currentCount);
-      if(newCount !== null && !isNaN(newCount)) {
-        await mySupabase.from('guests').update({ guests_count: parseInt(newCount) }).eq('id', id);
-        loadGuests();
-      }
-    }
-
     async function deleteGuest(id) {
-      if(confirm('בטוח שברצונך למחוק אורח זה לחלוטין?')) {
+      if(confirm('בטוח שברצונך למחוק אורח זה?')) {
         await mySupabase.from('guests').delete().eq('id', id);
         loadGuests();
       }
     }
 
+    // פונקציית ייצוא מעודכנת הכוללת עמודת מתנה ריקה לשימוש המשתמשים
     function exportToExcel() {
       if (globalGuestsData.length === 0) { alert('אין אורחים לייצא'); return; }
       let csvContent = "\uFEFF"; 
-      csvContent += "שם האורח,מגיע/ה?,כמות,ברכה,תאריך אישור\n";
+      csvContent += "שם האורח,מגיע/ה?,כמות,ברכה,תאריך אישור,כמה הביא/ה (₪)\n";
       globalGuestsData.forEach(g => {
         const name = g.guest_name ? g.guest_name.replace(/,/g, '') : '';
         const attending = g.attending ? 'כן' : 'לא';
         const count = g.attending ? g.guests_count : 0;
         const blessing = g.blessing ? g.blessing.replace(/,/g, ' -').replace(/\n/g, ' ') : '';
         const date = new Date(g.created_at).toLocaleDateString('he-IL');
-        csvContent += `${name},${attending},${count},${blessing},${date}\n`;
+        // פסיק אחרון משאיר את התא האחרון ריק לכתיבה
+        csvContent += `${name},${attending},${count},${blessing},${date},\n`;
       });
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", "רשימת_אורחים.csv");
+      link.setAttribute("href", URL.createObjectURL(blob));
+      link.setAttribute("download", "רשימת_אורחים_ומתנות.csv");
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
