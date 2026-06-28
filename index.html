@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>אישור הגעה</title>
+  <title>הזמנה לאירוע</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
@@ -23,7 +23,7 @@
     
     <div id="loadingScreen" class="absolute inset-0 bg-white flex flex-col items-center justify-center z-50">
       <div class="loader mb-4"></div>
-      <p class="text-slate-500 font-bold">טוען את פרטי האירוע...</p>
+      <p class="text-slate-500 font-bold">טוען את פרטי ההזמנה...</p>
     </div>
 
     <img id="displayImage" src="" alt="הזמנה" class="w-full h-auto object-cover border-b border-gray-100 hidden">
@@ -75,7 +75,7 @@
             <label class="block text-sm font-bold mb-1 theme-color">ברכה:</label>
             <textarea name="blessing" rows="2" class="w-full border p-2.5 rounded-xl bg-slate-50 resize-none"></textarea>
           </div>
-          <button type="submit" id="submitBtn" class="w-full bg-theme text-white text-lg font-bold py-3.5 rounded-xl shadow-md transition mt-2">
+          <button type="submit" id="submitBtn" class="w-full bg-theme text-white text-lg font-bold py-3.5 rounded-xl shadow-md transition mt-2 hover:opacity-90">
             שליחת אישור
           </button>
         </form>
@@ -88,14 +88,14 @@
         </div>
       </div>
 
-      <div id="successMessage" class="hidden py-4">
+      <div id="successMessage" class="hidden py-4 animate-fade-in">
         <div class="theme-color text-5xl mb-4">🎉</div>
         <h3 class="text-3xl font-bold theme-color mb-2">תודה רבה!</h3>
         <p id="successText" class="text-slate-600 font-medium mb-6 text-lg">האישור התקבל.</p>
         
-        <div id="successBitSection" class="bg-blue-50 rounded-2xl p-6 border border-blue-100 mt-4 hidden">
+        <div id="successBitSection" class="bg-blue-50 rounded-2xl p-6 border border-blue-100 mt-4 hidden shadow-sm">
           <p class="text-base text-slate-700 mb-4 font-bold">לנוחיותכם, ניתן להעביר מתנה בביט:</p>
-          <a id="successBitLink" href="#" target="_blank" class="flex items-center justify-center w-full bg-theme text-white font-bold py-4 rounded-xl shadow-md text-lg">
+          <a id="successBitLink" href="#" target="_blank" class="flex items-center justify-center w-full bg-theme text-white font-bold py-4 rounded-xl shadow-md text-lg hover:opacity-90">
             🎁 מעבר מהיר לביט
           </a>
         </div>
@@ -109,17 +109,15 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
     const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
-    // קריאת ה-ID של האירוע מתוך שורת הכתובת
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('event');
 
     window.addEventListener('DOMContentLoaded', async () => {
       if (!eventId) {
-        document.getElementById('loadingScreen').innerHTML = '<p class="text-red-500 font-bold p-6">שגיאה: חסר מזהה אירוע בקישור.</p>';
+        document.getElementById('loadingScreen').innerHTML = '<p class="text-red-500 font-bold p-6">שגיאה: חסר מזהה אירוע בקישור. נא להיכנס דרך הקישור המלא.</p>';
         return;
       }
 
-      // משיכת פרטי האירוע מהמסד
       const { data: event, error } = await mySupabase.from('events').select('*').eq('id', eventId).single();
 
       if (error || !event) {
@@ -127,7 +125,6 @@
         return;
       }
 
-      // הזרקת הנתונים למסך
       if(event.image_url) {
         const img = document.getElementById('displayImage');
         img.src = event.image_url;
@@ -135,7 +132,15 @@
       }
       
       document.getElementById('displayEventName').innerText = event.event_name;
-      document.getElementById('displayDate').innerText = event.event_date ? event.event_date.split('-').reverse().join('.') : '-';
+      
+      // תיקון התאריך! מבודד רק את התאריך לפני ההיפוך
+      let formattedDate = '-';
+      if (event.event_date) {
+        const datePart = event.event_date.split('T')[0];
+        formattedDate = datePart.split('-').reverse().join('.');
+      }
+      document.getElementById('displayDate').innerText = formattedDate;
+
       document.getElementById('displayTime').innerText = event.event_time || '-';
       document.getElementById('displayLocation').innerText = event.location_name || '-';
       
@@ -152,7 +157,6 @@
         document.getElementById('successBitLink').href = event.bit_link;
       }
 
-      // העלמת מסך הטעינה והצגת התוכן
       document.getElementById('loadingScreen').classList.add('hidden');
       document.getElementById('mainContent').classList.remove('hidden');
     });
@@ -174,12 +178,14 @@
       }]);
 
       if (error) {
-        alert("שגיאה. נסה שנית.");
+        alert("שגיאה בשמירה. נסה שנית.");
         btn.disabled = false; btn.innerText = "שליחת אישור";
       } else {
         document.getElementById("mainContent").classList.add("hidden");
         document.getElementById("successText").innerText = isAttending ? "האישור התקבל, נשמח לראותכם 💙" : "תודה שעדכנתם, ניפגש בשמחות 💙";
         document.getElementById("successMessage").classList.remove("hidden");
+        // גלילה חלקה למעלה כדי לראות את הודעת ההצלחה
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     });
   </script>
