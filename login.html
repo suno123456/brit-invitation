@@ -35,16 +35,13 @@
   </div>
 
   <script>
-    // ----------------------------------------------------
-    // פה אתה תכניס את הכתובת והמפתח הארוך שתמצא בסופרבייס
-    // ----------------------------------------------------
-    const SUPABASE_URL = 'שים_פה_את_הכתובת_שמתחילה_ב_HTTPS';
-    const SUPABASE_ANON_KEY = 'שים_פה_את_המפתח_הארוך_שמתחיל_ב_EYJ';
+    const SUPABASE_URL = 'https://ghfgqwslakjqmxuboobn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
 
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const SUPABASE_URL = 'https://ghfgqwslakjqmxuboobn.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const btn = document.getElementById('submitBtn');
@@ -54,7 +51,6 @@
       btn.innerText = 'מתחבר...';
       errorMsg.classList.add('hidden');
 
-      // פעולת ההתחברות מול סופרבייס
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
@@ -62,11 +58,10 @@
 
       if (error) {
         errorMsg.classList.remove('hidden');
-        errorMsg.innerText = error.message;
+        errorMsg.innerText = 'פרטי ההתחברות שגויים, נסה שנית.';
         btn.disabled = false;
         btn.innerText = 'התחבר למערכת';
       } else {
-        // אם ההתחברות הצליחה, נעביר את הלקוח לפאנל הניהול (שנבנה בשלב הבא)
         window.location.href = 'dashboard.html';
       }
     });
