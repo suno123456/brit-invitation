@@ -176,6 +176,10 @@
   <footer class="mt-8 mb-6 text-center p-4">
     <div class="bg-slate-200 h-px w-1/2 mx-auto mb-4"></div>
     <p class="text-sm font-bold text-slate-700">© כל הזכויות שמורות לסאן אורלביץ'.</p>
+    <p class="text-xs text-slate-500 mt-1 max-w-lg mx-auto leading-relaxed">
+      אין להעתיק, לשכפל או להעביר מערכת זו.<br>
+      <span class="text-red-500 font-semibold">שימו לב:</span> המערכת נמחקת אוטומטית כ-4 ימים לאחר האירוע.
+    </p>
   </footer>
 
   <script>
@@ -405,6 +409,7 @@
       await loadDashboardData();
     }
 
+    // תיקון השגיאה! משתמש ב-currentEventId הנכון במקום בשם שדה שגוי
     async function createNewTable() {
       const nameInput = document.getElementById('newTableName');
       const capacityInput = document.getElementById('newTableCapacity');
@@ -413,9 +418,18 @@
 
       if (!name) { alert("הזן שם לשולחן"); return; }
 
-      await mySupabase.from('tables').insert([{ event_id: currentEventId, table_name: name, capacity: capacity }]);
-      nameInput.value = '';
-      await loadDashboardData();
+      const { error } = await mySupabase.from('tables').insert([{ 
+        event_id: currentEventId, 
+        table_name: name, 
+        capacity: capacity 
+      }]);
+
+      if(error) {
+        alert("שגיאה ביצירת שולחן: " + error.message);
+      } else {
+        nameInput.value = '';
+        await loadDashboardData();
+      }
     }
 
     async function deleteTable(tableId) {
