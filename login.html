@@ -38,7 +38,8 @@
     const SUPABASE_URL = 'https://ghfgqwslakjqmxuboobn.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
 
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // שינינו את השם ל- mySupabase כדי למנוע התנגשות
+    const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -51,7 +52,7 @@
       btn.innerText = 'מתחבר...';
       errorMsg.classList.add('hidden');
 
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await mySupabase.auth.signInWithPassword({
         email: email,
         password: password,
       });
