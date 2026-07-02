@@ -251,6 +251,13 @@
     let globalGuestsData = [];
     let allTables = [];
 
+    // פונקציית מגן נגד התקפות XSS מאורחים אנונימיים
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => (
+        {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+      ));
+    }
+
     // הפעלה ראשונית
     async function init() {
       const { data: { user } } = await mySupabase.auth.getUser();
@@ -336,7 +343,6 @@
 
     // טעינת פרטי האירוע (הגדרות)
     async function loadEventDetails() {
-      // נוודא שקיים פרופיל
       await mySupabase.from('profiles').upsert([{ id: currentUser.id, email: currentUser.email }]);
 
       let { data: events } = await mySupabase.from('events').select('*').eq('host_id', currentUser.id);
@@ -394,7 +400,7 @@
       document.getElementById('statArrivedCount').innerText = arrived.reduce((sum, g) => sum + (g.guests_count || 0), 0);
     }
 
-    // הצגת רשימת האורחים המקורית
+    // הצגת רשימת האורחים המקורית (מוגנת מפני XSS)
     function renderGuestsTable() {
       const tbody = document.getElementById('guestsTableBody');
       tbody.innerHTML = '';
@@ -410,14 +416,14 @@
         const row = document.createElement('tr');
         row.className = 'border-b hover:bg-slate-50 transition';
         row.innerHTML = `
-          <td class="p-4 font-medium">${guest.guest_name}</td>
+          <td class="p-4 font-medium">${esc(guest.guest_name)}</td>
           <td class="p-4">
             <span class="px-3 py-1 rounded-full text-xs font-bold ${guest.attending ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
               ${guest.attending ? 'כן' : 'לא'}
             </span>
           </td>
           <td class="p-4 text-center font-bold">${guest.attending ? guest.guests_count : '-'}</td>
-          <td class="p-4 text-slate-600 text-xs">${guest.blessing || ''}</td>
+          <td class="p-4 text-slate-600 text-xs">${esc(guest.blessing)}</td>
           <td class="p-4 text-center">
             <button type="button" onclick="deleteGuest('${guest.id}')" class="text-red-500 hover:text-red-700 text-sm font-bold">מחק</button>
           </td>
@@ -427,7 +433,7 @@
       document.getElementById('totalGuests').innerText = `סה"כ מגיעים: ${totalCount}`;
     }
 
-    // הצגת סידורי ההושבה המקוריים
+    // הצגת סידורי ההושבה המקוריים (מוגנת מפני XSS)
     function renderTablesAndSeating() {
       const container = document.getElementById('tablesContainer');
       container.innerHTML = '';
@@ -458,7 +464,7 @@
           seatedInTable.forEach(g => {
             guestsListHtml += `
               <li class="flex justify-between items-center">
-                <span>👤 ${g.guest_name} (${g.guests_count})</span>
+                <span>👤 ${esc(g.guest_name)} (${g.guests_count})</span>
                 <button onclick="removeGuestFromTable('${g.id}')" class="text-red-500 font-bold ml-1">הסר</button>
               </li>`;
           });
@@ -468,7 +474,7 @@
         let dropdownHtml = `<select onchange="seatGuestInTable(this, '${table.id}')" class="w-full text-xs border p-2 rounded-lg bg-slate-50">`;
         dropdownHtml += `<option value="">➕ הושב אורח בשולחן זה...</option>`;
         unseatedGuests.forEach(g => {
-          dropdownHtml += `<option value="${g.id}">${g.guest_name} (${g.guests_count} מקומות)</option>`;
+          dropdownHtml += `<option value="${g.id}">${esc(g.guest_name)} (${g.guests_count} מקומות)</option>`;
         });
         dropdownHtml += `</select>`;
 
@@ -476,7 +482,7 @@
           <div>
             <div class="flex justify-between items-start border-b pb-2 mb-2">
               <div>
-                <h4 class="font-bold text-slate-800">${table.table_name}</h4>
+                <h4 class="font-bold text-slate-800">${esc(table.table_name)}</h4>
                 <p class="text-xs text-slate-500 mt-0.5">תפוסה: ${currentSeatedCount} / ${table.capacity || 10}</p>
               </div>
               <button onclick="deleteTable('${table.id}')" class="text-xs text-slate-400 hover:text-red-500">🗑️ מחק</button>
@@ -491,7 +497,7 @@
       });
     }
 
-    // הצגת הטאב החדש של הנוכחות (המארחת)
+    // הצגת הטאב החדש של הנוכחות (מוגנת מפני XSS)
     function renderArrivedGuestsTable() {
       const tbody = document.getElementById('arrivedGuestsTableBody');
       const arrivedList = globalGuestsData.filter(g => g.arrived === true);
@@ -512,9 +518,9 @@
         const row = document.createElement('tr');
         row.className = "border-b hover:bg-emerald-50/30 transition text-sm";
         row.innerHTML = `
-          <td class="p-4 font-bold text-slate-800">👤 ${guest.guest_name}</td>
+          <td class="p-4 font-bold text-slate-800">👤 ${esc(guest.guest_name)}</td>
           <td class="p-4 text-center font-extrabold text-slate-700 bg-slate-50/50">${guest.guests_count} מוזמנים</td>
-          <td class="p-4 text-center font-semibold text-blue-600">🪑 ${tableName}</td>
+          <td class="p-4 text-center font-semibold text-blue-600">🪑 ${esc(tableName)}</td>
           <td class="p-4 text-center"><span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full font-bold text-xs">✓ באולם</span></td>
         `;
         tbody.appendChild(row);
@@ -571,7 +577,7 @@
       
       if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
-        const fileName = `${Date.now()}_${file.name}`;
+        const fileName = `${crypto.randomUUID()}_${file.name}`; // שימוש ב-UUID רנדומלי אמיתי כדי למנוע ניחוש קבצים
         const { data } = await mySupabase.storage.from('invitations').upload(fileName, file);
         if (data) { finalImageUrl = SUPABASE_URL + '/storage/v1/object/public/invitations/' + fileName; }
       }
