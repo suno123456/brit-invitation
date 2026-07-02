@@ -146,24 +146,22 @@
       
       document.getElementById('displayEventName').innerText = event.event_name;
       
-      // עיבוד ותצוגת תאריך האירוע
       let formattedDate = '-';
       let isToday = false;
 
       if (event.event_date) {
-        const datePart = event.event_date.split('T')[0]; // בידוד ה-YYYY-MM-DD
+        const datePart = event.event_date.split('T')[0];
         formattedDate = datePart.split('-').reverse().join('.');
         
-        // 🔒 בדיקה חכמה בזמן אמת: האם היום זה יום האירוע? 🔒
+        // בדיקת תאריך מול היום הנוכחי (YYYY-MM-DD)
         const todayStr = new Date().toLocaleDateString('he-IL', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('.').reverse().join('-');
-        // בדיקה ישירה של התאריכים בפורמט YYYY-MM-DD
         if (datePart === todayStr) {
           isToday = true;
         }
       }
       document.getElementById('displayDate').innerText = formattedDate;
 
-      // 🔓 פתיחת חלונית החיפוש אך ורק אם מדובר ביום האירוע
+      // פתיחת חלונית איתור שולחן רק אם זה היום של האירוע
       if (isToday) {
         document.getElementById('dayOfEventSection').classList.remove('hidden');
       }
@@ -188,48 +186,35 @@
       document.getElementById('mainContent').classList.remove('hidden');
     });
 
-    // איתור שולחן וסימון הגעה אוטומטי (פועל רק ביום האירוע כשהחלון גלוי)
+    // איתור שולחן וסימון הגעה בטוח ומאובטח באמצעות ה-RPC שמונע דליפת מידע
     async function findMyTableAndMarkArrival() {
       const searchInput = document.getElementById('seatingSearchInput');
       const alertBox = document.getElementById('seatingAlertBox');
       const alertText = document.getElementById('seatingAlertText');
       const nameQuery = searchInput.value.trim();
 
-      if (!nameQuery) {
-        alert("אנא הקלידו שם מלא לחיפוש השולחן.");
-        return;
-      }
-
+      if (!nameQuery) { alert("אנא הקלידו שם מלא לחיפוש השולחן."); return; }
       alertBox.classList.add('hidden');
 
-      const { data: guests, error } = await mySupabase
-        .from('guests')
-        .select('*')
-        .eq('event_id', eventId)
-        .eq('attending', true)
-        .ilike('guest_name', `%${nameQuery}%`);
+      // קריאה לפונקציית השרת המאובטחת
+      const { data, error } = await mySupabase.rpc('find_guest_table_and_arrive', {
+        p_event_id: eventId,
+        p_guest_name: nameQuery
+      });
 
-      if (error || !guests || guests.length === 0) {
+      if (error || !data || data.length === 0) {
         alertText.innerText = `לא מצאנו אישור הגעה פעיל על השם "${nameQuery}". ודאו שהשם מאויית נכון.`;
         alertBox.className = "p-4 bg-rose-100 text-rose-800 rounded-xl border border-rose-300 text-center";
         alertBox.classList.remove('hidden');
         return;
       }
 
-      const guest = guests[0];
-
-      // עדכון הגעה אוטומטי לאולם
-      await mySupabase.from('guests').update({ arrived: true }).eq('id', guest.id);
+      const guest = data[0];
 
       if (guest.table_id) {
-        const { data: table } = await mySupabase.from('tables').select('table_name').eq('id', guest.table_id).single();
-        if (table) {
-          alertText.innerHTML = `ברוכים הבאים, <span class="font-extrabold">${guest.guest_name}</span>! 🎉<br>שובצתם ב-<span class="text-yellow-200 font-black text-lg underline">${table.table_name}</span>.<br><span class="text-xs opacity-90 font-medium">כניסתכם עודכנה אוטומטית במערכת האולם.</span>`;
-        } else {
-          alertText.innerHTML = `ברוכים הבאים, <span class="font-extrabold">${guest.guest_name}</span>!<br>נרשמה כניסתכם באולם, המארחת תפנה אתכם לשולחן.`;
-        }
+        alertText.innerHTML = `ברוכים הבאים, <span class="font-extrabold">${guest.guest_name}</span>! 🎉<br>שובצתם ב-<span class="text-yellow-200 font-black text-lg underline">${guest.table_name}</span>.<br><span class="text-xs opacity-90 font-medium">כניסתכם עודכנה אוטומטית במערכת האולם.</span>`;
       } else {
-        alertText.innerHTML = `ברוכים הבאים, <span class="font-extrabold">${guest.guest_name}</span>!<br>כניסתכם עודכנה בהצלחה. צוות המארחות יכוון אתכם לשולחן פנוי.`;
+        alertText.innerHTML = `ברוכים הבאים, <span class="font-extrabold">${guest.guest_name}</span>!<br>נרשמה כניסתכם באולם, המארחת תפנה אתכם לשולחן הרלוונטי.`;
       }
 
       alertBox.className = "p-4 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-xl shadow border border-emerald-500 text-center animate-fade-in";
@@ -237,6 +222,7 @@
       alertBox.scrollIntoView({ behavior: 'smooth' });
     }
 
+    // שליחת אישור הגעה מאובטח דרך RPC (INSERT בלבד, ללא זכויות קריאה חופשיות לאורח)
     document.getElementById('rsvpForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById("submitBtn");
@@ -245,13 +231,13 @@
       const form = e.target;
       const isAttending = form.attending.value === "yes";
       
-      const { error } = await mySupabase.from('guests').insert([{
-        event_id: eventId,
-        guest_name: form.name.value,
-        attending: isAttending,
-        guests_count: isAttending ? parseInt(form.guests.value) : 0,
-        blessing: form.blessing.value
-      }]);
+      const { error } = await mySupabase.rpc('submit_rsvp', {
+        p_event_id: eventId,
+        p_guest_name: form.name.value,
+        p_attending: isAttending,
+        p_guests_count: isAttending ? parseInt(form.guests.value) : 0,
+        p_blessing: form.blessing.value
+      });
 
       if (error) {
         alert("שגיאה בשמירה. נסה שנית.");
