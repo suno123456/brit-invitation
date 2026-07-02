@@ -7,11 +7,12 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:,">
   <style>
     body { font-family: 'Assistant', sans-serif; background-color: #f3f4f6; }
   </style>
 </head>
-<body class="flex items-center justify-center min-h-screen">
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
 
   <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
     <h2 class="text-2xl font-bold text-slate-700 mb-6">כניסת מנהלים</h2>
@@ -34,11 +35,15 @@
     <p id="errorMsg" class="text-red-500 mt-4 hidden font-medium">פרטי ההתחברות שגויים, נסה שנית.</p>
   </div>
 
+  <footer class="mt-8 text-center p-4">
+    <div class="bg-slate-200 h-px w-32 mx-auto mb-4"></div>
+    <p class="text-sm font-bold text-slate-700">© כל הזכויות שמורות לסאן אורלביץ'.</p>
+    <p class="text-xs text-slate-500 mt-1">אין להעתיק, לשכפל או להעביר מערכת זו.</p>
+  </footer>
+
   <script>
     const SUPABASE_URL = 'https://ghfgqwslakjqmxuboobn.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
-
-    // שינינו את השם ל- mySupabase כדי למנוע התנגשות
     const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -48,20 +53,14 @@
       const btn = document.getElementById('submitBtn');
       const errorMsg = document.getElementById('errorMsg');
 
-      btn.disabled = true;
-      btn.innerText = 'מתחבר...';
+      btn.disabled = true; btn.innerText = 'מתחבר...';
       errorMsg.classList.add('hidden');
 
-      const { data, error } = await mySupabase.auth.signInWithPassword({
-        email: email,
-        password: password,
-      });
+      const { data, error } = await mySupabase.auth.signInWithPassword({ email: email, password: password });
 
       if (error) {
         errorMsg.classList.remove('hidden');
-        errorMsg.innerText = 'פרטי ההתחברות שגויים, נסה שנית.';
-        btn.disabled = false;
-        btn.innerText = 'התחבר למערכת';
+        btn.disabled = false; btn.innerText = 'התחבר למערכת';
       } else {
         window.location.href = 'dashboard.html';
       }
