@@ -125,7 +125,6 @@
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('event');
 
-    // פונקציית מגן נגד התקפות הזרקת קוד (XSS Mitigation)
     function esc(s) {
       return String(s ?? '').replace(/[&<>"']/g, c => (
         {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
@@ -138,7 +137,6 @@
         return;
       }
 
-      // קריאה מאובטחת דרך RPC - מונע קריאה ישירה מהטבלה
       const { data: eventData, error } = await mySupabase.rpc('get_public_event', { target_event_id: eventId });
 
       if (error || !eventData || eventData.length === 0) {
@@ -203,10 +201,9 @@
       if (!nameQuery) { alert("אנא הקלידו שם מלא לחיפוש השולחן."); return; }
       alertBox.classList.add('hidden');
 
-      // הפעלה מאובטחת דרך RPC - מונע סריקת אורחים אחרים בדאטהבייס
       const { data, error } = await mySupabase.rpc('arrive_and_find_table', {
         p_event_id: eventId,
-        p_guest_name: nameQuery
+        p_name: nameQuery
       });
 
       if (error || !data || data.length === 0) {
@@ -237,12 +234,11 @@
       const form = e.target;
       const isAttending = form.attending.value === "yes";
       
-      // הזרקה אנונימית סגורה ומאובטחת דרך RPC
       const { error } = await mySupabase.rpc('submit_public_rsvp', {
         p_event_id: eventId,
-        p_guest_name: form.name.value,
+        p_name: form.name.value,
         p_attending: isAttending,
-        p_guests_count: isAttending ? parseInt(form.guests.value) : 0,
+        p_count: isAttending ? parseInt(form.guests.value) : 0,
         p_blessing: form.blessing.value
       });
 
