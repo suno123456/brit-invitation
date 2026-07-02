@@ -251,14 +251,12 @@
     let globalGuestsData = [];
     let allTables = [];
 
-    // פונקציית מגן נגד התקפות XSS מאורחים אנונימיים
     function esc(s) {
       return String(s ?? '').replace(/[&<>"']/g, c => (
         {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
       ));
     }
 
-    // הפעלה ראשונית
     async function init() {
       const { data: { user } } = await mySupabase.auth.getUser();
       if (!user) { 
@@ -269,13 +267,11 @@
       loadEventDetails();
     }
 
-    // ניתוק משתמש
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       await mySupabase.auth.signOut();
       window.location.href = 'login.html';
     });
 
-    // העתקת קישורים
     function copyLink() {
       const linkInput = document.getElementById('shareLink');
       linkInput.select();
@@ -297,7 +293,6 @@
       alert('ההודעה הועתקה!');
     }
 
-    // עדכון תבנית ההודעה לוואטסאפ
     function updateTemplate() {
       const eventName = document.getElementById('eventName').value || '[שם האירוע]';
       const rawDate = document.getElementById('eventDate').value;
@@ -314,7 +309,6 @@
       document.getElementById('whatsappTemplate').value = templateText;
     }
 
-    // חילוץ קישור ביט באמצעות QR
     document.getElementById('bitQrUpload').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -341,7 +335,6 @@
       reader.readAsDataURL(file);
     });
 
-    // טעינת פרטי האירוע (הגדרות)
     async function loadEventDetails() {
       await mySupabase.from('profiles').upsert([{ id: currentUser.id, email: currentUser.email }]);
 
@@ -354,7 +347,9 @@
       currentEventId = event.id;
       
       document.getElementById('shareLink').value = window.location.origin + '/?event=' + currentEventId;
-      document.getElementById('hostessLink').value = window.location.origin + '/hostess.html?event=' + currentEventId;
+      
+      // חיווט הטוקן הייעודי למארחת הוסף כאן:
+      document.getElementById('hostessLink').value = window.location.origin + '/hostess.html?event=' + currentEventId + '&token=' + (event.hostess_token || '');
       
       document.getElementById('eventName').value = event.event_name || '';
       document.getElementById('imageUrl').value = event.image_url || '';
@@ -371,7 +366,6 @@
       loadDashboardData();
     }
 
-    // טעינת אורחים ושולחנות למערכת
     async function loadDashboardData() {
       if (!currentEventId) return;
 
@@ -387,7 +381,6 @@
       renderArrivedGuestsTable();
     }
 
-    // חישוב הקוביות העליונות
     function calculateStats() {
       const attending = globalGuestsData.filter(g => g.attending === true);
       const declined = globalGuestsData.filter(g => g.attending === false);
@@ -400,7 +393,6 @@
       document.getElementById('statArrivedCount').innerText = arrived.reduce((sum, g) => sum + (g.guests_count || 0), 0);
     }
 
-    // הצגת רשימת האורחים המקורית (מוגנת מפני XSS)
     function renderGuestsTable() {
       const tbody = document.getElementById('guestsTableBody');
       tbody.innerHTML = '';
@@ -433,7 +425,6 @@
       document.getElementById('totalGuests').innerText = `סה"כ מגיעים: ${totalCount}`;
     }
 
-    // הצגת סידורי ההושבה המקוריים (מוגנת מפני XSS)
     function renderTablesAndSeating() {
       const container = document.getElementById('tablesContainer');
       container.innerHTML = '';
@@ -497,7 +488,6 @@
       });
     }
 
-    // הצגת הטאב החדש של הנוכחות (מוגנת מפני XSS)
     function renderArrivedGuestsTable() {
       const tbody = document.getElementById('arrivedGuestsTableBody');
       const arrivedList = globalGuestsData.filter(g => g.arrived === true);
@@ -527,7 +517,6 @@
       });
     }
 
-    // פונקציות ניהול (מחיקות והושבות)
     async function seatGuestInTable(selectElement, tableId) {
       const guestId = selectElement.value;
       if (!guestId) return;
@@ -566,7 +555,6 @@
       }
     }
 
-    // שמירת הגדרות האירוע
     document.getElementById('eventSettingsForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('saveEventBtn');
@@ -577,7 +565,7 @@
       
       if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
-        const fileName = `${crypto.randomUUID()}_${file.name}`; // שימוש ב-UUID רנדומלי אמיתי כדי למנוע ניחוש קבצים
+        const fileName = `${crypto.randomUUID()}_${file.name}`; 
         const { data } = await mySupabase.storage.from('invitations').upload(fileName, file);
         if (data) { finalImageUrl = SUPABASE_URL + '/storage/v1/object/public/invitations/' + fileName; }
       }
@@ -602,7 +590,6 @@
       updateTemplate();
     });
 
-    // ייצוא לאקסל
     function exportToExcel() {
       if (globalGuestsData.length === 0) { alert('אין אורחים לייצא'); return; }
       let csvContent = "\uFEFF"; 
@@ -622,7 +609,6 @@
       document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
 
-    // מעבר בין טאבים
     function switchTab(tab) {
       document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.flex-1.py-3').forEach(el => el.classList.remove('border-blue-600', 'text-blue-600'));
