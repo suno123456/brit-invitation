@@ -36,6 +36,7 @@
     
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('event');
+    const token = urlParams.get('token');
 
     let allTables = [];
     let allGuests = [];
@@ -47,19 +48,18 @@
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
-      if (!eventId) {
-        document.getElementById('guestsContainer').innerHTML = '<p class="text-red-500 font-bold p-6 text-center">שגיאה: חסר מזהה אירוע.</p>';
+      if (!eventId || !token) {
+        document.getElementById('guestsContainer').innerHTML = '<p class="text-red-500 font-bold p-6 text-center">שגיאה: חסר מזהה אירוע או טוקן אבטחה בקישור.</p>';
         return;
       }
       await loadHostessData();
     });
 
     async function loadHostessData() {
-      // שליפה מאובטחת ומרוכזת דרך RPC ללא פתיחת RLS פרוץ לציבור
-      const { data, error } = await mySupabase.rpc('get_hostess_data', { p_event_id: eventId });
+      const { data, error } = await mySupabase.rpc('get_hostess_data', { p_event_id: eventId, p_token: token });
 
       if (error || !data) {
-        document.getElementById('guestsContainer').innerHTML = '<p class="text-red-500 font-bold p-6 text-center">שגיאה בטעינת הנתונים המאובטחים.</p>';
+        document.getElementById('guestsContainer').innerHTML = '<p class="text-red-500 font-bold p-6 text-center">שגיאה בטעינת הנתונים המאובטחים (טוקן לא חוקי).</p>';
         return;
       }
 
@@ -115,8 +115,10 @@
 
     async function updateGuestCount(guestId, newCount) {
       if (newCount < 1) return;
-      // פקודת ה-update רצה כמשתמש מחובר/מורשה באמצעות ה-RPC או ה-RLS המוגדר
-      const { error } = await mySupabase.from('guests').update({ guests_count: newCount }).eq('id', guestId);
+      const { error } = await mySupabase.rpc('hostess_update_count', {
+        p_event_id: eventId, p_token: token, p_guest_id: guestId, p_count: newCount
+      });
+      
       if (error) { alert("שגיאה בעדכון: " + error.message); } 
       else {
         const guest = allGuests.find(g => g.id === guestId);
@@ -126,7 +128,10 @@
     }
 
     async function toggleArrival(guestId, currentStatus) {
-      const { error } = await mySupabase.from('guests').update({ arrived: !currentStatus }).eq('id', guestId);
+      const { error } = await mySupabase.rpc('hostess_toggle_arrival', {
+        p_event_id: eventId, p_token: token, p_guest_id: guestId, p_arrived: !currentStatus
+      });
+      
       if (error) { alert("שגיאה בסימון הנוכחות."); } 
       else {
         const guest = allGuests.find(g => g.id === guestId);
