@@ -20,11 +20,11 @@
 
     <div class="p-4 border-b bg-slate-50">
       <input type="text" id="searchInput" oninput="filterGuests()" placeholder="🔍 הקלידו שם של אורח לחיפוש מהיר..." 
-             class="w-full border-2 border-slate-200 p-3 rounded-xl bg-white focus:outline-none focus:border-amber-500 text-right text-base font-bold shadow-sm">
+             class="w-full border-2 border-slate-200 p-3 rounded-xl bg-white focus:outline-none focus:border-amber-500 text-right text-base font-bold">
     </div>
 
-    <div class="p-3 space-y-3 max-h-[70vh] overflow-y-auto" id="guestsContainer">
-      <p class="text-center text-sm text-slate-400 p-8">טוען רשימת אורחים מהשרת...</p>
+    <div id="guestsContainer" class="p-4 space-y-3">
+      <p class="text-center text-slate-400 py-6">טוען רשימת מוזמנים מאובטחת...</p>
     </div>
 
   </div>
@@ -33,41 +33,40 @@
     const SUPABASE_URL = 'https://ghfgqwslakjqmxuboobn.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
     const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    let allGuests = [];
-    let allTables = [];
-
-    // חילוץ ה-ID של האירוע מהכתובת
+    
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('event');
 
+    let allTables = [];
+    let allGuests = [];
+
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => (
+        {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+      ));
+    }
+
     window.addEventListener('DOMContentLoaded', async () => {
       if (!eventId) {
-        document.body.innerHTML = '<div class="text-center p-8 font-bold text-red-500">❌ קישור לא תקין. חסר מזהה אירוע.</div>';
+        document.getElementById('guestsContainer').innerHTML = '<p class="text-red-500 font-bold p-6 text-center">שגיאה: חסר מזהה אירוע.</p>';
         return;
       }
       await loadHostessData();
     });
 
     async function loadHostessData() {
-      // 1. שליפת שם האירוע
-      const { data: event } = await mySupabase.from('events').select('event_name').eq('id', eventId).single();
-      if (event) {
-        document.getElementById('eventTitle').innerText = event.event_name;
+      // שליפה מאובטחת ומרוכזת דרך RPC ללא פתיחת RLS פרוץ לציבור
+      const { data, error } = await mySupabase.rpc('get_hostess_data', { p_event_id: eventId });
+
+      if (error || !data) {
+        document.getElementById('guestsContainer').innerHTML = '<p class="text-red-500 font-bold p-6 text-center">שגיאה בטעינת הנתונים המאובטחים.</p>';
+        return;
       }
 
-      // 2. שליפת השולחנות
-      const { data: tables } = await mySupabase.from('tables').select('*').eq('event_id', eventId);
-      allTables = tables || [];
-
-      // 3. שליפת האורחים שאישרו הגעה (כן או אולי)
-      const { data: guests } = await mySupabase.from('guests')
-        .select('*')
-        .eq('event_id', eventId)
-        .eq('attending', true)
-        .order('guest_name', { ascending: true });
-        
-      allGuests = guests || [];
+      document.getElementById('eventTitle').innerText = data.event_name || 'עמדת מארחת';
+      allTables = data.tables || [];
+      allGuests = data.guests || [];
+      
       renderGuests(allGuests);
     }
 
@@ -76,17 +75,13 @@
       container.innerHTML = '';
 
       if (list.length === 0) {
-        container.innerHTML = '<p class="text-center text-sm text-slate-400 p-8">לא נמצאו אורחים תואמים 🤷‍♂️</p>';
+        container.innerHTML = '<p class="text-center text-slate-400 py-8 font-bold">לא נמצאו אורחים תואמים 🤷‍♂️</p>';
         return;
       }
 
       list.forEach(guest => {
-        // מציאת שם השולחן לפי ה-ID
         const table = allTables.find(t => t.id === guest.table_id);
         const tableName = table ? table.table_name : 'ללא שולחן';
-
-        // בדיקה האם האורח כבר סומן כמי שהגיע בפועל לאולם
-        // אנחנו משתמשים בשדה בשם `arrived` (במידה ולא קיים בטבלה, סופרבייס יתייחס אליו כ-false/null)
         const hasArrived = guest.arrived || false;
 
         const card = document.createElement('div');
@@ -95,8 +90,8 @@
         card.innerHTML = `
           <div class="flex-1 w-full">
             <div class="flex items-center gap-2">
-              <h4 class="font-extrabold text-slate-800 text-lg">${guest.guest_name}</h4>
-              <span class="text-xs bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded border border-slate-200">🪑 ${tableName}</span>
+              <h4 class="font-extrabold text-slate-800 text-lg">${esc(guest.guest_name)}</h4>
+              <span class="text-xs bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded border border-slate-200">🪑 ${esc(tableName)}</span>
             </div>
             
             <div class="flex items-center gap-2 mt-3 bg-slate-50 p-1.5 rounded-lg border border-slate-200 w-fit">
@@ -118,42 +113,31 @@
       });
     }
 
-    // פונקציה לעדכון כמות האורחים בזמן אמת מהכפתורים
     async function updateGuestCount(guestId, newCount) {
-      if (newCount < 1) return; // מניעה של ירידה מתחת ל-1
-      
+      if (newCount < 1) return;
+      // פקודת ה-update רצה כמשתמש מחובר/מורשה באמצעות ה-RPC או ה-RLS המוגדר
       const { error } = await mySupabase.from('guests').update({ guests_count: newCount }).eq('id', guestId);
-      if (error) {
-        alert("שגיאה בעדכון הכמות: " + error.message);
-      } else {
-        // עדכון הלוקאל דאטה כדי לא להטעין הכל מחדש
+      if (error) { alert("שגיאה בעדכון: " + error.message); } 
+      else {
         const guest = allGuests.find(g => g.id === guestId);
         if (guest) guest.guests_count = newCount;
-        renderGuests(document.getElementById('searchInput').value ? allGuests.filter(g => g.guest_name.toLowerCase().includes(document.getElementById('searchInput').value.toLowerCase())) : allGuests);
+        filterGuests();
       }
     }
 
-    // פונקציית סימון הגיע/לא הגיע לאולם
     async function toggleArrival(guestId, currentStatus) {
-      // במידה והעמודה `arrived` עדיין לא קיימת פיזית, אנחנו נטמיע אותה דינמית בעדכון
       const { error } = await mySupabase.from('guests').update({ arrived: !currentStatus }).eq('id', guestId);
-      if (error) {
-        // אם העמודה לא קיימת, סופרבייס ייצר שגיאה, אז אנחנו נטפל בזה בצורה חלקה
-        alert("שגיאה בסימון האורח. אנא ודא שהרצת את קוד ה-SQL בסופרבייס.");
-      } else {
+      if (error) { alert("שגיאה בסימון הנוכחות."); } 
+      else {
         const guest = allGuests.find(g => g.id === guestId);
         if (guest) guest.arrived = !currentStatus;
-        renderGuests(document.getElementById('searchInput').value ? allGuests.filter(g => g.guest_name.toLowerCase().includes(document.getElementById('searchInput').value.toLowerCase())) : allGuests);
+        filterGuests();
       }
     }
 
-    // פילטר מהיר לחיפוש שמות בלייב
     function filterGuests() {
       const query = document.getElementById('searchInput').value.trim().toLowerCase();
-      if (!query) {
-        renderGuests(allGuests);
-        return;
-      }
+      if (!query) { renderGuests(allGuests); return; }
       const filtered = allGuests.filter(g => g.guest_name.toLowerCase().includes(query));
       renderGuests(filtered);
     }
