@@ -8,6 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:,">
   <style> 
     body { font-family: 'Assistant', sans-serif; background-color: #f8fafc; } 
     .tab-section { display: none; } .tab-section.active { display: block; }
@@ -60,10 +61,11 @@
       </div>
     </div>
 
-    <div class="flex border-b border-gray-200 bg-white p-2 rounded-t-xl gap-2 shadow-sm">
+    <div id="tabsNavigationContainer" class="flex border-b border-gray-200 bg-white p-2 rounded-t-xl gap-2 shadow-sm">
       <button id="tabSettingsBtn" onclick="switchTab('settings')" class="flex-1 py-3 text-center font-bold text-sm border-b-2 border-blue-600 text-blue-600 focus:outline-none rounded-t-xl transition">⚙️ הגדרות ורשימות</button>
       <button id="tabTablesBtn" onclick="switchTab('tables')" class="flex-1 py-3 text-center font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 focus:outline-none rounded-t-xl transition">🪑 סידורי הושבה</button>
       <button id="tabArrivedBtn" onclick="switchTab('arrived')" class="flex-1 py-3 text-center font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 focus:outline-none rounded-t-xl transition">✨ דוח נוכחות אולם</button>
+      <button id="tabAdminBtn" onclick="switchTab('admin')" class="flex-1 py-3 text-center font-bold text-sm border-b-2 border-transparent text-purple-600 hover:text-purple-800 focus:outline-none rounded-t-xl transition hidden">👑 ניהול לקוחות (אדמין)</button>
     </div>
 
     <div id="sectionSettings" class="space-y-8 tab-section active">
@@ -145,11 +147,32 @@
         </table>
       </div>
     </div>
+
+    <div id="sectionAdmin" class="space-y-6 tab-section bg-white rounded-2xl shadow-md p-6">
+      <div class="border-b pb-3 mb-4">
+        <h2 class="text-xl font-black text-purple-700">👑 פאנל ניהול עסק (סופר-אדמין)</h2>
+        <p class="text-xs text-slate-500 mt-1">רשימת הלקוחות שנרשמו כעת במערכת וממתינים שתאשר את התשלום שלהם בביט.</p>
+      </div>
+      <div class="overflow-x-auto rounded-xl border border-purple-100">
+        <table class="w-full text-right text-sm">
+          <thead class="bg-purple-50 text-purple-900 font-bold border-b">
+            <tr><th class="p-4">שם הלקוח</th><th class="p-4">טלפון</th><th class="p-4">אימייל</th><th class="p-4 text-center">פעולה מיידית</th></tr>
+          </thead>
+          <tbody id="adminPendingTableBody" class="divide-y divide-slate-100">
+            <tr><td colspan="4" class="p-6 text-center text-slate-400">אין לקוחות שממתינים לאישור כרגע. ✨</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <footer class="mt-8 mb-6 text-center p-4">
     <div class="bg-slate-200 h-px w-1/2 mx-auto mb-4"></div>
     <p class="text-sm font-bold text-slate-700">© כל הזכויות שמורות לסאן אורלביץ'.</p>
+    <p class="text-xs text-slate-500 mt-1 max-w-lg mx-auto leading-relaxed">
+      אין להעתיק, לשכפל או להעביר מערכת זו.<br>
+      <span class="text-red-500 font-semibold">שימו לב:</span> המערכת נמחקת אוטומטית כ-4 ימים לאחר האירוע.
+    </p>
   </footer>
 
   <script>
@@ -179,7 +202,13 @@
     });
 
     async function loadEventDetails() {
-      let { data: profile } = await mySupabase.from('profiles').select('status').eq('id', currentUser.id).single();
+      let { data: profile } = await mySupabase.from('profiles').select('status, email').eq('id', currentUser.id).single();
+      
+      // משתמש במייל הפרטי החדש שלך כדי לפתוח את הטאב הסודי
+      if (profile && profile.email === 'sunorlovich@gmail.com') {
+        document.getElementById('tabAdminBtn').classList.remove('hidden');
+      }
+
       if (!profile || profile.status === 'pending') {
         document.getElementById('globalLoader').classList.add('hidden');
         document.getElementById('pendingScreen').classList.remove('hidden');
@@ -219,6 +248,37 @@
       allTables = tables || [];
 
       calculateStats(); renderGuestsTable(); renderTablesAndSeating(); renderArrivedGuestsTable();
+    }
+
+    async function loadPendingUsersForAdmin() {
+      const tbody = document.getElementById('adminPendingTableBody');
+      const { data: pendingUsers, error } = await mySupabase.rpc('get_pending_profiles');
+
+      if (error || !pendingUsers || pendingUsers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400 font-medium">אין לקוחות שממתינים לאישור כרגע. ✨</td></tr>';
+        return;
+      }
+      tbody.innerHTML = '';
+      pendingUsers.forEach(user => {
+        tbody.innerHTML += `
+          <tr class="hover:bg-purple-50/20 transition">
+            <td class="p-4 font-bold text-slate-800">👤 ${esc(user.full_name || 'ללא שם')}</td>
+            <td class="p-4 font-mono text-slate-600">${esc(user.phone || '-')}</td>
+            <td class="p-4 text-slate-600">${esc(user.email)}</td>
+            <td class="p-4 text-center">
+              <button onclick="approveUserFromDashboard('${user.id}')" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition">
+                🚀 אשר והפעל מערכת
+              </button>
+            </td>
+          </tr>`;
+      });
+    }
+
+    async function approveUserFromDashboard(uid) {
+      if (!confirm("האם לאשר את המשתמש ולפתוח לו את המערכת?")) return;
+      const { data, error } = await mySupabase.rpc('super_admin_approve', { p_target_uid: uid });
+      if (error || data !== 'success') { alert("שגיאה באישור המשתמש."); } 
+      else { alert("הלקוח אושר בהצלחה!"); await loadPendingUsersForAdmin(); }
     }
 
     function calculateStats() {
@@ -311,9 +371,18 @@
 
     function switchTab(tab) {
       document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.flex-1.py-3').forEach(el => el.classList.remove('border-blue-600', 'text-blue-600'));
-      document.getElementById('section' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
-      document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1) + 'Btn').classList.add('border-blue-600', 'text-blue-600');
+      document.querySelectorAll('#tabsNavigationContainer button').forEach(el => el.classList.remove('border-blue-600', 'text-blue-600', 'border-purple-600', 'text-purple-600'));
+      
+      const targetSection = document.getElementById('section' + tab.charAt(0).toUpperCase() + tab.slice(1));
+      const targetBtn = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1) + 'Btn');
+      
+      targetSection.classList.add('active');
+      if (tab === 'admin') {
+        targetBtn.classList.add('border-purple-600', 'text-purple-600');
+        loadPendingUsersForAdmin();
+      } else {
+        targetBtn.classList.add('border-blue-600', 'text-blue-600');
+      }
     }
 
     function copyLink() { document.getElementById('shareLink').select(); document.execCommand('copy'); alert('הועתק!'); }
