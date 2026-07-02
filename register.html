@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:,">
   <style> body { font-family: 'Assistant', sans-serif; background-color: #f8fafc; } </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
@@ -115,12 +116,12 @@
       } 
       
       if (data.user) {
-        // הכנסת הפרופיל (הטריגר בשרת יקבע שזה pending וימנע מניפולציות)
         await mySupabase.from('profiles').upsert([{ 
           id: data.user.id, email: email, full_name: fullName, phone: phone
         }]);
       }
 
+      // שליחת המייל עם קישור האישור הדינמי החדש
       try {
         await fetch('https://api.web3forms.com/submit', {
           method: 'POST',
@@ -129,7 +130,7 @@
             access_key: WEB3FORMS_ACCESS_KEY,
             subject: '🚀 לקוח חדש נרשם למערכת (אימות 79 ש"ח)!',
             from_name: 'מערכת המכירות',
-            message: `יש לך לקוח חדש שסימן ששילם 79 ש"ח בביט!\n\nשם מלא: ${fullName}\nטלפון: ${phone}\nאימייל: ${email}\n\nודא כעת באפליקציית ביט שהסכום אכן נכנס, ולאחר מכן העבר את הסטטוס שלו ל-active בסופרבייס.`
+            message: `יש לך לקוח חדש שסימן ששילם 79 ש"ח בביט!\n\nשם מלא: ${fullName}\nטלפון: ${phone}\nאימייל: ${email}\n\nלאישור מיידי של הלקוח ופתיחת המערכת ישירות מהנייד, לחץ כאן:\n${window.location.origin}/approve.html?uid=${data.user.id}`
           })
         });
       } catch (err) { console.error("שגיאה בשליחת המייל", err); }
