@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>אישור לקוח - מנהל מערכת</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:,">
+  <style> body { font-family: 'Assistant', sans-serif; background-color: #f8fafc; } </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+  <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center border-t-4 border-slate-800">
+    <div id="statusIcon" class="text-6xl mb-4 animate-bounce">⏳</div>
+    <h2 id="statusTitle" class="text-2xl font-black text-slate-800 mb-2">מאמת הרשאות מנהל...</h2>
+    <p id="statusDesc" class="text-slate-500 font-medium mb-6">אנא המתן בזמן שהמערכת מאשרת את הלקוח.</p>
+    
+    <div id="actionBtnContainer" class="hidden">
+      <a href="dashboard.html" class="inline-block bg-slate-800 hover:bg-slate-900 text-white font-bold px-6 py-3 rounded-xl transition w-full shadow-md">
+        מעבר לדאשבורד
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://ghfgqwslakjqmxuboobn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
+    const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetUid = urlParams.get('uid');
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      const icon = document.getElementById('statusIcon');
+      const title = document.getElementById('statusTitle');
+      const desc = document.getElementById('statusDesc');
+
+      if (!targetUid) {
+        icon.innerText = '❌'; icon.classList.remove('animate-bounce');
+        title.innerText = 'שגיאה בקישור';
+        desc.innerText = 'חסר מזהה לקוח (uid) בקישור.';
+        return;
+      }
+
+      // 1. בדיקה שאתה מחובר למערכת מהטלפון
+      const { data: { user } } = await mySupabase.auth.getUser();
+      if (!user) {
+        // אם אתה לא מחובר, הוא יזרוק אותך קודם להתחבר ואז יחזיר אותך לכאן
+        window.location.href = `login.html?redirect=approve.html?uid=${targetUid}`;
+        return;
+      }
+
+      // 2. הפעלת אישור הלקוח (השרת יוודא שזה באמת האימייל שלך)
+      const { data, error } = await mySupabase.rpc('super_admin_approve', { p_target_uid: targetUid });
+
+      icon.classList.remove('animate-bounce');
+
+      if (error || data === 'unauthorized') {
+        icon.innerText = '⛔';
+        title.innerText = 'גישה נדחתה!';
+        desc.innerText = 'רק מנהל המערכת הראשי מורשה לאשר לקוחות.';
+      } else {
+        icon.innerText = '✅';
+        title.innerText = 'הלקוח אושר בהצלחה!';
+        desc.innerText = 'המערכת נפתחה עבורו אוטומטית והוא יכול להתחיל לעבוד.';
+        document.getElementById('actionBtnContainer').classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
