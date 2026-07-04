@@ -227,7 +227,6 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
     const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
-    // כתובת ה-API של השרת שלך בוורסל
     const vercelUrl = 'https://brit-invitation.vercel.app/api/send-whatsapp'; 
     
     let currentUser = null;
@@ -541,16 +540,21 @@
       document.getElementById('saveMsg').classList.remove('hidden'); setTimeout(() => document.getElementById('saveMsg').classList.add('hidden'), 3000); updateTemplate();
     });
 
-    // 📥 פונקציית הורדת הרשימה לאקסל - שוחזרה במלואה עם עמודת הברכה/מתנה המקורית!
+    // הורדת רשימה מפוצלת ומדויקת לפי עמודות: שם האורח | מגיע/ה? | כמות | מתנה | ברכה | תאריך אישור
     function exportToExcel() {
       if (globalGuestsData.length === 0) return;
-      let csvContent = "\uFEFFשם האורח,מגיע/ה?,כמות,ברכה / מתנה שקיבל,תאריך אישור\n";
+      let csvContent = "\uFEFFשם האורח,מגיע/ה?,כמות,מתנה,ברכה,תאריך אישור\n";
       globalGuestsData.forEach(g => { 
         let statusText = 'טרם ענה';
         if (g.attending === true) statusText = 'כן';
         if (g.attending === false) statusText = 'לא';
         
-        csvContent += `${g.guest_name ? g.guest_name.replace(/,/g, '') : ''},${statusText},${g.guests_count || 0},${g.blessing ? g.blessing.replace(/,/g, ' -').replace(/\n/g, ' ') : ''},${new Date(g.created_at).toLocaleDateString('he-IL')}\n`; 
+        // מתנה שקיבל (בדרך כלל נשמרת במידה והוזן סכום, או נשאיר ריק למילוי)
+        let giftAmount = g.gift_received ? String(g.gift_received).replace(/,/g, '') : '';
+        // ברכה מהאורח
+        let blessingText = g.blessing ? g.blessing.replace(/,/g, ' -').replace(/\n/g, ' ') : '';
+        
+        csvContent += `${g.guest_name ? g.guest_name.replace(/,/g, '') : ''},${statusText},${g.guests_count || 0},${giftAmount},${blessingText},${new Date(g.created_at).toLocaleDateString('he-IL')}\n`; 
       });
       const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })); link.download = "רשימת_אורחים.csv"; document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
