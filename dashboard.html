@@ -8,6 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.landbot.io/landbot-3/landbot-3.0.0.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" href="data:,">
   <style> 
@@ -352,40 +353,43 @@
       else { alert("הלקוח אושר בהצלחה!"); await loadPendingUsersForAdmin(); }
     }
 
-// 🔗 פונקציה לפתיחת הבוט של Landbot והזרקת המשתנים המאובטחים בצורה חסינת תקלות
+// 👑 משתנה גלובלי למניעת כפל בוטים וניהול הזיכרון של לנדבוט בצורה נקייה
+    let activeLandbotInstance = null;
+
+    // 🔗 פונקציה לפתיחת הבוט של Landbot והזרקת המשתנים דרך ה-SDK הרשמי (בלי לגעת בעיצוב/טאבים)
     function openWhatsAppConnectBot(isSuperAdmin = false) {
-      const iframe = document.getElementById('landbotIframe');
       const title = document.getElementById('landbotModalTitle');
+      const container = document.getElementById('landbotIframe'); // משתמש ב-div הקיים של ה-iframe במערכת שלך
       const encodedId = String(currentEventId || '');
       
-      // הגדרת המשתנים שיוזרקו לתוך הבוט
-      let botVariables = {
-        event_id: encodedId,
-        eventId: encodedId,
-        EVENT_ID: encodedId
-      };
-      
+      // עדכון כותרת המודאל בלבד (לפי הלוגיקה הקיימת שלך)
       if (isSuperAdmin) {
-        botVariables.admin_email = "sunorlovich@gmail.com";
-        botVariables.adminEmail = "sunorlovich@gmail.com";
         title.innerText = "👑 פאנל ניהול סופר-אדמין לוואטסאפ";
       } else {
         title.innerText = "📲 חיבור מכשיר וואטסאפ לאירוע";
       }
       
-      // בניית ה-URL הרשמי של לנדבוט
-      const baseUrl = "https://landbot.online/v3/H-3472118-ACRK7VOOQQZOV18J/index.html";
+      // ניקוי תוכן פנימי קודם (מנקה את ה-iframe הישן או בוט קודם שנשאר בזיכרון)
+      container.innerHTML = "";
       
-      // המרה של המשתנים לפורמט ש-Landbot חייבת לקרוא (גם ב-Query String ו-Hash)
-      const queryString = new URLSearchParams(botVariables).toString();
-      const finalBotUrl = `${baseUrl}?${queryString}#${queryString}`;
+      // הצגת המודאל המקורי שלך בדיוק באותו עיצוב וגרפיקה
+      document.getElementById('landbotModalContainer').style.display = 'flex';
       
-      // טעינה נקייה של ה-Iframe כדי לאלץ ריענון נתונים
-      iframe.src = "";
-      setTimeout(() => {
-        iframe.src = finalBotUrl;
-        document.getElementById('landbotModalContainer').style.display = 'flex';
-      }, 50);
+      // בניית אובייקט ה-Custom Data שהקוד של הצוות שלהם מצפה לקבל כעת
+      let customDataVariables = {
+        event_id: encodedId
+      };
+      
+      if (isSuperAdmin) {
+        customDataVariables.admin_email = "sunorlovich@gmail.com";
+      }
+      
+      // אתחול הבוט בצורה הרשמית של לנדבוט ישירות לתוך ה-container הקיים שלך
+      activeLandbotInstance = new Landbot.Container({
+        container: '#landbotIframe', // מטרגט בדיוק את ה-div הקיים של המודאל שלך
+        configUrl: 'https://storage.googleapis.com/landbot-uploads/v3/H-3472118-ACRK7VOOQQZOV18J/index.json',
+        customData: customDataVariables
+      });
     }
 
     function closeWhatsAppConnectBot() {
