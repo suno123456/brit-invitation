@@ -7,7 +7,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" href="data:,">
   <style> 
@@ -38,7 +37,7 @@
     <button onclick="location.reload()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-8 py-3 rounded-xl mt-4 transition shadow-md w-full">בדוק סטטוס ורענן עמוד</button>
   </div>
 
-  <div id="mainDashboard" class="hidden max-w-4xl mx-auto p-4 mt-6 space-y-8 flex-1 w-full text-sm">
+  <div id="mainDashboard" class="hidden max-w-4xl mx-auto p-4 mt-6 space-y-8 flex-1 w-full">
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center shadow-sm"><p class="text-xs text-emerald-700 font-semibold">אישרו הגעה (כמות)</p><p id="statAttending" class="text-2xl font-bold text-emerald-800 mt-1">0</p></div>
       <div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-center shadow-sm"><p class="text-xs text-rose-700 font-semibold">לא מגיעים</p><p id="statDeclined" class="text-2xl font-bold text-rose-800 mt-1">0</p></div>
@@ -57,9 +56,16 @@
       </div>
       <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-inner">
         <h4 class="font-bold text-slate-700 mb-2 flex items-center gap-2">💬 נוסח מומלץ לוואטסאפ:</h4>
-        <textarea id="whatsappTemplate" readonly rows="5" class="w-full bg-slate-50 border p-3 rounded-lg text-sm text-slate-600 resize-none focus:outline-none"></textarea>
+        <textarea id="whatsappTemplate" readonly rows="8" class="w-full bg-slate-50 border p-3 rounded-lg text-sm text-slate-600 resize-none focus:outline-none"></textarea>
         <button onclick="copyWhatsappMessage()" class="mt-2 w-full md:w-auto bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-2 px-4 rounded-lg transition">📋 העתק הודעה</button>
       </div>
+    </div>
+
+    <div id="tabsNavigationContainer" class="flex border-b border-gray-200 bg-white p-2 rounded-t-xl gap-2 shadow-sm">
+      <button id="tabSettingsBtn" onclick="switchTab('settings')" class="flex-1 py-3 text-center font-bold text-sm border-b-2 border-blue-600 text-blue-600 focus:outline-none rounded-t-xl transition">⚙️ הגדרות ורשימות</button>
+      <button id="tabTablesBtn" onclick="switchTab('tables')" class="flex-1 py-3 text-center font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 focus:outline-none rounded-t-xl transition">🪑 סידורי הושבה</button>
+      <button id="tabArrivedBtn" onclick="switchTab('arrived')" class="flex-1 py-3 text-center font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 focus:outline-none rounded-t-xl transition">✨ דוח נוכחות אולם</button>
+      <button id="tabAdminBtn" onclick="switchTab('admin')" class="flex-1 py-3 text-center font-bold text-sm border-b-2 border-transparent text-purple-600 hover:text-purple-800 focus:outline-none rounded-t-xl transition hidden">👑 ניהול לקוחות (אדמין)</button>
     </div>
 
     <div id="sectionSettings" class="space-y-8 tab-section active">
@@ -76,7 +82,7 @@
             <div class="md:col-span-2 border-t pt-4 mt-2">
               <label class="block font-bold mb-2 text-blue-600">קבלת מתנות ב-Bit</label>
               <div class="flex flex-col md:flex-row gap-4 mb-2">
-                <div class="flex-1"><input type="text" id="bitLink" placeholder="הקישור יופיע כאן אוטומטית..." class="w-full border border-blue-200 p-3 rounded-lg text-left bg-blue-50" dir="ltr"></div>
+                <div class="flex-1"><input type="text" id="bitLink" placeholder="הקישור יופיע כאן אוטומטית לאחר סריקת ה-QR..." class="w-full border border-blue-200 p-3 rounded-lg text-left bg-blue-50" dir="ltr"></div>
                 <div class="flex-1"><label class="block w-full text-sm font-bold bg-blue-100 text-blue-800 p-3 rounded-lg cursor-pointer text-center hover:bg-blue-200 transition border border-blue-300">📷 העלה תמונת QR של ביט<input type="file" id="bitQrUpload" accept="image/*" class="hidden"></label></div>
               </div>
             </div>
@@ -86,41 +92,19 @@
         </form>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-md p-6 border space-y-4">
-        <div>
-          <h3 class="text-base font-bold text-slate-800">📥 העלאת רשימת מוזמנים מאקסל ושליחה מרוכזת</h3>
-          <p class="text-xs text-slate-500 mt-0.5">המערכת קוראת קבצי אקסל ישירות! ודא ששמות העמודות בשורה הראשונה הם: <strong>שם, טלפון, כמות, צד, קטגוריה</strong>.</p>
-        </div>
-        <div class="flex flex-col sm:flex-row items-center gap-4">
-          <div class="flex-1 w-full">
-            <label class="block w-full text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 p-3 rounded-xl cursor-pointer text-center transition border border-emerald-300 border-dashed">
-              📊 לחצו לבחירת קובץ אקסל (.xlsx, .xls)
-              <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden">
-            </label>
-          </div>
-          <button onclick="handleExcelImport()" id="importExcelBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl transition shadow text-xs whitespace-nowrap w-full sm:w-auto">
-            🚀 קרא ועבד קובץ
-          </button>
-        </div>
-        <p id="excelStatusMsg" class="text-xs font-bold hidden mt-1"></p>
-      </div>
-
       <div class="bg-white rounded-2xl shadow-md overflow-hidden">
-        <div class="p-6 bg-slate-50 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div class="p-6 bg-slate-50 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
+          <h3 class="text-lg font-bold">ניהול אורחים</h3>
           <div class="flex items-center gap-3">
-            <h3 class="text-lg font-bold">ניהול אורחים</h3>
-            <span id="totalGuests" class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">סה"כ מגיעים: 0</span>
-          </div>
-          <div class="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
-            <button onclick="sendBulkWhatsApp()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-xl transition shadow">💬 שלח וואטסאפ לכולם</button>
-            <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 px-4 rounded-xl transition shadow">📥 הורד רשימה לאקסל</button>
+            <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition shadow-sm">📥 הורד רשימה לאקסל</button>
+            <span id="totalGuests" class="bg-blue-100 text-blue-800 text-sm font-bold px-4 py-2 rounded-full">סה"כ מגיעים: 0</span>
           </div>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-right border-collapse">
             <thead>
-              <tr class="bg-slate-100 text-slate-600 text-xs font-bold border-b">
-                <th class="p-4">שם האורח</th><th class="p-4">סטטוס מענה</th><th class="p-4 text-center">כמות</th><th class="p-4">ברכה / קטגוריה</th><th class="p-4 text-center">פעולות</th>
+              <tr class="bg-slate-100 text-slate-600 text-sm">
+                <th class="p-4 font-bold border-b">שם האורח</th><th class="p-4 font-bold border-b">סטטוס</th><th class="p-4 font-bold border-b text-center">כמות</th><th class="p-4 font-bold border-b">ברכה</th><th class="p-4 font-bold border-b text-center">פעולות</th>
               </tr>
             </thead>
             <tbody id="guestsTableBody" class="text-sm"><tr><td colspan="5" class="p-6 text-center text-slate-500">טוען אורחים...</td></tr></tbody>
@@ -174,7 +158,7 @@
           <thead class="bg-purple-50 text-purple-900 font-bold border-b">
             <tr><th class="p-4">שם הלקוח</th><th class="p-4">טלפון</th><th class="p-4">אימייל</th><th class="p-4 text-center">פעולה מיידית</th></tr>
           </thead>
-          <tbody id="adminPendingTableBody">
+          <tbody id="adminPendingTableBody" class="divide-y divide-slate-100">
             <tr><td colspan="4" class="p-6 text-center text-slate-400">אין לקוחות שממתינים לאישור כרגע. ✨</td></tr>
           </tbody>
         </table>
@@ -182,22 +166,7 @@
     </div>
   </div>
 
-  <div id="tabsNavigationContainer" class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-xl py-2 z-50 flex justify-around items-center px-2">
-    <button id="tabSettingsBtn" onclick="switchTab('settings')" class="flex flex-col items-center font-bold text-xs text-blue-600 focus:outline-none transition-all">
-      <span class="text-lg mb-0.5">⚙️</span><span>הגדרות ורשימות</span>
-    </button>
-    <button id="tabTablesBtn" onclick="switchTab('tables')" class="flex flex-col items-center font-medium text-xs text-slate-400 hover:text-slate-600 focus:outline-none transition-all">
-      <span class="text-lg mb-0.5">🪑</span><span>סידורי הושבה</span>
-    </button>
-    <button id="tabArrivedBtn" onclick="switchTab('arrived')" class="flex flex-col items-center font-medium text-xs text-slate-400 hover:text-slate-600 focus:outline-none transition-all">
-      <span class="text-lg mb-0.5">✨</span><span>דוח נוכחות אולם</span>
-    </button>
-    <button id="tabAdminBtn" onclick="switchTab('admin')" class="flex flex-col items-center font-medium text-xs text-purple-400 hover:text-purple-600 focus:outline-none transition-all hidden">
-      <span class="text-lg mb-0.5">👑</span><span>ניהול לקוחות (אדמין)</span>
-    </button>
-  </div>
-
-  <footer class="mt-8 mb-20 text-center p-4">
+  <footer class="mt-8 mb-6 text-center p-4">
     <div class="bg-slate-200 h-px w-1/2 mx-auto mb-4"></div>
     <p class="text-sm font-bold text-slate-700">© כל הזכויות שמורות לסאן אורלביץ'.</p>
     <p class="text-xs text-slate-500 mt-1 max-w-lg mx-auto leading-relaxed">
@@ -207,13 +176,9 @@
   </footer>
 
   <script>
-    // הגדרות בסיס הנתונים ושרת ההודעות
-    const SUPABASE_URL = 'https://ghfggwslakjgmquboobn.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA'
-    const vercelUrl = 'https://brit-invitation.vercel.app/api/send-whatsapp'; 
-    
-    // יצירת החיבור לסופרבייס בראש הסקריפט - פותר את בעיית ההתחברות!
-    const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const SUPABASE_URL = 'https://ghfgqwslakjqmxuboobn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
+    const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     let currentUser = null;
     let currentEventId = null;
@@ -224,16 +189,11 @@
       return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
 
-    // פונקציית האתחול - תרוץ עכשיו בצורה חלקה
     async function init() {
-      try {
-        const { data: { user }, error } = await mySupabase.auth.getUser();
-        if (error || !user) { window.location.href = 'login.html'; return; }
-        currentUser = user;
-        await loadEventDetails();
-      } catch (err) {
-        window.location.href = 'login.html';
-      }
+      const { data: { user } } = await mySupabase.auth.getUser();
+      if (!user) { window.location.href = 'login.html'; return; }
+      currentUser = user;
+      await loadEventDetails();
     }
 
     document.getElementById('logoutBtn').addEventListener('click', async () => {
@@ -244,7 +204,7 @@
     async function loadEventDetails() {
       let { data: profile } = await mySupabase.from('profiles').select('status, email').eq('id', currentUser.id).single();
       
-      // הגנת הברזל הסודית שלך: רק המייל שלך יראה ויחשוף את כפתור האדמין בתפריט התחתון
+      // משתמש במייל הפרטי החדש שלך כדי לפתוח את הטאב הסודי
       if (profile && profile.email === 'sunorlovich@gmail.com') {
         document.getElementById('tabAdminBtn').classList.remove('hidden');
       }
@@ -301,7 +261,7 @@
       tbody.innerHTML = '';
       pendingUsers.forEach(user => {
         tbody.innerHTML += `
-          <tr class="hover:bg-purple-50/20 transition text-xs">
+          <tr class="hover:bg-purple-50/20 transition">
             <td class="p-4 font-bold text-slate-800">👤 ${esc(user.full_name || 'ללא שם')}</td>
             <td class="p-4 font-mono text-slate-600">${esc(user.phone || '-')}</td>
             <td class="p-4 text-slate-600">${esc(user.email)}</td>
@@ -321,104 +281,6 @@
       else { alert("הלקוח אושר בהצלחה!"); await loadPendingUsersForAdmin(); }
     }
 
-    // מנגנון ייבוא מבוסס SheetJS לקריאת קבצי אקסל אמיתיים (.xlsx ו-.xls)
-    function handleExcelImport() {
-      const fileInput = document.getElementById('excelFileInput');
-      const statusMsg = document.getElementById('excelStatusMsg');
-      const btn = document.getElementById('importExcelBtn');
-
-      if (!fileInput.files || fileInput.files.length === 0) { alert("אנא בחר קובץ אקסל תחילה."); return; }
-      
-      const file = fileInput.files[0];
-      const reader = new FileReader();
-
-      btn.disabled = true; btn.innerText = "מעבד...";
-      statusMsg.className = "text-xs font-bold text-slate-500 mt-1";
-      statusMsg.classList.remove('hidden');
-      statusMsg.innerText = "קורא שורות נתונים...";
-
-      reader.onload = async function(e) {
-        try {
-          const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: 'array' });
-          const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-          
-          let successCount = 0;
-          for (const row of jsonData) {
-            const name = row['שם'] || row['שם מלא'];
-            const phone = row['טלפון'] || row['נייד'];
-            const count = parseInt(row['כמות'] || row['מספר מוזמנים']) || 1;
-            const side = row['צד'] || '';
-            const category = row['קטגוריה'] || '';
-
-            if (!name) continue;
-
-            // הפעלת הפונקציה החכמה ב-DB (גישה ב' - מונעת כפילויות)
-            const { error } = await mySupabase.rpc('import_guest_from_excel', {
-              p_event_id: currentEventId,
-              p_guest_name: String(name),
-              p_phone: phone ? String(phone) : '',
-              p_guests_count: count,
-              p_side: String(side),
-              p_category: String(category)
-            });
-
-            if (!error) successCount++;
-          }
-
-          statusMsg.className = "text-xs font-bold text-green-600 mt-1";
-          statusMsg.innerText = `הפעולה הושלמה! ${successCount} שורות עודכנו/הוכנסו ברשימה.`;
-          fileInput.value = '';
-          await loadDashboardData();
-        } catch (err) {
-          statusMsg.className = "text-xs font-bold text-red-600 mt-1";
-          statusMsg.innerText = "שגיאה בפענוח קובץ האקסל. ודא ששמות העמודות נכונים.";
-        }
-        btn.disabled = false; btn.innerText = "🚀 קרא ועבד קובץ";
-      };
-      reader.readAsArrayBuffer(file);
-    }
-
-    // מנגנון שליחת הודעות מרוכזות דרך השרת המאובטח של Vercel
-    async function sendBulkWhatsApp() {
-      const { data: list, error } = await mySupabase
-        .from('guests')
-        .select('*')
-        .eq('event_id', currentEventId)
-        .eq('source', 'imported')
-        .eq('status', 'לא נשלח');
-
-      if (error || !list || list.length === 0) {
-        alert("אין אורחים חדשים בסטטוס 'לא נשלח' ברשימה.");
-        return;
-      }
-      if (!confirm(`לשלח הודעות וואטסאפ ל-${list.length} אורחים?`)) return;
-
-      for (const guest of list) {
-        if (!guest.phone) {
-          await mySupabase.from('guests').update({ status: 'נכשל' }).eq('id', guest.id);
-          continue;
-        }
-        const guestLink = `https://brit-invitation.vercel.app/?event=${encodeURIComponent(currentEventId)}`;
-        const messageText = `שלום ${guest.guest_name} היקר/ה, נשמח מאוד לראותך באירוע שלנו! אנא אשר/י את הגעתך בהקדם בקישור הבא: ${guestLink}`;
-
-        try {
-          const response = await fetch(vercelUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone: guest.phone, message: messageText })
-          });
-          const result = await response.json();
-          const finalStatus = (response.ok && result.success) ? 'נשלח' : 'נכשל';
-          await mySupabase.from('guests').update({ status: finalStatus }).eq('id', guest.id);
-        } catch {
-          await mySupabase.from('guests').update({ status: 'נכשל' }).eq('id', guest.id);
-        }
-      }
-      alert("תהליך השליחה המרוכזת הסתיים!");
-      await loadDashboardData();
-    }
-
     function calculateStats() {
       const attending = globalGuestsData.filter(g => g.attending === true);
       const declined = globalGuestsData.filter(g => g.attending === false);
@@ -428,23 +290,14 @@
       document.getElementById('statDeclined').innerText = declined.length;
       document.getElementById('statSeated').innerText = seated.reduce((sum, g) => sum + (g.guests_count || 0), 0);
       document.getElementById('statArrivedCount').innerText = arrived.reduce((sum, g) => sum + (g.guests_count || 0), 0);
-      document.getElementById('totalGuests').innerText = `סה"כ מגיעים: ${attending.reduce((sum, g) => sum + (g.guests_count || 0), 0)}`;
     }
 
     function renderGuestsTable() {
       const tbody = document.getElementById('guestsTableBody'); tbody.innerHTML = '';
       if (globalGuestsData.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-500">עדיין אין אישורי הגעה.</td></tr>'; return; }
       globalGuestsData.forEach(guest => {
-        let statusText = esc(guest.status || 'לא נשלח');
-        let statusClass = 'bg-gray-100 text-gray-600';
-        
-        if (guest.attending === true) { statusText = '👍 מגיע'; statusClass = 'bg-green-100 text-green-700 font-bold'; } 
-        else if (guest.attending === false) { statusText = '👎 לא מגיע'; statusClass = 'bg-red-100 text-red-700'; } 
-        else if (guest.status === 'נשלח') { statusClass = 'bg-blue-100 text-blue-700'; } 
-        else if (guest.status === 'נכשל') { statusClass = 'bg-amber-100 text-amber-700'; }
-
         const row = document.createElement('tr'); row.className = 'border-b hover:bg-slate-50 transition';
-        row.innerHTML = `<td class="p-4 font-medium">${esc(guest.guest_name)}</td><td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${statusClass}">${statusText}</span></td><td class="p-4 text-center font-bold">${guest.attending ? guest.guests_count : (guest.guests_count || 0)}</td><td class="p-4 text-slate-600 text-xs">${esc(guest.blessing || guest.category || '-')}</td><td class="p-4 text-center"><button type="button" onclick="deleteGuest('${guest.id}')" class="text-red-500 hover:text-red-700 text-xs font-bold">מחק</button></td>`;
+        row.innerHTML = `<td class="p-4 font-medium">${esc(guest.guest_name)}</td><td class="p-4"><span class="px-3 py-1 rounded-full text-xs font-bold ${guest.attending ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${guest.attending ? 'כן' : 'לא'}</span></td><td class="p-4 text-center font-bold">${guest.attending ? guest.guests_count : '-'}</td><td class="p-4 text-slate-600 text-xs">${esc(guest.blessing)}</td><td class="p-4 text-center"><button type="button" onclick="deleteGuest('${guest.id}')" class="text-red-500 hover:text-red-700 text-sm font-bold">מחק</button></td>`;
         tbody.appendChild(row);
       });
     }
@@ -518,20 +371,17 @@
 
     function switchTab(tab) {
       document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('#tabsNavigationContainer button').forEach(el => {
-        el.className = 'flex flex-col items-center font-medium text-xs text-slate-400 hover:text-slate-600 focus:outline-none transition-all';
-      });
+      document.querySelectorAll('#tabsNavigationContainer button').forEach(el => el.classList.remove('border-blue-600', 'text-blue-600', 'border-purple-600', 'text-purple-600'));
       
       const targetSection = document.getElementById('section' + tab.charAt(0).toUpperCase() + tab.slice(1));
       const targetBtn = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1) + 'Btn');
       
       targetSection.classList.add('active');
-      
       if (tab === 'admin') {
-        targetBtn.className = 'flex flex-col items-center font-bold text-xs text-purple-600 focus:outline-none transition-all';
+        targetBtn.classList.add('border-purple-600', 'text-purple-600');
         loadPendingUsersForAdmin();
       } else {
-        targetBtn.className = 'flex flex-col items-center font-bold text-xs text-blue-600 focus:outline-none transition-all';
+        targetBtn.classList.add('border-blue-600', 'text-blue-600');
       }
     }
 
