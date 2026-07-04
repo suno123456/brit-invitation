@@ -352,29 +352,40 @@
       else { alert("הלקוח אושר בהצלחה!"); await loadPendingUsersForAdmin(); }
     }
 
-// 🔗 פונקציה לפתיחת הבוט של Landbot והזרקת המשתנים המאובטחים בצורה נקייה וחסינת תקלות
+// 🔗 פונקציה לפתיחת הבוט של Landbot והזרקת המשתנים המאובטחים בצורה חסינת תקלות
     function openWhatsAppConnectBot(isSuperAdmin = false) {
       const iframe = document.getElementById('landbotIframe');
       const title = document.getElementById('landbotModalTitle');
-      const encodedId = encodeURIComponent(currentEventId);
+      const encodedId = String(currentEventId || '');
       
-      // הזרקת המשתנים בכל הפורמטים האפשריים כדי לעקוף כל הגדרה שגויה בלנדבוט
-      let botUrl = `https://landbot.online/v3/H-3472118-ACRK7VOOQQZOV18J/index.html?event_id=${encodedId}&eventId=${encodedId}&EVENT_ID=${encodedId}`;
+      // הגדרת המשתנים שיוזרקו לתוך הבוט
+      let botVariables = {
+        event_id: encodedId,
+        eventId: encodedId,
+        EVENT_ID: encodedId
+      };
       
       if (isSuperAdmin) {
-        // הזרקה ישירה של מייל האדמין בכל הפורמטים
-        botUrl += `&admin_email=sunorlovich%40gmail.com&adminEmail=sunorlovich%40gmail.com&ADMIN_EMAIL=sunorlovich%40gmail.com`;
+        botVariables.admin_email = "sunorlovich@gmail.com";
+        botVariables.adminEmail = "sunorlovich@gmail.com";
         title.innerText = "👑 פאנל ניהול סופר-אדמין לוואטסאפ";
       } else {
         title.innerText = "📲 חיבור מכשיר וואטסאפ לאירוע";
       }
       
-      // איפוס מוחלט של ה-Iframe וטעינה מחדש בטיימאאוט מאובטח
+      // בניית ה-URL הרשמי של לנדבוט
+      const baseUrl = "https://landbot.online/v3/H-3472118-ACRK7VOOQQZOV18J/index.html";
+      
+      // המרה של המשתנים לפורמט ש-Landbot חייבת לקרוא (גם ב-Query String ו-Hash)
+      const queryString = new URLSearchParams(botVariables).toString();
+      const finalBotUrl = `${baseUrl}?${queryString}#${queryString}`;
+      
+      // טעינה נקייה של ה-Iframe כדי לאלץ ריענון נתונים
       iframe.src = "";
       setTimeout(() => {
-        iframe.src = botUrl;
+        iframe.src = finalBotUrl;
         document.getElementById('landbotModalContainer').style.display = 'flex';
-      }, 100);
+      }, 50);
     }
 
     function closeWhatsAppConnectBot() {
