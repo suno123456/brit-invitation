@@ -352,17 +352,18 @@
       else { alert("הלקוח אושר בהצלחה!"); await loadPendingUsersForAdmin(); }
     }
 
-    // 🔗 פונקציה לפתיחת הבוט של Landbot והזרקת המשתנים המאובטחים
+   // 🔗 פונקציה לפתיחת הבוט של Landbot והזרקת המשתנים המאובטחים בכל הפורמטים
     function openWhatsAppConnectBot(isSuperAdmin = false) {
       const iframe = document.getElementById('landbotIframe');
       const title = document.getElementById('landbotModalTitle');
+      const encodedId = encodeURIComponent(currentEventId);
       
-      // בניית הקישור והזרקת ה-event_id והמייל בצורה חלקה ב-Query String של Landbot
-      let botUrl = `https://landbot.online/v3/H-3472118-ACRK7VOOQQZOV18J/index.html?event_id=${encodeURIComponent(currentEventId)}`;
+      // הזרקת ה-ID בכל הווריאציות האפשריות כדי להבטיח זיהוי מלא בבלוקים של Landbot
+      let botUrl = `https://landbot.online/v3/H-3472118-ACRK7VOOQQZOV18J/index.html?event_id=${encodedId}&eventId=${encodedId}&EVENT_ID=${encodedId}`;
       
       if (isSuperAdmin) {
         // אם מדובר בחיבור שלך דרך כפתור האדמין - נזריק מראש את נתוני האבטחה
-        botUrl += `&admin_email=sunorlovich@gmail.com`;
+        botUrl += `&admin_email=sunorlovich@gmail.com&adminEmail=sunorlovich@gmail.com`;
         title.innerText = "👑 פאנל ניהול סופר-אדמין לוואטסאפ";
       } else {
         title.innerText = "📲 חיבור מכשיר וואטסאפ לאירוע";
