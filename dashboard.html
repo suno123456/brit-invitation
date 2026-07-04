@@ -39,6 +39,14 @@
   </div>
 
   <div id="mainDashboard" class="hidden max-w-4xl mx-auto p-4 mt-6 space-y-8 flex-1 w-full text-sm">
+    
+    <div id="tabsNavigationContainer" class="flex border-b border-gray-200 bg-white p-2 rounded-t-xl gap-2 shadow-sm">
+      <button id="tabSettingsBtn" onclick="switchTab('settings')" class="flex-1 py-3 text-center font-bold text-sm border-b-2 border-blue-600 text-blue-600 focus:outline-none rounded-t-xl transition">⚙️ הגדרות ורשימות</button>
+      <button id="tabTablesBtn" onclick="switchTab('tables')" class="flex-1 py-3 text-center font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 focus:outline-none rounded-t-xl transition">🪑 סידורי הושבה</button>
+      <button id="tabArrivedBtn" onclick="switchTab('arrived')" class="flex-1 py-3 text-center font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 focus:outline-none rounded-t-xl transition">✨ דוח נוכחות אולם</button>
+      <button id="tabAdminBtn" onclick="switchTab('admin')" class="flex-1 py-3 text-center font-bold text-sm border-b-2 border-transparent text-purple-600 hover:text-purple-800 focus:outline-none rounded-t-xl transition hidden">👑 ניהול לקוחות (אדמין)</button>
+    </div>
+
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center shadow-sm"><p class="text-xs text-emerald-700 font-semibold">אישרו הגעה (כמות)</p><p id="statAttending" class="text-2xl font-bold text-emerald-800 mt-1">0</p></div>
       <div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-center shadow-sm"><p class="text-xs text-rose-700 font-semibold">לא מגיעים</p><p id="statDeclined" class="text-2xl font-bold text-rose-800 mt-1">0</p></div>
@@ -76,7 +84,7 @@
             <div class="md:col-span-2 border-t pt-4 mt-2">
               <label class="block font-bold mb-2 text-blue-600">קבלת מתנות ב-Bit</label>
               <div class="flex flex-col md:flex-row gap-4 mb-2">
-                <div class="flex-1"><input type="text" id="bitLink" placeholder="הקישור יופיע כאן אוטומטית..." class="w-full border border-blue-200 p-3 rounded-lg text-left bg-blue-50" dir="ltr"></div>
+                <div class="flex-1"><input type="text" id="bitLink" placeholder="הקישור יופיע כאן אוטומטית לאחר סריקת ה-QR..." class="w-full border border-blue-200 p-3 rounded-lg text-left bg-blue-50" dir="ltr"></div>
                 <div class="flex-1"><label class="block w-full text-sm font-bold bg-blue-100 text-blue-800 p-3 rounded-lg cursor-pointer text-center hover:bg-blue-200 transition border border-blue-300">📷 העלה תמונת QR של ביט<input type="file" id="bitQrUpload" accept="image/*" class="hidden"></label></div>
               </div>
             </div>
@@ -111,7 +119,7 @@
             <h3 class="text-lg font-bold">ניהול אורחים</h3>
             <span id="totalGuests" class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">סה"כ מגיעים: 0</span>
           </div>
-          <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 px-4 rounded-xl transition shadow">📥 הורד רשימה לאקסל</button>
+          <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition shadow-sm">📥 הורד רשימה לאקסל</button>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-right border-collapse">
@@ -185,31 +193,15 @@
     </div>
   </div>
 
-  <div id="tabsNavigationContainer" class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-xl py-2 z-40 flex justify-around items-center px-2">
-    <button id="tabSettingsBtn" onclick="switchTab('settings')" class="flex flex-col items-center font-bold text-xs text-blue-600 focus:outline-none transition-all">
-      <span class="text-lg mb-0.5">⚙️</span><span>הגדרות ורשימות</span>
-    </button>
-    <button id="tabTablesBtn" onclick="switchTab('tables')" class="flex flex-col items-center font-medium text-xs text-slate-400 hover:text-slate-600 focus:outline-none transition-all">
-      <span class="text-lg mb-0.5">🪑</span><span>סידורי הושבה</span>
-    </button>
-    <button id="tabArrivedBtn" onclick="switchTab('arrived')" class="flex flex-col items-center font-medium text-xs text-slate-400 hover:text-slate-600 focus:outline-none transition-all">
-      <span class="text-lg mb-0.5">✨</span><span>דוח נוכחות אולם</span>
-    </button>
-    <button id="tabAdminBtn" onclick="switchTab('admin')" class="flex flex-col items-center font-medium text-xs text-purple-400 hover:text-purple-600 focus:outline-none transition-all hidden">
-      <span class="text-lg mb-0.5">👑</span><span>ניהול לקוחות (אדמין)</span>
-    </button>
-  </div>
-
   <div id="whatsappPreviewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden border flex flex-col">
+    <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden border flex flex-col text-sm">
       <div class="p-4 bg-blue-50 border-b border-blue-100 flex justify-between items-center">
         <h4 class="font-bold text-blue-900 text-base">📄 תצוגה מקדימה של ההודעה שתישלח</h4>
         <button onclick="closeWhatsAppPreviewPopup()" class="text-slate-400 hover:text-slate-600 text-xl font-bold focus:outline-none">&times;</button>
       </div>
       <div class="p-5 space-y-4 flex-1">
         <p class="text-xs text-slate-500">אנא אשרו את הנוסח הבא. ההודעה תישלח לכלל האורחים ברשימה שטרם נשלחה אליהם הודעה:</p>
-        <div class="bg-slate-50 border rounded-xl p-4 text-sm text-slate-700 whitespace-pre-wrap font-sans leading-relaxed shadow-inner max-h-60 overflow-y-auto" id="popupMessagePreview">
-          </div>
+        <div class="bg-slate-50 border rounded-xl p-4 text-sm text-slate-700 whitespace-pre-wrap font-sans leading-relaxed shadow-inner max-h-60 overflow-y-auto" id="popupMessagePreview"></div>
       </div>
       <div class="p-4 bg-slate-50 border-t flex flex-row-reverse gap-3">
         <button onclick="confirmAndSendBulkWhatsApp()" id="popupConfirmBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl text-xs shadow-sm transition">
@@ -222,7 +214,7 @@
     </div>
   </div>
 
-  <footer class="mt-8 mb-20 text-center p-4">
+  <footer class="mt-8 mb-6 text-center p-4">
     <div class="bg-slate-200 h-px w-1/2 mx-auto mb-4"></div>
     <p class="text-sm font-bold text-slate-700">© כל הזכויות שמורות לסאן אורלביץ'.</p>
     <p class="text-xs text-slate-500 mt-1 max-w-lg mx-auto leading-relaxed">
@@ -232,12 +224,13 @@
   </footer>
 
   <script>
-    // 1. אתחול מאובטח בראש הסקריפט
+    // 1. אתחול יציב ומאובטח של משתני המערכת בראש הסקריפט
     const SUPABASE_URL = 'https://ghfgqwslakjqmxuboobn.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
-    const vercelUrl = 'https://brit-invitation.vercel.app/api/send-whatsapp'; 
-    
     const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // כתובת ה-API הנכונה והסופית של השרת שלך בוורסל
+    const vercelUrl = 'https://brit-invitation.vercel.app/api/send-whatsapp'; 
     
     let currentUser = null;
     let currentEventId = null;
@@ -323,7 +316,7 @@
       tbody.innerHTML = '';
       pendingUsers.forEach(user => {
         tbody.innerHTML += `
-          <tr class="hover:bg-purple-50/20 transition text-xs">
+          <tr class="hover:bg-purple-50/20 transition">
             <td class="p-4 font-bold text-slate-800">👤 ${esc(user.full_name || 'ללא שם')}</td>
             <td class="p-4 font-mono text-slate-600">${esc(user.phone || '-')}</td>
             <td class="p-4 text-slate-600">${esc(user.email)}</td>
@@ -343,7 +336,6 @@
       else { alert("הלקוח אושר בהצלחה!"); await loadPendingUsersForAdmin(); }
     }
 
-    // פונקציית ייבוא אקסל (משאירה מוזמנים כטרם ענה / nullable)
     function handleExcelImport() {
       const fileInput = document.getElementById('excelFileInput');
       const statusMsg = document.getElementById('excelStatusMsg');
@@ -383,7 +375,7 @@
               side: String(side),
               category: String(category),
               source: 'imported',
-              attending: null, // ברירת מחדל: טרם ענה
+              attending: null,
               status: 'לא נשלח'
             }]);
 
@@ -403,7 +395,6 @@
       reader.readAsArrayBuffer(file);
     }
 
-    // פתיחת הפופ-אפ המציג את תבנית ההודעה הרשומה מעלה
     function openWhatsAppPreviewPopup() {
       const templateText = document.getElementById('whatsappTemplate').value;
       document.getElementById('popupMessagePreview').innerText = templateText;
@@ -414,7 +405,6 @@
       document.getElementById('whatsappPreviewModal').classList.add('hidden');
     }
 
-    // לחיצה על "המשך ושלח" מתוך הפופ-אפ
     async function confirmAndSendBulkWhatsApp() {
       const btn = document.getElementById('popupConfirmBtn');
       btn.disabled = true; btn.innerText = "...שולח";
@@ -439,7 +429,6 @@
           continue;
         }
         
-        // טעינת הטקסט המדויק מתוך התיבה למעלה לכל אורח ואורח
         const templateText = document.getElementById('whatsappTemplate').value;
         const messageText = templateText.replace(/👤 \[שם\]/g, guest.guest_name).replace(/\[שם\]/g, guest.guest_name);
 
@@ -563,20 +552,17 @@
 
     function switchTab(tab) {
       document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('#tabsNavigationContainer button').forEach(el => {
-        el.className = 'flex flex-col items-center font-medium text-xs text-slate-400 hover:text-slate-600 focus:outline-none transition-all';
-      });
+      document.querySelectorAll('#tabsNavigationContainer button').forEach(el => el.classList.remove('border-blue-600', 'text-blue-600', 'border-purple-600', 'text-purple-600'));
       
       const targetSection = document.getElementById('section' + tab.charAt(0).toUpperCase() + tab.slice(1));
       const targetBtn = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1) + 'Btn');
       
       targetSection.classList.add('active');
-      
       if (tab === 'admin') {
-        targetBtn.className = 'flex flex-col items-center font-bold text-xs text-purple-600 focus:outline-none transition-all';
+        targetBtn.classList.add('border-purple-600', 'text-purple-600');
         loadPendingUsersForAdmin();
       } else {
-        targetBtn.className = 'flex flex-col items-center font-bold text-xs text-blue-600 focus:outline-none transition-all';
+        targetBtn.classList.add('border-blue-600', 'text-blue-600');
       }
     }
 
