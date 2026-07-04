@@ -12,7 +12,7 @@
         body { font-family: 'Assistant', sans-serif; }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen text-gray-800">
+<body class="bg-gray-50 min-h-screen text-gray-800 pb-24">
 
     <div class="w-full bg-white border-b border-gray-200 py-4 px-6 flex justify-between items-center shadow-sm">
         <button class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-1.5 rounded-lg text-sm font-semibold transition">התנתק</button>
@@ -59,7 +59,7 @@
 
             <div class="bg-white rounded-xl p-4 border border-gray-200">
                 <label class="block text-sm font-bold text-gray-700 mb-2">💬 נוסח מומלץ לוואטסאפ:</label>
-                <textarea id="whatsapp-template" rows="6" class="w-full text-sm border-0 focus:ring-0 resize-none text-right text-gray-600">משפחה וחברים יקרים ❤️
+                <textarea id="whatsapp-template" rows="5" class="w-full text-sm border-0 focus:ring-0 resize-none text-right text-gray-600">משפחה וחברים יקרים ❤️
 
 אנחנו מתרגשים לקראת האירוע שלנו ומחכים לחגוג אתכם!
 
@@ -72,71 +72,152 @@
             </div>
         </div>
 
-        <div class="border-b border-gray-200 mb-6">
-            <nav class="flex space-x-8 space-x-reverse">
-                <button onclick="switchTab('tab-import')" id="btn-tab-import" class="border-b-2 border-blue-600 py-4 px-1 text-sm font-bold text-blue-600 whitespace-nowrap">
-                    📋 רשימת מוזמנים (ייבוא אקסל)
-                </button>
-                <button onclick="switchTab('tab-rsvps')" id="btn-tab-rsvps" class="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
-                    ✅ אישורי הגעה בפועל
-                </button>
-            </nav>
-        </div>
 
-        <div id="tab-import" class="tab-content block">
-            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 mb-6">
-                <h3 class="text-lg font-bold mb-4 text-gray-700">העלאת רשימת אורחים חדשה מאקסל</h3>
+        <div id="section-settings" class="main-section block space-y-8">
+            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                <h3 class="text-xl font-bold border-b pb-3 mb-6 text-gray-800">הגדרות האירוע</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">שם האירוע</label>
+                        <input type="text" id="event-name" class="w-full border rounded-xl p-2.5 bg-gray-50" value="יומולדת שירלי" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">תמונת הזמנה</label>
+                        <input type="file" class="w-full border rounded-xl p-2 bg-gray-50 text-sm" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">תאריך האירוע</label>
+                        <input type="date" id="event-date" class="w-full border rounded-xl p-2.5 bg-gray-50" value="2026-07-02" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">שעת קבלת פנים</label>
+                        <input type="time" id="event-time" class="w-full border rounded-xl p-2.5 bg-gray-50" value="12:00" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">שם האולם/מקום</label>
+                        <input type="text" id="event-venue" class="w-full border rounded-xl p-2.5 bg-gray-50" value="הבית של סאן ושירלי" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">כתובת (מייצר Waze אוטומטית)</label>
+                        <input type="text" id="event-address" class="w-full border rounded-xl p-2.5 bg-gray-50" value="משה שרת 15 פתח תקווה" />
+                    </div>
+                </div>
+                <div class="mt-6 border-t pt-4">
+                    <label class="block text-sm font-semibold text-gray-600 mb-2">קבלת מתנות ב-Bit</label>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <input type="text" class="w-full border rounded-xl p-2.5 bg-gray-50 text-left text-sm text-gray-500" value="https://www.bitpay.co.il/app/me/D4AE99EF-ACE6-96F6-3BB9-0D" />
+                        <button class="bg-blue-50 hover:bg-blue-100 text-blue-600 font-semibold px-4 py-2.5 rounded-xl text-sm whitespace-nowrap">📸 העלה תמונת QR של ביט</button>
+                    </div>
+                </div>
+                <div class="flex justify-end mt-6">
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl shadow">שמור עדכונים</button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                <h3 class="text-lg font-bold mb-4 text-gray-700">🚀 העלאת רשימת אורחים חדשה מאקסל</h3>
                 <div class="flex flex-col md:flex-row items-center gap-4">
                     <input type="file" id="excel-file" accept=".xlsx, .xls" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
-                    <button onclick="handleExcelImport()" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition shadow flex items-center justify-center gap-2">🚀 קרא ועבד קובץ</button>
+                    <button onclick="handleExcelImport()" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-6 rounded-xl transition shadow flex items-center justify-center gap-2">קרא ועבד קובץ</button>
                 </div>
                 <p class="text-xs text-gray-400 mt-2">* עמודות חובה באקסל: <span class="font-semibold text-gray-600">שם, טלפון, כמות, צד, קטגוריה</span></p>
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-50/50">
-                    <div>
-                        <h3 class="font-bold text-lg text-gray-800">רשימת האורחים המיובאים</h3>
+                    <div class="flex items-center gap-3">
+                        <h3 class="font-bold text-xl text-gray-800">ניהול אורחים</h3>
+                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">סה"כ מגיעים: <span id="total-guests-count">0</span></span>
                     </div>
-                    <button onclick="sendBulkWhatsApp()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl transition flex items-center gap-2 shadow">💬 שליחת הודעות וואטסאפ לכולם</button>
+                    <div class="flex gap-2">
+                        <button onclick="sendBulkWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold py-2 px-4 rounded-xl transition shadow">💬 שלח וואטסאפ לכולם</button>
+                        <button class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold py-2 px-4 rounded-xl transition shadow flex items-center gap-1">📥 הורד רשימה לאקסל</button>
+                    </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-right border-collapse">
                         <thead>
                             <tr class="bg-gray-100 text-gray-600 text-sm font-semibold border-b border-gray-200">
                                 <th class="p-4">שם האורח</th>
-                                <th class="p-4">טלפון</th>
-                                <th class="p-4">כמות</th>
-                                <th class="p-4">צד</th>
-                                <th class="p-4">קטגוריה</th>
                                 <th class="p-4">סטטוס הודעה</th>
+                                <th class="p-4">כמות</th>
+                                <th class="p-4">ברכה / הערה</th>
+                                <th class="p-4 text-center">פעולות</th>
                             </tr>
                         </thead>
                         <tbody id="imported-guests-table" class="divide-y divide-gray-100 text-sm">
-                            <tr><td colspan="6" class="p-8 text-center text-gray-400">אין עדיין אורחים ברשימה. העלה קובץ אקסל.</td></tr>
+                            <tr><td colspan="5" class="p-8 text-center text-gray-400">עדיין אין אישורי הגעה.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <div id="tab-rsvps" class="tab-content hidden">
+        <div id="section-seating" class="main-section hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="font-bold text-lg text-amber-600 mb-4 border-b pb-2">🟠 אורחים שאישרו ועדיין לא הושבו:</h3>
+                    <div class="text-center text-sm text-gray-400 py-8">אין שולחנות כרגע.</div>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-fit">
+                    <h3 class="font-bold text-lg text-gray-800 mb-4 flex items-center gap-1">✨ הוספת שולחן חדש</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">שם/מספר שולחן:</label>
+                            <input type="text" placeholder="למשל: שולחן 1" class="w-full border rounded-xl p-2 text-sm bg-gray-50" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">תכולת שולחן (כיסאות):</label>
+                            <input type="number" value="10" class="w-full border rounded-xl p-2 text-sm bg-gray-50" />
+                        </div>
+                        <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl shadow transition flex items-center justify-center gap-1">🔨 צור שולחן</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-hostess" class="main-section hidden">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="p-6 border-b border-gray-100 bg-gray-50/50">
-                    <h3 class="font-bold text-lg text-gray-800">אורחים שאישרו הגעה בפועל</h3>
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                    <h3 class="font-bold text-lg text-gray-800 flex items-center gap-2">📋 דוח נוכחות אולם (אישור מארחת)</h3>
+                    <span class="bg-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full">סה"כ באולם: 0</span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-right border-collapse">
                         <thead>
                             <tr class="bg-gray-100 text-gray-600 text-sm font-semibold border-b border-gray-200">
                                 <th class="p-4">שם האורח</th>
-                                <th class="p-4">סטטוס הגעה</th>
-                                <th class="p-4">כמות מגיעים</th>
-                                <th class="p-4">ברכה / הערה</th>
+                                <th class="p-4">כמות שהגיעה</th>
+                                <th class="p-4">שולחן</th>
+                                <th class="p-4">סטטוס כניסה</th>
                             </tr>
                         </thead>
-                        <tbody id="rsvps-table" class="divide-y divide-gray-100 text-sm">
-                            <tr><td colspan="4" class="p-8 text-center text-gray-400">אף אורח עוד לא מילא את טופס אישור ההגעה.</td></tr>
+                        <tbody class="divide-y divide-gray-100 text-sm text-gray-400">
+                            <tr><td colspan="4" class="p-8 text-center">אף אורח עדיין לא נכנס לאירוע.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-superadmin" class="main-section hidden">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-6">
+                <div class="border-b pb-4 mb-4">
+                    <h3 class="font-bold text-xl text-purple-700 flex items-center gap-2">👑 פאנל ניהול עסק (סופר-אדמין)</h3>
+                    <p class="text-xs text-gray-400 mt-1">רשימת הלקוחות שנרשמו כעת במערכת וממתינים שתאשר את התשלום שלהם בביט.</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right border-collapse">
+                        <thead>
+                            <tr class="bg-purple-50 text-purple-900 text-sm font-semibold border-b border-purple-200">
+                                <th class="p-4">שם הלקוח</th>
+                                <th class="p-4">טלפון</th>
+                                <th class="p-4">אימייל</th>
+                                <th class="p-4">פעולה מיידית</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-purple-50 text-sm text-gray-500">
+                            <tr><td colspan="4" class="p-8 text-center text-purple-300">✨ אין לקוחות שממתינים לאישור כרגע.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -145,19 +226,38 @@
 
     </div>
 
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-xl py-3 z-50">
+        <div class="max-w-4xl mx-auto flex justify-around items-center px-4">
+            <button onclick="switchMainTab('settings', this)" class="flex flex-col items-center text-blue-600 font-bold text-xs sm:text-sm transition-all transform scale-105">
+                <span class="text-xl mb-0.5">⚙️</span>
+                <span>הגדרות ורשימות</span>
+            </button>
+            <button onclick="switchMainTab('seating', this)" class="flex flex-col items-center text-gray-400 hover:text-gray-600 font-medium text-xs sm:text-sm transition-all">
+                <span class="text-xl mb-0.5">⛺</span>
+                <span>סידורי הושבה</span>
+            </button>
+            <button onclick="switchMainTab('hostess', this)" class="flex flex-col items-center text-gray-400 hover:text-gray-600 font-medium text-xs sm:text-sm transition-all">
+                <span class="text-xl mb-0.5">✨</span>
+                <span>דוח נוכחות אולם</span>
+            </button>
+            <button onclick="switchMainTab('superadmin', this)" class="flex flex-col items-center text-gray-400 hover:text-gray-600 font-medium text-xs sm:text-sm transition-all">
+                <span class="text-xl mb-0.5">👑</span>
+                <span>ניהול לקוחות (אדמין)</span>
+            </button>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = 'https://ghfggwslakjgmquboobn.supabase.co'; 
-        const SUPABASE_KEY = 'הדבק_כאן_את_ה_ANON_KEY_שמצאת'; // <-- תדביק את המפתח שלך פה!
+        const SUPABASE_KEY = 'הדבק_כאן_את_ה_ANON_KEY_שמצאת'; // <-- תדביק את המפתח שלך כאן!
         const vercelUrl = 'https://brit-invitation.vercel.app/api/send-whatsapp'; 
         
         const urlParams = new URLSearchParams(window.location.search);
         const CURRENT_EVENT_ID = urlParams.get('event') || 'd4d309c8-cc20-40f5-9f00-688cc585dc0a';
 
-        // בניית הקישורים המקוריים להצגה בתיבות
+        // בניית הקישורים לתיבות התצוגה
         document.getElementById('link-guests').value = `https://brit-invitation.vercel.app/?event=${CURRENT_EVENT_ID}`;
         document.getElementById('link-hostess').value = `https://brit-invitation.vercel.app/hostess.html?event=${CURRENT_EVENT_ID}`;
-        
-        // הוספת הקישור באופן אוטומטי גם לסוף תבנית הוואטסאפ
         document.getElementById('whatsapp-template').value += `\nhttps://brit-invitation.vercel.app/?event=${CURRENT_EVENT_ID}`;
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -175,63 +275,53 @@
 
                 if (error) throw error;
 
-                const importedGuests = guests.filter(g => g.source === 'imported');
-                const rsvps = guests.filter(g => g.attending !== null);
+                // עדכון מונה האורחים הכולל מעל הטבלה
+                document.getElementById('total-guests-count').innerText = guests.length;
 
-                // חישוב ועדכון 4 הקוביות העליונות המקוריות שלך
-                const totalAttending = rsvps.filter(g => g.attending === true).reduce((sum, g) => sum + (g.guests_count || 0), 0);
-                const totalNotAttending = rsvps.filter(g => g.attending === false).reduce((sum, g) => sum + (g.guests_count || 0), 0);
+                // חישוב ועדכון 4 הריבועים הצבעוניים
+                const totalAttending = guests.filter(g => g.attending === true).reduce((sum, g) => sum + (g.guests_count || 0), 0);
+                const totalNotAttending = guests.filter(g => g.attending === false).reduce((sum, g) => sum + (g.guests_count || 0), 0);
                 
                 document.getElementById('stat-attending').innerText = totalAttending;
                 document.getElementById('stat-not-attending').innerText = totalNotAttending;
-                // הערה: שדות seated ו-arrived מנוהלים בהמשך בהתאם לעמודות במסד הנתונים שלך (כרגע נשארים 0 כברירת מחדל)
 
-                renderImportedTable(importedGuests);
-                renderRsvpsTable(rsvps);
-
+                renderImportedTable(guests);
             } catch (err) {
-                console.error("שגיאה:", err.message);
+                console.error("שגיאה בטעינת הנתונים:", err.message);
             }
         }
 
         function renderImportedTable(list) {
             const tbody = document.getElementById('imported-guests-table');
             if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">אין עדיין אורחים ברשימה. העלה קובץ אקסל.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400">עדיין אין אישורי הגעה. העלה קובץ אקסל.</td></tr>`;
                 return;
             }
             tbody.innerHTML = list.map(g => {
+                let statusText = esc(g.status || 'לא נשלח');
                 let statusClass = 'bg-gray-100 text-gray-600';
-                if (g.status === 'נשלח') statusClass = 'bg-green-100 text-green-700';
-                if (g.status === 'נכשל') statusClass = 'bg-red-100 text-red-700';
-                return `
-                    <tr class="hover:bg-gray-50 transition border-b border-gray-100">
-                        <td class="p-4 font-medium text-gray-900">${esc(g.guest_name)}</td>
-                        <td class="p-4 text-gray-600">${esc(g.phone || '-')}</td>
-                        <td class="p-4 text-gray-600">${g.guests_count || 0}</td>
-                        <td class="p-4 text-gray-600">${esc(g.side || '-')}</td>
-                        <td class="p-4 text-gray-600">${esc(g.category || '-')}</td>
-                        <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${statusClass}">${esc(g.status || 'לא נשלח')}</span></td>
-                    </tr>
-                `;
-            }).join('');
-        }
+                
+                if (g.attending === true) {
+                    statusText = '👍 מגיע';
+                    statusClass = 'bg-green-100 text-green-700 font-bold';
+                } else if (g.attending === false) {
+                    statusText = '👎 לא מגיע';
+                    statusClass = 'bg-red-100 text-red-700';
+                } else if (g.status === 'נשלח') {
+                    statusClass = 'bg-blue-100 text-blue-700';
+                } else if (g.status === 'נכשל') {
+                    statusClass = 'bg-amber-100 text-amber-700';
+                }
 
-        function renderRsvpsTable(list) {
-            const tbody = document.getElementById('rsvps-table');
-            if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">אף אורח עוד לא מילא את טופס אישור ההגעה.</td></tr>`;
-                return;
-            }
-            tbody.innerHTML = list.map(g => {
-                const statusText = g.attending ? '👍 מגיע' : '👎 לא מגיע';
-                const statusColor = g.attending ? 'text-green-600 font-semibold' : 'text-red-500';
                 return `
                     <tr class="hover:bg-gray-50 transition border-b border-gray-100">
                         <td class="p-4 font-medium text-gray-900">${esc(g.guest_name)}</td>
-                        <td class="p-4 ${statusColor}">${statusText}</td>
+                        <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${statusClass}">${statusText}</span></td>
                         <td class="p-4 text-gray-600">${g.guests_count || 0}</td>
-                        <td class="p-4 italic text-gray-500 max-w-xs truncate">${esc(g.blessing || '-')}</td>
+                        <td class="p-4 italic text-gray-500 max-w-xs truncate">${esc(g.blessing || g.category || '-')}</td>
+                        <td class="p-4 text-center">
+                            <button class="text-blue-600 hover:text-blue-800 font-medium text-xs px-2 py-1">ערוך</button>
+                        </td>
                     </tr>
                 `;
             }).join('');
@@ -242,15 +332,18 @@
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.replace('block', 'hidden'));
-            document.getElementById(tabId).classList.replace('hidden', 'block');
-            document.querySelectorAll('nav button').forEach(btn => {
-                btn.classList.remove('border-blue-600', 'text-blue-600');
-                btn.classList.add('border-transparent', 'text-gray-500');
+        // פונקציית מעבר בין הלשוניות המקוריות בתחתית הדף
+        function switchMainTab(sectionId, btnElement) {
+            document.querySelectorAll('.main-section').forEach(el => el.classList.replace('block', 'hidden'));
+            document.getElementById('section-' + sectionId).classList.replace('hidden', 'block');
+            
+            // עיצוב כפתורי התפריט
+            document.querySelectorAll('fixed bottom-0 button, .fixed bottom-0 flex button').forEach(btn => {
+                btn.classList.remove('text-blue-600', 'font-bold', 'scale-105');
+                btn.classList.add('text-gray-400', 'font-medium');
             });
-            document.getElementById('btn-' + tabId).classList.add('border-blue-600', 'text-blue-600');
-            document.getElementById('btn-' + tabId).classList.remove('border-transparent', 'text-gray-500');
+            btnElement.classList.add('text-blue-600', 'font-bold', 'scale-105');
+            btnElement.classList.remove('text-gray-400', 'font-medium');
         }
 
         function copyToClipboard(inputId) {
@@ -290,20 +383,21 @@
                         const category = row['קטגוריה'] || '';
                         if (!name) continue;
 
-                        const { error } = await supabaseClient.rpc('import_guest_from_excel', {
-                            p_event_id: CURRENT_EVENT_ID,
-                            p_guest_name: String(name),
-                            p_phone: phone ? String(phone) : '',
-                            p_guests_count: count,
-                            p_side: String(side),
-                            p_category: String(category)
-                        });
+                        const { error } = await supabaseClient.from('guests').insert([{
+                            event_id: CURRENT_EVENT_ID,
+                            guest_name: String(name),
+                            phone: phone ? String(phone) : '',
+                            guests_count: count,
+                            side: String(side),
+                            category: String(category),
+                            source: 'imported'
+                        }]);
                         if (!error) successCount++;
                     }
-                    alert(`הסתיים עיבוד הקובץ! ${successCount} שורות עודכנו/הוכנסו.`);
+                    alert(`הסתיים עיבוד הקובץ! ${successCount} אורחים נוספו לרשימה.`);
                     loadAllData();
                 } catch (err) {
-                    alert("שגיאה בפענוח הקובץ.");
+                    alert("שגיאה בפענוח קובץ האקסל.");
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -314,14 +408,13 @@
                 .from('guests')
                 .select('*')
                 .eq('event_id', CURRENT_EVENT_ID)
-                .eq('source', 'imported')
-                .eq('status', 'לא נשלח');
+                .is('status', null);
 
             if (error || !list || list.length === 0) {
-                alert("אין אורחים חדשים בסטטוס 'לא נשלח' ברשימה.");
+                alert("אין אורחים חדשים לשליחה ברשימה.");
                 return;
             }
-            if (!confirm(`לשלוח הודעות ל-${list.length} אורחים?`)) return;
+            if (!confirm(`לשלוח הודעות ל- ${list.length} אורחים?`)) return;
 
             for (const guest of list) {
                 if (!guest.phone) {
@@ -329,7 +422,7 @@
                     continue;
                 }
                 const guestLink = `https://brit-invitation.vercel.app/?event=${encodeURIComponent(CURRENT_EVENT_ID)}`;
-                const messageText = `שלום ${guest.guest_name} היקר/ה, נשמח מאוד לראותך באירוע שלנו! אנא אשר/י את הגעתך בהקדם בקישור הבא: ${guestLink}`;
+                const messageText = `שלום ${guest.guest_name} ❤️\nנשמח מאוד לראותכם באירוע שלנו! אנא אשרו הגעה בקישור הבא:\n${guestLink}`;
 
                 try {
                     const response = await fetch(vercelUrl, {
