@@ -352,25 +352,29 @@
       else { alert("הלקוח אושר בהצלחה!"); await loadPendingUsersForAdmin(); }
     }
 
-   // 🔗 פונקציה לפתיחת הבוט של Landbot והזרקת המשתנים המאובטחים בכל הפורמטים
+  // 🔗 פונקציה לפתיחת הבוט של Landbot והזרקת המשתנים המאובטחים בצורה נקייה
     function openWhatsAppConnectBot(isSuperAdmin = false) {
       const iframe = document.getElementById('landbotIframe');
       const title = document.getElementById('landbotModalTitle');
       const encodedId = encodeURIComponent(currentEventId);
       
-      // הזרקת ה-ID בכל הווריאציות האפשריות כדי להבטיח זיהוי מלא בבלוקים של Landbot
-      let botUrl = `https://landbot.online/v3/H-3472118-ACRK7VOOQQZOV18J/index.html?event_id=${encodedId}&eventId=${encodedId}&EVENT_ID=${encodedId}`;
+      // בניית הכתובת הרשמית של לנדבוט עם הפרמטרים שיוזרקו ישירות ל-Hidden Fields
+      let botUrl = `https://landbot.online/v3/H-3472118-ACRK7VOOQQZOV18J/index.html?event_id=${encodedId}`;
       
       if (isSuperAdmin) {
-        // אם מדובר בחיבור שלך דרך כפתור האדמין - נזריק מראש את נתוני האבטחה
-        botUrl += `&admin_email=sunorlovich@gmail.com&adminEmail=sunorlovich@gmail.com`;
+        // הזרקה ישירה של מייל האדמין רק כשאתה נכנס דרך פאנל הניהול שלך
+        botUrl += `&admin_email=sunorlovich%40gmail.com`;
         title.innerText = "👑 פאנל ניהול סופר-אדמין לוואטסאפ";
       } else {
         title.innerText = "📲 חיבור מכשיר וואטסאפ לאירוע";
       }
       
-      iframe.src = botUrl;
-      document.getElementById('landbotModalContainer').style.display = 'flex';
+      // איפוס ה-Iframe וטעינה מחדש כדי להכריח את לנדבוט לקרוא את ה-URL החדש
+      iframe.src = "";
+      setTimeout(() => {
+        iframe.src = botUrl;
+        document.getElementById('landbotModalContainer').style.display = 'flex';
+      }, 50);
     }
 
     function closeWhatsAppConnectBot() {
