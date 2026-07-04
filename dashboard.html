@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" href="data:,">
   <style> 
@@ -92,6 +93,25 @@
         </form>
       </div>
 
+      <div class="bg-white rounded-2xl shadow-md p-6 border border-slate-100 space-y-4">
+        <div>
+          <h3 class="text-base font-bold text-slate-800">📥 העלאת רשימת מוזמנים מתוך אקסל</h3>
+          <p class="text-xs text-slate-500 mt-0.5">המערכת קוראת קבצי אקסל ישירות! ודא ששמות העמודות בשורה הראשונה הם: <strong>שם, טלפון, כמות, צד, קטגוריה</strong>.</p>
+        </div>
+        <div class="flex flex-col sm:flex-row items-center gap-4 text-sm">
+          <div class="flex-1 w-full">
+            <label class="block w-full text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 p-3.5 rounded-xl cursor-pointer text-center transition border border-emerald-300 border-dashed">
+              📊 לחצו כאן לבחירת קובץ אקסל (.xlsx, .xls)
+              <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden">
+            </label>
+          </div>
+          <button onclick="handleExcelImport()" id="importExcelBtn" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 px-6 rounded-xl transition shadow text-xs whitespace-nowrap">
+            🚀 קרא ועבד קובץ
+          </button>
+        </div>
+        <p id="excelStatusMsg" class="text-xs font-bold hidden mt-1"></p>
+      </div>
+
       <div class="bg-white rounded-2xl shadow-md overflow-hidden">
         <div class="p-6 bg-slate-50 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
           <h3 class="text-lg font-bold">ניהול אורחים</h3>
@@ -104,7 +124,7 @@
           <table class="w-full text-right border-collapse">
             <thead>
               <tr class="bg-slate-100 text-slate-600 text-sm">
-                <th class="p-4 font-bold border-b">שם האורח</th><th class="p-4 font-bold border-b">סטטוס</th><th class="p-4 font-bold border-b text-center">כמות</th><th class="p-4 font-bold border-b">ברכה</th><th class="p-4 font-bold border-b text-center">פעולות</th>
+                <th class="p-4 font-bold border-b">שם האורח</th><th class="p-4 font-bold border-b">סטטוס</th><th class="p-4 font-bold border-b text-center">כמות</th><th class="p-4 font-bold border-b">ברכה / קטגוריה</th><th class="p-4 font-bold border-b text-center">פעולות</th>
               </tr>
             </thead>
             <tbody id="guestsTableBody" class="text-sm"><tr><td colspan="5" class="p-6 text-center text-slate-500">טוען אורחים...</td></tr></tbody>
@@ -176,6 +196,7 @@
   </footer>
 
   <script>
+    // 1. אתחול יציב ומאובטח של משתני המערכת בראש הסקריפט (מונע בעיות התחברות לחלוטין)
     const SUPABASE_URL = 'https://ghfgqwslakjqmxuboobn.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
     const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -190,10 +211,14 @@
     }
 
     async function init() {
-      const { data: { user } } = await mySupabase.auth.getUser();
-      if (!user) { window.location.href = 'login.html'; return; }
-      currentUser = user;
-      await loadEventDetails();
+      try {
+        const { data: { user }, error } = await mySupabase.auth.getUser();
+        if (error || !user) { window.location.href = 'login.html'; return; }
+        currentUser = user;
+        await loadEventDetails();
+      } catch (err) {
+        window.location.href = 'login.html';
+      }
     }
 
     document.getElementById('logoutBtn').addEventListener('click', async () => {
@@ -204,7 +229,6 @@
     async function loadEventDetails() {
       let { data: profile } = await mySupabase.from('profiles').select('status, email').eq('id', currentUser.id).single();
       
-      // משתמש במייל הפרטי החדש שלך כדי לפתוח את הטאב הסודי
       if (profile && profile.email === 'sunorlovich@gmail.com') {
         document.getElementById('tabAdminBtn').classList.remove('hidden');
       }
@@ -281,6 +305,64 @@
       else { alert("הלקוח אושר בהצלחה!"); await loadPendingUsersForAdmin(); }
     }
 
+    // 📊 פונקציית ייבוא אקסל חכמה (SheetJS) המותאמת לעמודות: שם, טלפון, כמות, צד, קטגוריה
+    function handleExcelImport() {
+      const fileInput = document.getElementById('excelFileInput');
+      const statusMsg = document.getElementById('excelStatusMsg');
+      const btn = document.getElementById('importExcelBtn');
+
+      if (!fileInput.files || fileInput.files.length === 0) { alert("אנא בחר קובץ אקסל תחילה."); return; }
+      
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      btn.disabled = true; btn.innerText = "מעבד...";
+      statusMsg.className = "text-xs font-bold text-slate-500 mt-1";
+      statusMsg.classList.remove('hidden');
+      statusMsg.innerText = "קורא נתונים...";
+
+      reader.onload = async function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+          
+          let successCount = 0;
+          for (const row of jsonData) {
+            const name = row['שם'] || row['שם מלא'];
+            const phone = row['טלפון'] || row['נייד'];
+            const count = parseInt(row['כמות'] || row['מספר מוזמנים']) || 1;
+            const side = row['צד'] || '';
+            const category = row['קטגוריה'] || '';
+
+            if (!name) continue;
+
+            // הפעלת פונקציית ה-RPC החכמה המונעת כפילות (גישה ב')
+            const { error } = await mySupabase.rpc('import_guest_from_excel', {
+              p_event_id: currentEventId,
+              p_guest_name: String(name),
+              p_phone: phone ? String(phone) : '',
+              p_guests_count: count,
+              p_side: String(side),
+              p_category: String(category)
+            });
+
+            if (!error) successCount++;
+          }
+
+          statusMsg.className = "text-xs font-bold text-green-600 mt-1";
+          statusMsg.innerText = `הפעולה הושלמה בהצלחה! ${successCount} שורות עודכנו/הוכנסו ברשימה.`;
+          fileInput.value = '';
+          await loadDashboardData();
+        } catch (err) {
+          statusMsg.className = "text-xs font-bold text-red-600 mt-1";
+          statusMsg.innerText = "שגיאה בפענוח קובץ האקסל. ודא שהעמודות כתובות נכון.";
+        }
+        btn.disabled = false; btn.innerText = "🚀 קרא ועבד קובץ";
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
     function calculateStats() {
       const attending = globalGuestsData.filter(g => g.attending === true);
       const declined = globalGuestsData.filter(g => g.attending === false);
@@ -290,14 +372,24 @@
       document.getElementById('statDeclined').innerText = declined.length;
       document.getElementById('statSeated').innerText = seated.reduce((sum, g) => sum + (g.guests_count || 0), 0);
       document.getElementById('statArrivedCount').innerText = arrived.reduce((sum, g) => sum + (g.guests_count || 0), 0);
+      document.getElementById('totalGuests').innerText = `סה"כ מגיעים: ${attending.reduce((sum, g) => sum + (g.guests_count || 0), 0)}`;
     }
 
     function renderGuestsTable() {
       const tbody = document.getElementById('guestsTableBody'); tbody.innerHTML = '';
       if (globalGuestsData.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-500">עדיין אין אישורי הגעה.</td></tr>'; return; }
       globalGuestsData.forEach(guest => {
+        let statusText = 'טרם ענה';
+        let statusClass = 'bg-amber-100 text-amber-700';
+
+        if (guest.attending === true) { statusText = 'כן'; statusClass = 'bg-green-100 text-green-700 font-bold'; } 
+        else if (guest.attending === false) { statusText = 'לא'; statusClass = 'bg-red-100 text-red-700'; }
+
+        // משלב את הברכה או את הקטגוריה המיובאת בתוך השדה המתאים
+        const metaInfo = guest.blessing ? guest.blessing : (guest.category ? `[${guest.category}] ${guest.side || ''}` : '-');
+
         const row = document.createElement('tr'); row.className = 'border-b hover:bg-slate-50 transition';
-        row.innerHTML = `<td class="p-4 font-medium">${esc(guest.guest_name)}</td><td class="p-4"><span class="px-3 py-1 rounded-full text-xs font-bold ${guest.attending ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${guest.attending ? 'כן' : 'לא'}</span></td><td class="p-4 text-center font-bold">${guest.attending ? guest.guests_count : '-'}</td><td class="p-4 text-slate-600 text-xs">${esc(guest.blessing)}</td><td class="p-4 text-center"><button type="button" onclick="deleteGuest('${guest.id}')" class="text-red-500 hover:text-red-700 text-sm font-bold">מחק</button></td>`;
+        row.innerHTML = `<td class="p-4 font-medium">${esc(guest.guest_name)}</td><td class="p-4"><span class="px-3 py-1 rounded-full text-xs font-bold ${statusClass}">${statusText}</span></td><td class="p-4 text-center font-bold">${guest.guests_count || 0}</td><td class="p-4 text-slate-600 text-xs">${esc(metaInfo)}</td><td class="p-4 text-center"><button type="button" onclick="deleteGuest('${guest.id}')" class="text-red-500 hover:text-red-700 text-sm font-bold">מחק</button></td>`;
         tbody.appendChild(row);
       });
     }
@@ -401,6 +493,7 @@
       }; reader.readAsDataURL(file);
     });
 
+    // מאתחל את המערכת רק כאשר כל ה-DOM טעון פיזית בדפדפן
     window.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
