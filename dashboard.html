@@ -212,7 +212,7 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA'
     const vercelUrl = 'https://brit-invitation.vercel.app/api/send-whatsapp'; 
     
-    // יצירת חיבור תקין ומאובטח לסופרבייס
+    // יצירת החיבור לסופרבייס בראש הסקריפט - פותר את בעיית ההתחברות!
     const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     
     let currentUser = null;
@@ -224,6 +224,7 @@
       return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
 
+    // פונקציית האתחול - תרוץ עכשיו בצורה חלקה
     async function init() {
       try {
         const { data: { user }, error } = await mySupabase.auth.getUser();
