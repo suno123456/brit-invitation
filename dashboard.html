@@ -131,9 +131,12 @@
           </table>
         </div>
         
-        <div class="p-4 bg-slate-50 border-t flex justify-center">
-          <button onclick="openWhatsAppPreviewPopup()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition shadow-md text-sm flex items-center gap-2">
+        <div class="p-4 bg-slate-50 border-t flex flex-col sm:flex-row justify-center items-center gap-4">
+          <button onclick="openWhatsAppPreviewPopup()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition shadow-md text-sm flex items-center justify-center gap-2">
             💬 שלח הודעת וואטסאפ לכלל הרשימה
+          </button>
+          <button onclick="openWhatsAppConnectBot()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-xl transition shadow-md text-sm flex items-center justify-center gap-2">
+            🔗 חבר מכשיר לוואטסאפ (QR)
           </button>
         </div>
       </div>
@@ -175,9 +178,14 @@
     </div>
 
     <div id="sectionAdmin" class="space-y-6 tab-section bg-white rounded-2xl shadow-md p-6">
-      <div class="border-b pb-3 mb-4">
-        <h2 class="text-xl font-black text-purple-700">👑 פאנל ניהול עסק (סופר-אדמין)</h2>
-        <p class="text-xs text-slate-500 mt-1">רשימת הלקוחות שנרשמו כעת במערכת וממתינים שתאשר את התשלום שלהם בביט.</p>
+      <div class="border-b pb-3 mb-4 flex justify-between items-center">
+        <div>
+          <h2 class="text-xl font-black text-purple-700">👑 פאנל ניהול עסק (סופר-אדמין)</h2>
+          <p class="text-xs text-slate-500 mt-1">רשימת הלקוחות שנרשמו כעת במערכת וממתינים שתאשר את התשלום שלהם בביט.</p>
+        </div>
+        <button onclick="openWhatsAppConnectBot(true)" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-xl text-xs shadow transition">
+          🚀 פתח בוט ניהול אדמין מלא
+        </button>
       </div>
       <div class="overflow-x-auto rounded-xl border border-purple-100">
         <table class="w-full text-right text-sm">
@@ -192,7 +200,7 @@
     </div>
   </div>
 
-  <div id="whatsappPreviewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div id="whatsappPreviewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden border flex flex-col text-sm">
       <div class="p-4 bg-blue-50 border-b border-blue-100 flex justify-between items-center">
         <h4 class="font-bold text-blue-900 text-base">📄 תצוגה מקדימה של ההודעה שתישלח</h4>
@@ -213,6 +221,18 @@
     </div>
   </div>
 
+  <div id="landbotModalContainer" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full h-[85vh] overflow-hidden border flex flex-col">
+      <div class="p-4 bg-slate-100 border-b flex justify-between items-center">
+        <h4 id="landbotModalTitle" class="font-bold text-slate-800 text-sm">📲 חיבור מכשיר וואטסאפ לאירוע</h4>
+        <button onclick="closeWhatsAppConnectBot()" class="text-slate-400 hover:text-slate-600 text-2xl focus:outline-none leading-none">&times;</button>
+      </div>
+      <div class="flex-1 w-full bg-slate-50 relative">
+        <iframe id="landbotIframe" class="w-full h-full border-none" src=""></iframe>
+      </div>
+    </div>
+  </div>
+
   <footer class="mt-8 mb-6 text-center p-4">
     <div class="bg-slate-200 h-px w-1/2 mx-auto mb-4"></div>
     <p class="text-sm font-bold text-slate-700">© כל הזכויות שמורות לסאן אורלביץ'.</p>
@@ -226,7 +246,6 @@
     const SUPABASE_URL = 'https://ghfgqwslakjqmxuboobn.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
     const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
     const vercelUrl = 'https://brit-invitation.vercel.app/api/send-whatsapp'; 
     
     let currentUser = null;
@@ -333,6 +352,31 @@
       else { alert("הלקוח אושר בהצלחה!"); await loadPendingUsersForAdmin(); }
     }
 
+    // 🔗 פונקציה לפתיחת הבוט של Landbot והזרקת המשתנים המאובטחים
+    function openWhatsAppConnectBot(isSuperAdmin = false) {
+      const iframe = document.getElementById('landbotIframe');
+      const title = document.getElementById('landbotModalTitle');
+      
+      // בניית הקישור והזרקת ה-event_id והמייל בצורה חלקה ב-Query String של Landbot
+      let botUrl = `https://landbot.online/v3/H-3472118-ACRK7VOOQQZOV18J/index.html?event_id=${encodeURIComponent(currentEventId)}`;
+      
+      if (isSuperAdmin) {
+        // אם מדובר בחיבור שלך דרך כפתור האדמין - נזריק מראש את נתוני האבטחה
+        botUrl += `&admin_email=sunorlovich@gmail.com`;
+        title.innerText = "👑 פאנל ניהול סופר-אדמין לוואטסאפ";
+      } else {
+        title.innerText = "📲 חיבור מכשיר וואטסאפ לאירוע";
+      }
+      
+      iframe.src = botUrl;
+      document.getElementById('landbotModalContainer').style.display = 'flex';
+    }
+
+    function closeWhatsAppConnectBot() {
+      document.getElementById('landbotModalContainer').style.display = 'none';
+      document.getElementById('landbotIframe').src = "";
+    }
+
     function handleExcelImport() {
       const fileInput = document.getElementById('excelFileInput');
       const statusMsg = document.getElementById('excelStatusMsg');
@@ -395,11 +439,11 @@
     function openWhatsAppPreviewPopup() {
       const templateText = document.getElementById('whatsappTemplate').value;
       document.getElementById('popupMessagePreview').innerText = templateText;
-      document.getElementById('whatsappPreviewModal').classList.remove('hidden');
+      document.getElementById('whatsappPreviewModal').style.display = 'flex';
     }
 
     function closeWhatsAppPreviewPopup() {
-      document.getElementById('whatsappPreviewModal').classList.add('hidden');
+      document.getElementById('whatsappPreviewModal').style.display = 'none';
     }
 
     async function confirmAndSendBulkWhatsApp() {
@@ -433,7 +477,7 @@
           const response = await fetch(vercelUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone: guest.phone, message: messageText })
+            body: JSON.stringify({ phone: guest.phone, message: messageText, event_id: currentEventId })
           });
           const result = await response.json();
           const finalStatus = (response.ok && result.success) ? 'נשלח' : 'נכשל';
@@ -540,7 +584,6 @@
       document.getElementById('saveMsg').classList.remove('hidden'); setTimeout(() => document.getElementById('saveMsg').classList.add('hidden'), 3000); updateTemplate();
     });
 
-    // הורדת רשימה מפוצלת ומדויקת לפי עמודות: שם האורח | מגיע/ה? | כמות | מתנה | ברכה | תאריך אישור
     function exportToExcel() {
       if (globalGuestsData.length === 0) return;
       let csvContent = "\uFEFFשם האורח,מגיע/ה?,כמות,מתנה,ברכה,תאריך אישור\n";
@@ -548,12 +591,8 @@
         let statusText = 'טרם ענה';
         if (g.attending === true) statusText = 'כן';
         if (g.attending === false) statusText = 'לא';
-        
-        // מתנה שקיבל (בדרך כלל נשמרת במידה והוזן סכום, או נשאיר ריק למילוי)
         let giftAmount = g.gift_received ? String(g.gift_received).replace(/,/g, '') : '';
-        // ברכה מהאורח
         let blessingText = g.blessing ? g.blessing.replace(/,/g, ' -').replace(/\n/g, ' ') : '';
-        
         csvContent += `${g.guest_name ? g.guest_name.replace(/,/g, '') : ''},${statusText},${g.guests_count || 0},${giftAmount},${blessingText},${new Date(g.created_at).toLocaleDateString('he-IL')}\n`; 
       });
       const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })); link.download = "רשימת_אורחים.csv"; document.body.appendChild(link); link.click(); document.body.removeChild(link);
