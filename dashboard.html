@@ -11,8 +11,8 @@
   <script src="https://cdn.landbot.io/landbot-3/landbot-3.0.0.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" href="data:,">
-  <style> 
-    body { font-family: 'Assistant', sans-serif; background-color: #f8fafc; } 
+  <style>
+    body { font-family: 'Assistant', sans-serif; background-color: #f8fafc; }
     .tab-section { display: none; } .tab-section.active { display: block; }
     .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -46,7 +46,6 @@
       <div class="bg-slate-100 border border-slate-200 rounded-2xl p-4 text-center shadow-sm"><p class="text-xs text-slate-600 font-semibold">סה"כ שובצו</p><p id="statSeated" class="text-2xl font-bold text-slate-800 mt-1">0</p></div>
       <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center shadow-sm"><p class="text-xs text-amber-700 font-semibold">🏁 הגיעו לאולם</p><p id="statArrivedCount" class="text-2xl font-bold text-amber-800 mt-1">0</p></div>
     </div>
-    
     <div class="bg-blue-50 rounded-2xl shadow-sm border border-blue-200 p-6 space-y-6">
       <div class="text-center border-b pb-4">
         <h3 class="text-lg font-bold text-blue-800 mb-2">הקישור שלכם לשליחה לאורחים:</h3>
@@ -125,20 +124,41 @@
           <table class="w-full text-right border-collapse">
             <thead>
               <tr class="bg-slate-100 text-slate-600 text-xs font-bold border-b">
-                <th class="p-4">שם האורח</th><th class="p-4">סטטוס מענה</th><th class="p-4 text-center">כמות</th><th class="p-4">ברכה / קטגוריה</th><th class="p-4 text-center">פעולות</th>
+                <th class="p-4">שם האורח</th><th class="p-4">סטטוס מענה</th><th class="p-4 text-center">כמות</th><th class="p-4">ברכה / קטגוריה</th><th class="p-4 text-center">וואטסאפ</th><th class="p-4 text-center">פעולות</th>
               </tr>
             </thead>
-            <tbody id="guestsTableBody" class="text-sm"><tr><td colspan="5" class="p-6 text-center text-slate-500">טוען אורחים...</td></tr></tbody>
+            <tbody id="guestsTableBody" class="text-sm"><tr><td colspan="6" class="p-6 text-center text-slate-500">טוען אורחים...</td></tr></tbody>
           </table>
         </div>
-        
-        <div class="p-4 bg-slate-50 border-t flex flex-col sm:flex-row justify-center items-center gap-4">
-          <button onclick="openWhatsAppPreviewPopup()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition shadow-md text-sm flex items-center justify-center gap-2">
-            💬 שלח הודעת וואטסאפ לכלל הרשימה
-          </button>
-          <button onclick="openWhatsAppConnectBot()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-xl transition shadow-md text-sm flex items-center justify-center gap-2">
-            🔗 חבר מכשיר לוואטסאפ (QR)
-          </button>
+
+        <div class="p-4 bg-slate-50 border-t space-y-4">
+          <!-- אזור שליחת וואטסאפ -->
+          <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-3">
+            <div class="flex items-center gap-2">
+              <h4 class="font-bold text-emerald-900 text-sm">💬 שליחת הזמנות בוואטסאפ לכל הרשימה</h4>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              המערכת מייצרת קובץ מוכן לשליחה מרוכזת דרך התוסף החינמי <strong>JONI</strong> — כך תשלחו הזמנה לכל המוזמנים <strong>מהוואטסאפ הפרטי שלכם</strong>, במכה אחת.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <button onclick="exportForJoni()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-sm text-xs flex items-center justify-center gap-2">
+                📤 הורד קובץ לשליחה ב-JONI
+              </button>
+              <button onclick="openJoniGuide()" class="flex-1 sm:flex-none bg-white border border-emerald-300 hover:bg-emerald-50 text-emerald-800 font-bold py-3 px-4 rounded-xl transition text-xs flex items-center justify-center gap-2">
+                ❓ איך שולחים? מדריך JONI
+              </button>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              טיפ: אפשר גם לשלוח לכל אורח בנפרד — לחצו על כפתור הוואטסאפ ליד השם בטבלה.
+            </p>
+          </div>
+
+          <!-- Landbot נשאר בתמונה (בפיתוח) -->
+          <div class="flex flex-col sm:flex-row justify-center items-center gap-4 pt-1">
+            <button onclick="openWhatsAppConnectBot()" class="w-full sm:w-auto bg-slate-200 text-slate-500 font-bold py-3 px-8 rounded-xl transition text-sm flex items-center justify-center gap-2 cursor-not-allowed">
+              🔗 חיבור אוטומטי (בפיתוח) 🔜
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -184,9 +204,6 @@
           <h2 class="text-xl font-black text-purple-700">👑 פאנל ניהול עסק (סופר-אדמין)</h2>
           <p class="text-xs text-slate-500 mt-1">רשימת הלקוחות שנרשמו כעת במערכת וממתינים שתאשר את התשלום שלהם בביט.</p>
         </div>
-        <button onclick="openWhatsAppConnectBot(true)" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-xl text-xs shadow transition">
-          🚀 פתח בוט ניהול אדמין מלא
-        </button>
       </div>
       <div class="overflow-x-auto rounded-xl border border-purple-100">
         <table class="w-full text-right text-sm">
@@ -201,36 +218,81 @@
     </div>
   </div>
 
-  <div id="whatsappPreviewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden border flex flex-col text-sm">
-      <div class="p-4 bg-blue-50 border-b border-blue-100 flex justify-between items-center">
-        <h4 class="font-bold text-blue-900 text-base">📄 תצוגה מקדימה של ההודעה שתישלח</h4>
-        <button onclick="closeWhatsAppPreviewPopup()" class="text-slate-400 hover:text-slate-600 text-xl font-bold focus:outline-none">&times;</button>
+  <!-- מודאל מדריך JONI -->
+  <div id="joniGuideModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden border flex flex-col text-sm max-h-[90vh]">
+      <div class="p-4 bg-emerald-50 border-b border-emerald-100 flex justify-between items-center">
+        <h4 class="font-bold text-emerald-900 text-base">📖 איך שולחים הזמנות דרך JONI</h4>
+        <button onclick="closeJoniGuide()" class="text-slate-400 hover:text-slate-600 text-xl font-bold focus:outline-none">&times;</button>
       </div>
-      <div class="p-5 space-y-4 flex-1">
-        <p class="text-xs text-slate-500">אנא אשרו את הנוסח הבא. ההודעה תישלח לכלל האורחים ברשימה שטרם נשלחה אליהם הודעה:</p>
-        <div class="bg-slate-50 border rounded-xl p-4 text-sm text-slate-700 whitespace-pre-wrap font-sans leading-relaxed shadow-inner max-h-60 overflow-y-auto" id="popupMessagePreview"></div>
+      <div class="p-5 space-y-4 overflow-y-auto">
+        <p class="text-xs text-slate-600 leading-relaxed bg-blue-50 border border-blue-100 rounded-lg p-3">
+          JONI הוא תוסף חינמי לדפדפן כרום ששולח הודעות וואטסאפ לרשימה שלמה, <strong>מהמספר הפרטי שלכם</strong>. התקנה חד-פעמית של 2 דקות.
+        </p>
+
+        <div class="space-y-3">
+          <div class="flex gap-3 items-start">
+            <span class="bg-emerald-600 text-white font-bold rounded-full w-6 h-6 flex items-center justify-center text-xs shrink-0">1</span>
+            <div>
+              <p class="font-bold text-slate-800">מתקינים את התוסף (פעם אחת)</p>
+              <p class="text-xs text-slate-500 mt-0.5">נכנסים לחנות כרום ולוחצים "הוסף לכרום".</p>
+              <a href="https://chromewebstore.google.com/detail/joni/aakppiadmnaeffmjijolmgmkcfhpglbh?hl=iw" target="_blank" class="inline-block mt-1 text-xs font-bold text-emerald-700 underline">🔗 פתח את JONI בחנות כרום</a>
+            </div>
+          </div>
+          <div class="flex gap-3 items-start">
+            <span class="bg-emerald-600 text-white font-bold rounded-full w-6 h-6 flex items-center justify-center text-xs shrink-0">2</span>
+            <div>
+              <p class="font-bold text-slate-800">מורידים את הקובץ מהמערכת</p>
+              <p class="text-xs text-slate-500 mt-0.5">לוחצים "📤 הורד קובץ לשליחה ב-JONI". יירד קובץ עם רשימת המוזמנים והטלפונים.</p>
+            </div>
+          </div>
+          <div class="flex gap-3 items-start">
+            <span class="bg-emerald-600 text-white font-bold rounded-full w-6 h-6 flex items-center justify-center text-xs shrink-0">3</span>
+            <div>
+              <p class="font-bold text-slate-800">פותחים את WhatsApp Web</p>
+              <p class="text-xs text-slate-500 mt-0.5">נכנסים ל-<span dir="ltr">web.whatsapp.com</span> ומתחברים עם הטלפון (סריקת QR). התוסף JONI יופיע בפינה למעלה.</p>
+            </div>
+          </div>
+          <div class="flex gap-3 items-start">
+            <span class="bg-emerald-600 text-white font-bold rounded-full w-6 h-6 flex items-center justify-center text-xs shrink-0">4</span>
+            <div>
+              <p class="font-bold text-slate-800">טוענים את הקובץ ל-JONI</p>
+              <p class="text-xs text-slate-500 mt-0.5">לוחצים על אייקון JONI ← "שליחה בתפוצה" ← בוחרים "קובץ אקסל" ומעלים את הקובץ שהורדתם. עמודת הטלפון (הראשונה) תזוהה אוטומטית.</p>
+            </div>
+          </div>
+          <div class="flex gap-3 items-start">
+            <span class="bg-emerald-600 text-white font-bold rounded-full w-6 h-6 flex items-center justify-center text-xs shrink-0">5</span>
+            <div>
+              <p class="font-bold text-slate-800">כותבים הודעה ושולחים</p>
+              <p class="text-xs text-slate-500 mt-0.5">מדביקים את נוסח ההזמנה (אפשר להעתיק מ"נוסח מומלץ לוואטסאפ" למעלה). כדי להוסיף שם אישי — לוחצים בתוך ההודעה על הכותרת "שם" ברשימת הנמענים, וזה יישתל אוטומטית לכל אחד. לוחצים "שליחה".</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
+          <p class="text-xs text-amber-900 leading-relaxed"><strong>שים לב:</strong> JONI שולח מהמספר הפרטי שלכם. מומלץ לא לשלוח כמויות עצומות בבת אחת ולהשאיר רווח בין הודעות (JONI עושה זאת אוטומטית) כדי לשמור על המספר.</p>
+        </div>
       </div>
-      <div class="p-4 bg-slate-50 border-t flex flex-row-reverse gap-3">
-        <button onclick="confirmAndSendBulkWhatsApp()" id="popupConfirmBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl text-xs shadow-sm transition">
-          המשך ושלח
-        </button>
-        <button onclick="closeWhatsAppPreviewPopup()" class="bg-white border hover:bg-slate-100 text-slate-700 font-bold py-2.5 px-5 rounded-xl text-xs transition">
-          ביטול
-        </button>
+      <div class="p-4 bg-slate-50 border-t flex justify-end">
+        <button onclick="closeJoniGuide()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-xl text-xs transition">הבנתי, סגור</button>
       </div>
     </div>
   </div>
 
+  <!-- מודאל Landbot (נשאר בתמונה, מנוטרל) -->
   <div id="landbotModalContainer" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full h-[85vh] overflow-hidden border flex flex-col">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border flex flex-col">
       <div class="p-4 bg-slate-100 border-b flex justify-between items-center">
-        <h4 id="landbotModalTitle" class="font-bold text-slate-800 text-sm">📲 חיבור מכשיר וואטסאפ לאירוע</h4>
+        <h4 id="landbotModalTitle" class="font-bold text-slate-800 text-sm">📲 חיבור אוטומטי לוואטסאפ</h4>
         <button onclick="closeWhatsAppConnectBot()" class="text-slate-400 hover:text-slate-600 text-2xl focus:outline-none leading-none">&times;</button>
       </div>
-      <div class="flex-1 w-full bg-slate-50 relative">
-        <div id="landbotIframe" class="w-full h-full"></div>
+      <div class="p-8 text-center space-y-3">
+        <div class="text-5xl">🔜</div>
+        <h3 class="font-black text-slate-800 text-lg">בפיתוח</h3>
+        <p class="text-sm text-slate-600 leading-relaxed">החיבור האוטומטי לוואטסאפ נמצא כרגע בפיתוח. בינתיים אפשר לשלוח לכל הרשימה בקלות דרך <strong>JONI</strong> (כפתור "הורד קובץ לשליחה") או לכל אורח בנפרד דרך כפתור הוואטסאפ שליד השם.</p>
       </div>
+      <!-- אזור טעינת Landbot (מוסתר כרגע, נשמר לעתיד) -->
+      <div id="landbotIframe" class="hidden w-full h-full"></div>
     </div>
   </div>
 
@@ -247,8 +309,7 @@
     const SUPABASE_URL = 'https://ghfgqwslakjqmxuboobn.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
     const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const vercelUrl = 'https://brit-invitation.vercel.app/api/send-whatsapp'; 
-    
+
     let currentUser = null;
     let currentEventId = null;
     let globalGuestsData = [];
@@ -256,6 +317,16 @@
 
     function esc(s) {
       return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    // המרת טלפון ישראלי לפורמט בינלאומי (0501234567 -> 972501234567)
+    function toIntlPhone(raw) {
+      let p = String(raw ?? '').replace(/[^0-9]/g, ''); // רק ספרות
+      if (!p) return '';
+      if (p.startsWith('972')) return p;            // כבר בינלאומי
+      if (p.startsWith('0')) return '972' + p.slice(1); // 05... -> 9725...
+      if (p.length === 9) return '972' + p;         // 5xxxxxxxx בלי 0
+      return p;
     }
 
     async function init() {
@@ -276,7 +347,7 @@
 
     async function loadEventDetails() {
       let { data: profile } = await mySupabase.from('profiles').select('status, email').eq('id', currentUser.id).single();
-      
+
       if (profile && profile.email === 'sunorlovich@gmail.com') {
         document.getElementById('tabAdminBtn').classList.remove('hidden');
       }
@@ -284,7 +355,7 @@
       if (!profile || profile.status === 'pending') {
         document.getElementById('globalLoader').classList.add('hidden');
         document.getElementById('pendingScreen').classList.remove('hidden');
-        return; 
+        return;
       }
 
       let { data: events } = await mySupabase.from('events').select('*').eq('host_id', currentUser.id);
@@ -294,10 +365,10 @@
       }
       const event = events[0];
       currentEventId = event.id;
-      
+
       document.getElementById('shareLink').value = window.location.origin + '/?event=' + currentEventId;
       document.getElementById('hostessLink').value = window.location.origin + '/hostess.html?event=' + currentEventId + '&token=' + (event.hostess_token || '');
-      
+
       document.getElementById('eventName').value = event.event_name || '';
       document.getElementById('imageUrl').value = event.image_url || '';
       document.getElementById('eventDate').value = event.event_date ? event.event_date.split('T')[0] : '';
@@ -305,7 +376,7 @@
       document.getElementById('locationName').value = event.location_name || '';
       document.getElementById('bitLink').value = event.bit_link || '';
       if (event.waze_link) { try { document.getElementById('address').value = decodeURIComponent(event.waze_link.split('q=')[1]); } catch(e){} }
-      
+
       updateTemplate();
       await loadDashboardData();
       document.getElementById('globalLoader').classList.add('hidden');
@@ -349,186 +420,82 @@
     async function approveUserFromDashboard(uid) {
       if (!confirm("האם לאשר את המשתמש ולפתוח לו את המערכת?")) return;
       const { data, error } = await mySupabase.rpc('super_admin_approve', { p_target_uid: uid });
-      if (error || data !== 'success') { alert("שגיאה באישור המשתמש."); } 
+      if (error || data !== 'success') { alert("שגיאה באישור המשתמש."); }
       else { alert("הלקוח אושר בהצלחה!"); await loadPendingUsersForAdmin(); }
     }
 
-let myLandbotContainerInstance = null;
+    /* ========= JONI ========= */
+    function exportForJoni() {
+      if (globalGuestsData.length === 0) { alert('אין אורחים ברשימה לייצוא.'); return; }
 
-function openWhatsAppConnectBot(isSuperAdmin = false) {
-  const title = document.getElementById('landbotModalTitle');
-  const container = document.getElementById('landbotIframe');
-  const encodedId = String(currentEventId || '');
+      // רק אורחים עם טלפון
+      const rows = globalGuestsData.filter(g => g.phone && toIntlPhone(g.phone));
+      if (rows.length === 0) { alert('אין אורחים עם מספר טלפון ברשימה. הוסיפו טלפונים (למשל דרך ייבוא אקסל).'); return; }
 
-  title.innerText = isSuperAdmin
-    ? "👑 פאנל ניהול סופר-אדמין לוואטסאפ"
-    : "📲 חיבור מכשיר וואטסאפ לאירוע";
+      // עמודה A = טלפון (חובה ל-JONI), ואז שדות דינמיים
+      let csv = "\uFEFFטלפון,שם,כמות,צד\n";
+      rows.forEach(g => {
+        const phone = toIntlPhone(g.phone);
+        const name = (g.guest_name || '').replace(/,/g, ' ');
+        const count = g.guests_count || 1;
+        const side = (g.side || '').replace(/,/g, ' ');
+        csv += `${phone},${name},${count},${side}\n`;
+      });
 
-  // מזריקים את ה-div המארח
-  container.innerHTML = '<div id="landbot-embedded-zone" style="width:100%;height:100%;min-height:520px;"></div>';
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+      link.download = "רשימה_לוואטסאפ_JONI.csv";
+      document.body.appendChild(link); link.click(); document.body.removeChild(link);
 
-  // מציגים את המודאל קודם — כדי שה-div יהיה קיים פיזית לפני האתחול
-  document.getElementById('landbotModalContainer').style.display = 'flex';
+      // סימון שנשלחה אליהם הודעה (סטטוס)
+      // לא משנים סטטוס אוטומטית — השליחה בפועל נעשית ב-JONI, לא כאן.
+    }
 
-  const customData = { event_id: encodedId, eventId: encodedId, EVENT_ID: encodedId };
-  if (isSuperAdmin) { customData.admin_email = "sunorlovich@gmail.com"; }
+    function openJoniGuide() { document.getElementById('joniGuideModal').style.display = 'flex'; }
+    function closeJoniGuide() { document.getElementById('joniGuideModal').style.display = 'none'; }
 
-  const initLandbot = () => {
-    requestAnimationFrame(() => {
-      const zone = document.getElementById('landbot-embedded-zone');
-      if (!zone) { console.error('landbot zone missing'); return; }
-      if (myLandbotContainerInstance?.destroy) {
-        try { myLandbotContainerInstance.destroy(); } catch (e) {}
-      }
-      try {
-        myLandbotContainerInstance = new window.Landbot.Container({
-          container: '#landbot-embedded-zone',
-          configUrl: 'https://storage.googleapis.com/landbot.online/v3/H-3472118-ACRK7VOOQQZOV18J/index.json',
-          customData
-        });
-      } catch (e) {
-        console.error('Landbot init failed:', e);
-      }
-    });
-  };
+    /* ========= wa.me לאורח בודד ========= */
+    function sendWaMe(phone, guestName) {
+      const intl = toIntlPhone(phone);
+      if (!intl) { alert('לאורח זה אין מספר טלפון תקין.'); return; }
+      let msg = document.getElementById('whatsappTemplate').value || '';
+      msg = msg.replace(/\[שם\]/g, guestName || '');
+      const url = 'https://wa.me/' + intl + '?text=' + encodeURIComponent(msg);
+      window.open(url, '_blank');
+    }
 
-  if (typeof window.Landbot === 'undefined') {
-    const s = document.createElement('script');
-    s.src = 'https://static.landbot.io/landbot-3/landbot-3.0.0.js';
-    s.async = true;
-    s.onload = initLandbot;
-    s.onerror = () => console.error('Landbot script failed to load');
-    document.body.appendChild(s);
-  } else {
-    initLandbot();
-  }
-}
-
-// זו הפונקציה שנמחקה — היא מה שגרם לשגיאה
-function closeWhatsAppConnectBot() {
-  document.getElementById('landbotModalContainer').style.display = 'none';
-  if (myLandbotContainerInstance?.destroy) {
-    try { myLandbotContainerInstance.destroy(); } catch (e) {}
-  }
-  myLandbotContainerInstance = null;
-  const container = document.getElementById('landbotIframe');
-  if (container) container.innerHTML = "";
-}
-    function handleExcelImport() {
-      const fileInput = document.getElementById('excelFileInput');
-      const statusMsg = document.getElementById('excelStatusMsg');
-      const btn = document.getElementById('importExcelBtn');
-
-      if (!fileInput.files || fileInput.files.length === 0) { alert("אנא בחר קובץ אקסל תחילה."); return; }
-      
-      const file = fileInput.files[0];
-      const reader = new FileReader();
-
-      btn.disabled = true; btn.innerText = "מעבד...";
-      statusMsg.className = "text-xs font-bold text-slate-500 mt-1";
-      statusMsg.classList.remove('hidden');
-      statusMsg.innerText = "קורא שורות נתונים...";
-
-      reader.onload = async function(e) {
+    /* ========= Landbot (נשמר, מנוטרל — מציג "בפיתוח") ========= */
+    let myLandbotContainerInstance = null;
+    function openWhatsAppConnectBot(isSuperAdmin = false) {
+      // כרגע מציג מסך "בפיתוח" בלבד. הקוד המלא נשמר למטה להפעלה עתידית.
+      document.getElementById('landbotModalContainer').style.display = 'flex';
+    }
+    function closeWhatsAppConnectBot() {
+      document.getElementById('landbotModalContainer').style.display = 'none';
+    }
+    /* --- קוד Landbot מקורי (מושבת). להפעלה עתידית: כשיהיה שרת connect אמיתי,
+       להחזיר את התוכן ל-#landbotIframe ולהסיר את מסך "בפיתוח".
+    function initLandbotFull(isSuperAdmin) {
+      const container = document.getElementById('landbotIframe');
+      const encodedId = String(currentEventId || '');
+      container.classList.remove('hidden');
+      container.innerHTML = '<div id="landbot-embedded-zone" style="width:100%;height:100%;min-height:520px;"></div>';
+      const customData = { event_id: encodedId, eventId: encodedId, EVENT_ID: encodedId };
+      if (isSuperAdmin) { customData.admin_email = "sunorlovich@gmail.com"; }
+      requestAnimationFrame(() => {
+        const zone = document.getElementById('landbot-embedded-zone');
+        if (!zone) return;
+        if (myLandbotContainerInstance?.destroy) { try { myLandbotContainerInstance.destroy(); } catch(e){} }
         try {
-          const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: 'array' });
-          const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-          
-          let successCount = 0;
-          for (const row of jsonData) {
-            const name = row['שם'] || row['שם מלא'];
-            const phone = row['טלפון'] || row['נייד'];
-            const count = parseInt(row['כמות'] || row['מספר מוזמנים']) || 1;
-            const side = row['צד'] || '';
-            const category = row['קטגוריה'] || '';
-
-            if (!name) continue;
-
-            const { error } = await mySupabase.from('guests').insert([{
-              event_id: currentEventId,
-              guest_name: String(name),
-              phone: phone ? String(phone) : '',
-              guests_count: count,
-              side: String(side),
-              category: String(category),
-              source: 'imported',
-              attending: null,
-              status: 'לא נשלח'
-            }]);
-
-            if (!error) successCount++;
-          }
-
-          statusMsg.className = "text-xs font-bold text-green-600 mt-1";
-          statusMsg.innerText = `הפעולה הושלמה! הוכנסו ${successCount} מוזמנים בסטטוס 'טרם ענה'.`;
-          fileInput.value = '';
-          await loadDashboardData();
-        } catch (err) {
-          statusMsg.className = "text-xs font-bold text-red-600 mt-1";
-          statusMsg.innerText = "שגיאה בפענוח קובץ האקסל. ודא שהקובץ תקין.";
-        }
-        btn.disabled = false; btn.innerText = "🚀 קרא ועבד קובץ";
-      };
-      reader.readAsArrayBuffer(file);
-    }
-
-    function openWhatsAppPreviewPopup() {
-      const templateText = document.getElementById('whatsappTemplate').value;
-      document.getElementById('popupMessagePreview').innerText = templateText;
-      document.getElementById('whatsappPreviewModal').style.display = 'flex';
-    }
-
-    function closeWhatsAppPreviewPopup() {
-      document.getElementById('whatsappPreviewModal').style.display = 'none';
-    }
-
-    async function confirmAndSendBulkWhatsApp() {
-      const btn = document.getElementById('popupConfirmBtn');
-      btn.disabled = true; btn.innerText = "...שולח";
-
-      const { data: list, error } = await mySupabase
-        .from('guests')
-        .select('*')
-        .eq('event_id', currentEventId)
-        .eq('source', 'imported')
-        .eq('status', 'לא נשלח');
-
-      if (error || !list || list.length === 0) {
-        alert("אין אורחים חדשים בסטטוס 'לא נשלח' ברשימה.");
-        closeWhatsAppPreviewPopup();
-        btn.disabled = false; btn.innerText = "המשך ושלח";
-        return;
-      }
-
-      for (const guest of list) {
-        if (!guest.phone) {
-          await mySupabase.from('guests').update({ status: 'נכשל' }).eq('id', guest.id);
-          continue;
-        }
-        
-        const templateText = document.getElementById('whatsappTemplate').value;
-        const messageText = templateText.replace(/👤 \[שם\]/g, guest.guest_name).replace(/\[שם\]/g, guest.guest_name);
-
-        try {
-          const response = await fetch(vercelUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone: guest.phone, message: messageText, event_id: currentEventId })
+          myLandbotContainerInstance = new window.Landbot.Container({
+            container: '#landbot-embedded-zone',
+            configUrl: 'https://storage.googleapis.com/landbot.online/v3/H-3472118-ACRK7VOOQQZOV18J/index.json',
+            customData
           });
-          const result = await response.json();
-          const finalStatus = (response.ok && result.success) ? 'נשלח' : 'נכשל';
-          await mySupabase.from('guests').update({ status: finalStatus }).eq('id', guest.id);
-        } catch {
-          await mySupabase.from('guests').update({ status: 'נכשל' }).eq('id', guest.id);
-        }
-      }
-
-      alert("תהליך השליחה המרוכזת הסתיים בהצלחה!");
-      closeWhatsAppPreviewPopup();
-      btn.disabled = false; btn.innerText = "המשך ושלח";
-      await loadDashboardData();
+        } catch (e) { console.error('Landbot init failed:', e); }
+      });
     }
+    */
 
     function calculateStats() {
       const attending = globalGuestsData.filter(g => g.attending === true);
@@ -543,22 +510,29 @@ function closeWhatsAppConnectBot() {
 
     function renderGuestsTable() {
       const tbody = document.getElementById('guestsTableBody'); tbody.innerHTML = '';
-      if (globalGuestsData.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-500">עדיין אין אישורי הגעה.</td></tr>'; return; }
+      if (globalGuestsData.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-500">עדיין אין אישורי הגעה.</td></tr>'; return; }
+      let totalCount = 0;
       globalGuestsData.forEach(guest => {
+        if (guest.attending) totalCount += (guest.guests_count || 0);
         let statusText = '⏳ טרם ענה';
         let statusClass = 'bg-amber-100 text-amber-700';
-
-        if (guest.attending === true) { statusText = '👍 מגיע'; statusClass = 'bg-green-100 text-green-700 font-bold'; } 
+        if (guest.attending === true) { statusText = '👍 מגיע'; statusClass = 'bg-green-100 text-green-700 font-bold'; }
         else if (guest.attending === false) { statusText = '👎 לא מגיע'; statusClass = 'bg-red-100 text-red-700'; }
         else if (guest.status === 'נשלח') { statusText = '📲 נשלח'; statusClass = 'bg-blue-100 text-blue-700'; }
         else if (guest.status === 'נכשל') { statusText = '⚠️ נכשל'; statusClass = 'bg-red-50 text-red-600'; }
 
         const metaInfo = guest.blessing ? guest.blessing : (guest.category ? `[${guest.category}] ${guest.side || ''}` : '-');
 
+        // כפתור wa.me רק אם יש טלפון
+        const waBtn = guest.phone
+          ? `<button type="button" onclick="sendWaMe('${esc(guest.phone)}','${esc(guest.guest_name)}')" class="text-green-600 hover:text-green-800 text-lg" title="שלח וואטסאפ">💬</button>`
+          : `<span class="text-slate-300 text-xs">אין טלפון</span>`;
+
         const row = document.createElement('tr'); row.className = 'border-b hover:bg-slate-50 transition';
-        row.innerHTML = `<td class="p-4 font-medium">${esc(guest.guest_name)}</td><td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${statusClass}">${statusText}</span></td><td class="p-4 text-center font-bold">${guest.attending ? guest.guests_count : (guest.guests_count || 0)}</td><td class="p-4 text-slate-600 text-xs">${esc(metaInfo)}</td><td class="p-4 text-center"><button type="button" onclick="deleteGuest('${guest.id}')" class="text-red-500 hover:text-red-700 text-xs font-bold">מחק</button></td>`;
+        row.innerHTML = `<td class="p-4 font-medium">${esc(guest.guest_name)}</td><td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${statusClass}">${statusText}</span></td><td class="p-4 text-center font-bold">${guest.attending ? guest.guests_count : (guest.guests_count || 0)}</td><td class="p-4 text-slate-600 text-xs">${esc(metaInfo)}</td><td class="p-4 text-center">${waBtn}</td><td class="p-4 text-center"><button type="button" onclick="deleteGuest('${guest.id}')" class="text-red-500 hover:text-red-700 text-xs font-bold">מחק</button></td>`;
         tbody.appendChild(row);
       });
+      document.getElementById('totalGuests').innerText = `סה"כ מגיעים: ${totalCount}`;
     }
 
     function renderTablesAndSeating() {
@@ -602,12 +576,70 @@ function closeWhatsAppConnectBot() {
     async function deleteTable(tableId) { if (confirm("למחוק את השולחן?")) { await mySupabase.from('tables').delete().eq('id', tableId); loadDashboardData(); } }
     async function deleteGuest(id) { if(confirm('למחוק אורח זה?')) { await mySupabase.from('guests').delete().eq('id', id); loadDashboardData(); } }
 
+    function handleExcelImport() {
+      const fileInput = document.getElementById('excelFileInput');
+      const statusMsg = document.getElementById('excelStatusMsg');
+      const btn = document.getElementById('importExcelBtn');
+
+      if (!fileInput.files || fileInput.files.length === 0) { alert("אנא בחר קובץ אקסל תחילה."); return; }
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      btn.disabled = true; btn.innerText = "מעבד...";
+      statusMsg.className = "text-xs font-bold text-slate-500 mt-1";
+      statusMsg.classList.remove('hidden');
+      statusMsg.innerText = "קורא שורות נתונים...";
+
+      reader.onload = async function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+
+          let successCount = 0;
+          for (const row of jsonData) {
+            const name = row['שם'] || row['שם מלא'];
+            const phone = row['טלפון'] || row['נייד'];
+            const count = parseInt(row['כמות'] || row['מספר מוזמנים']) || 1;
+            const side = row['צד'] || '';
+            const category = row['קטגוריה'] || '';
+
+            if (!name) continue;
+
+            const { error } = await mySupabase.from('guests').insert([{
+              event_id: currentEventId,
+              guest_name: String(name),
+              phone: phone ? String(phone) : '',
+              guests_count: count,
+              side: String(side),
+              category: String(category),
+              source: 'imported',
+              attending: null,
+              status: 'לא נשלח'
+            }]);
+            if (!error) successCount++;
+          }
+
+          statusMsg.className = "text-xs font-bold text-green-600 mt-1";
+          statusMsg.innerText = `הפעולה הושלמה! הוכנסו ${successCount} מוזמנים בסטטוס 'טרם ענה'.`;
+          fileInput.value = '';
+          await loadDashboardData();
+        } catch (err) {
+          statusMsg.className = "text-xs font-bold text-red-600 mt-1";
+          statusMsg.innerText = "שגיאה בפענוח קובץ האקסל. ודא שהקובץ תקין.";
+        }
+        btn.disabled = false; btn.innerText = "🚀 קרא ועבד קובץ";
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
     document.getElementById('eventSettingsForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('saveEventBtn'); btn.innerText = 'שומר...'; btn.disabled = true;
       let finalImageUrl = document.getElementById('imageUrl').value; const fileInput = document.getElementById('imageUpload');
       if (fileInput.files.length > 0) {
-        const file = fileInput.files[0]; const fileName = `${crypto.randomUUID()}_${file.name}`; 
+        const file = fileInput.files[0]; const fileName = `${crypto.randomUUID()}_${file.name}`;
         const { data } = await mySupabase.storage.from('invitations').upload(fileName, file);
         if (data) { finalImageUrl = SUPABASE_URL + '/storage/v1/object/public/invitations/' + fileName; }
       }
@@ -623,14 +655,14 @@ function closeWhatsAppConnectBot() {
 
     function exportToExcel() {
       if (globalGuestsData.length === 0) return;
-      let csvContent = "\uFEFFשם האורח,מגיע/ה?,כמות,מתנה,ברכה,תאריך אישור\n";
-      globalGuestsData.forEach(g => { 
+      let csvContent = "\uFEFFשם האורח,מגיע/ה?,כמות,טלפון,ברכה,תאריך אישור\n";
+      globalGuestsData.forEach(g => {
         let statusText = 'טרם ענה';
         if (g.attending === true) statusText = 'כן';
         if (g.attending === false) statusText = 'לא';
-        let giftAmount = g.gift_received ? String(g.gift_received).replace(/,/g, '') : '';
+        let phoneText = g.phone ? String(g.phone).replace(/,/g, '') : '';
         let blessingText = g.blessing ? g.blessing.replace(/,/g, ' -').replace(/\n/g, ' ') : '';
-        csvContent += `${g.guest_name ? g.guest_name.replace(/,/g, '') : ''},${statusText},${g.guests_count || 0},${giftAmount},${blessingText},${new Date(g.created_at).toLocaleDateString('he-IL')}\n`; 
+        csvContent += `${g.guest_name ? g.guest_name.replace(/,/g, '') : ''},${statusText},${g.guests_count || 0},${phoneText},${blessingText},${new Date(g.created_at).toLocaleDateString('he-IL')}\n`;
       });
       const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })); link.download = "רשימת_אורחים.csv"; document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
@@ -638,10 +670,10 @@ function closeWhatsAppConnectBot() {
     function switchTab(tab) {
       document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('#tabsNavigationContainer button').forEach(el => el.classList.remove('border-blue-600', 'text-blue-600', 'border-purple-600', 'text-purple-600'));
-      
+
       const targetSection = document.getElementById('section' + tab.charAt(0).toUpperCase() + tab.slice(1));
       const targetBtn = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1) + 'Btn');
-      
+
       targetSection.classList.add('active');
       if (tab === 'admin') {
         targetBtn.classList.add('border-purple-600', 'text-purple-600');
