@@ -124,10 +124,10 @@
           <table class="w-full text-right border-collapse">
             <thead>
               <tr class="bg-slate-100 text-slate-600 text-xs font-bold border-b">
-                <th class="p-4">שם האורח</th><th class="p-4">סטטוס מענה</th><th class="p-4 text-center">כמות</th><th class="p-4">ברכה / קטגוריה</th><th class="p-4 text-center">וואטסאפ</th><th class="p-4 text-center">פעולות</th>
+                <th class="p-4">שם האורח</th><th class="p-4">סטטוס מענה</th><th class="p-4 text-center">כמות</th><th class="p-4">ברכה / קטגוריה</th><th class="p-4 text-center">פעולות</th>
               </tr>
             </thead>
-            <tbody id="guestsTableBody" class="text-sm"><tr><td colspan="6" class="p-6 text-center text-slate-500">טוען אורחים...</td></tr></tbody>
+            <tbody id="guestsTableBody" class="text-sm"><tr><td colspan="5" class="p-6 text-center text-slate-500">טוען אורחים...</td></tr></tbody>
           </table>
         </div>
 
@@ -454,16 +454,6 @@
     function openJoniGuide() { document.getElementById('joniGuideModal').style.display = 'flex'; }
     function closeJoniGuide() { document.getElementById('joniGuideModal').style.display = 'none'; }
 
-    /* ========= wa.me לאורח בודד ========= */
-   function sendWaMe(phone, guestName) {
-  const intl = toIntlPhone(phone);
-  if (!intl) { alert('לאורח זה אין מספר טלפון תקין.'); return; }
-  let msg = document.getElementById('whatsappTemplate').value || '';
-  msg = msg.replace(/\[שם\]/g, guestName || '');
-  // שימוש ב-endpoint הרשמי המלא שמטפל טוב יותר באימוג'ים
-  const url = 'https://api.whatsapp.com/send?phone=' + intl + '&text=' + encodeURIComponent(msg);
-  window.open(url, '_blank');
-}
     /* ========= Landbot (נשמר, מנוטרל — מציג "בפיתוח") ========= */
     let myLandbotContainerInstance = null;
     function openWhatsAppConnectBot(isSuperAdmin = false) {
@@ -510,7 +500,7 @@
 
     function renderGuestsTable() {
       const tbody = document.getElementById('guestsTableBody'); tbody.innerHTML = '';
-      if (globalGuestsData.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-500">עדיין אין אישורי הגעה.</td></tr>'; return; }
+      if (globalGuestsData.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-500">עדיין אין אישורי הגעה.</td></tr>'; return; }
       let totalCount = 0;
       globalGuestsData.forEach(guest => {
         if (guest.attending) totalCount += (guest.guests_count || 0);
@@ -523,13 +513,9 @@
 
         const metaInfo = guest.blessing ? guest.blessing : (guest.category ? `[${guest.category}] ${guest.side || ''}` : '-');
 
-        // כפתור wa.me רק אם יש טלפון
-        const waBtn = guest.phone
-          ? `<button type="button" onclick="sendWaMe('${esc(guest.phone)}','${esc(guest.guest_name)}')" class="text-green-600 hover:text-green-800 text-lg" title="שלח וואטסאפ">💬</button>`
-          : `<span class="text-slate-300 text-xs">אין טלפון</span>`;
 
         const row = document.createElement('tr'); row.className = 'border-b hover:bg-slate-50 transition';
-        row.innerHTML = `<td class="p-4 font-medium">${esc(guest.guest_name)}</td><td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${statusClass}">${statusText}</span></td><td class="p-4 text-center font-bold">${guest.attending ? guest.guests_count : (guest.guests_count || 0)}</td><td class="p-4 text-slate-600 text-xs">${esc(metaInfo)}</td><td class="p-4 text-center">${waBtn}</td><td class="p-4 text-center"><button type="button" onclick="deleteGuest('${guest.id}')" class="text-red-500 hover:text-red-700 text-xs font-bold">מחק</button></td>`;
+        row.innerHTML = `<td class="p-4 font-medium">${esc(guest.guest_name)}</td><td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${statusClass}">${statusText}</span></td><td class="p-4 text-center font-bold">${guest.attending ? guest.guests_count : (guest.guests_count || 0)}</td><td class="p-4 text-slate-600 text-xs">${esc(metaInfo)}</td><td class="p-4 text-center"><button type="button" onclick="deleteGuest('${guest.id}')" class="text-red-500 hover:text-red-700 text-xs font-bold">מחק</button></td>`;
         tbody.appendChild(row);
       });
       document.getElementById('totalGuests').innerText = `סה"כ מגיעים: ${totalCount}`;
