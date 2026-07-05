@@ -455,15 +455,15 @@
     function closeJoniGuide() { document.getElementById('joniGuideModal').style.display = 'none'; }
 
     /* ========= wa.me לאורח בודד ========= */
-    function sendWaMe(phone, guestName) {
-      const intl = toIntlPhone(phone);
-      if (!intl) { alert('לאורח זה אין מספר טלפון תקין.'); return; }
-      let msg = document.getElementById('whatsappTemplate').value || '';
-      msg = msg.replace(/\[שם\]/g, guestName || '');
-      const url = 'https://wa.me/' + intl + '?text=' + encodeURIComponent(msg);
-      window.open(url, '_blank');
-    }
-
+   function sendWaMe(phone, guestName) {
+  const intl = toIntlPhone(phone);
+  if (!intl) { alert('לאורח זה אין מספר טלפון תקין.'); return; }
+  let msg = document.getElementById('whatsappTemplate').value || '';
+  msg = msg.replace(/\[שם\]/g, guestName || '');
+  // שימוש ב-endpoint הרשמי המלא שמטפל טוב יותר באימוג'ים
+  const url = 'https://api.whatsapp.com/send?phone=' + intl + '&text=' + encodeURIComponent(msg);
+  window.open(url, '_blank');
+}
     /* ========= Landbot (נשמר, מנוטרל — מציג "בפיתוח") ========= */
     let myLandbotContainerInstance = null;
     function openWhatsAppConnectBot(isSuperAdmin = false) {
