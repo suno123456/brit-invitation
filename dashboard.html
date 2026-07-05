@@ -366,39 +366,23 @@
         title.innerText = "📲 חיבור מכשיר וואטסאפ לאירוע";
       }
       
-      // שימוש בכתובת השרתים המעודכנת והרשמית של לנדבוט (V3 Chats Router)
+      // שימוש בכתובת השרתים המעודכנת והרשמית של לנדבוט
       let botUrl = `https://chats.landbot.io/v3/H-3472118-ACRK7VOOQQZOV18J/index.html?event_id=${encodedId}&eventId=${encodedId}&EVENT_ID=${encodedId}`;
       
       if (isSuperAdmin) {
         botUrl += `&admin_email=sunorlovich%40gmail.com&adminEmail=sunorlovich%40gmail.com&ADMIN_EMAIL=sunorlovich%40gmail.com`;
       }
       
-      // החזרת מבנה ה-iframe הפנימי בצורה דינמית כדי לעקוף לחלוטין חסימות CORS ו-404
+      // החזרת מבנה ה-iframe הפנימי בצורה דינמית כדי לעקוף לחלוטין חסימות CORS
       container.innerHTML = `<iframe src="${botUrl}" class="w-full h-full border-none" style="min-height: 500px;"></iframe>`;
       
       // הצגת המודאל המעוצב שלך בדיוק כפי שהיה
       document.getElementById('landbotModalContainer').style.display = 'flex';
     }
-      // בניית אובייקט ה-Custom Data שהקוד של הצוות שלהם מצפה לקבל כעת
-      let customDataVariables = {
-        event_id: encodedId
-      };
-      
-      if (isSuperAdmin) {
-        customDataVariables.admin_email = "sunorlovich@gmail.com";
-      }
-      
-      // אתחול הבוט בצורה הרשמית של לנדבוט ישירות לתוך ה-container הקיים שלך
-      activeLandbotInstance = new Landbot.Container({
-        container: '#landbotIframe', // מטרגט בדיוק את ה-div הקיים של המודאל שלך
-        configUrl: 'https://storage.googleapis.com/landbot-uploads/v3/H-3472118-ACRK7VOOQQZOV18J/index.json',
-        customData: customDataVariables
-      });
-    }
 
     function closeWhatsAppConnectBot() {
       document.getElementById('landbotModalContainer').style.display = 'none';
-      document.getElementById('landbotIframe').src = "";
+      document.getElementById('landbotIframe').innerHTML = "";
     }
 
     function handleExcelImport() {
