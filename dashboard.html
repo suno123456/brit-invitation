@@ -353,45 +353,75 @@
       else { alert("הלקוח אושר בהצלחה!"); await loadPendingUsersForAdmin(); }
     }
 
-// 👑 משתנה גלובלי לניהול הבוט ומניעת כפילויות בטעינה
-    let activeLandbotInstance = null;
+// 👑 משתנה גלובלי לניהול הבוט
+    let myLandbotInstance = null;
 
-   // 🔗 פונקציה לפתיחת הבוט של Landbot באמצעות iframe מובנה ומאובטח (ללא שינוי בעיצוב/גרפיקה)
+    // 🔗 פונקציה לפתיחת הבוט באמצעות ה-Livechat SDK הרשמי שעוקף חסימות אבטחה
     function openWhatsAppConnectBot(isSuperAdmin = false) {
       const title = document.getElementById('landbotModalTitle');
-      const iframe = document.getElementById('landbotIframe');
-      const encodedId = encodeURIComponent(currentEventId || '');
+      const container = document.getElementById('landbotIframe'); 
+      const encodedId = String(currentEventId || '');
       
-      // הגדרת כותרת המודאל המקורי שלך
       if (isSuperAdmin) {
         title.innerText = "👑 פאנל ניהול סופר-אדמין לוואטסאפ";
       } else {
         title.innerText = "📲 חיבור מכשיר וואטסאפ לאירוע";
       }
       
-      // הזרקת המשתנה בדיוק בפורמטים שהקוד שלהם מחפש כעת באייפריים (אותיות קטנות ו-CamelCase)
-      // הוספנו גם שבירת קש (v=) כדי לוודא שהשינוי נקלט מיד
-      let botUrl = `https://storage.googleapis.com/landbot.online/v3/H-3472118-ACRK7VOOQQZOV18J/index.html?event_id=${encodedId}&eventId=${encodedId}&v=${Date.now()}`;
+      // הסתרת ה-iframe הישן כדי שלא יפריע ויזואלית
+      container.innerHTML = `<div style="padding: 20px; text-align: center; color: #666;">טוען רכיב חיבור מאובטח...</div>`;
+      document.getElementById('landbotModalContainer').style.display = 'flex';
+      
+      let customDataVariables = {
+        event_id: encodedId,
+        eventId: encodedId,
+        EVENT_ID: encodedId
+      };
       
       if (isSuperAdmin) {
-        botUrl += `&admin_email=sunorlovich%40gmail.com&adminEmail=sunorlovich%40gmail.com`;
+        customDataVariables.admin_email = "sunorlovich@gmail.com";
       }
       
-      // עדכון ישיר של ה-Iframe
-      iframe.src = botUrl;
+      // פונקציית האתחול של ה-Livechat
+      const initLivechat = () => {
+        // אם כבר קיים בוט פתוח, נסגור אותו קודם
+        if (myLandbotInstance && typeof myLandbotInstance.destroy === 'function') {
+          myLandbotInstance.destroy();
+        }
+        
+        // אתחול צ'אט רשמי בתוך הזיכרון של הדף (עוקף חסימות Iframe/Storage)
+        myLandbotInstance = new window.Landbot.Livechat({
+          configUrl: 'https://storage.googleapis.com/landbot.online/v3/H-3472118-ACRK7VOOQQZOV18J/index.json',
+          customData: customDataVariables
+        });
+        
+        // פתיחה מאולצת אוטומטית של הבוט
+        myLandbotInstance.on('landbot-load', () => {
+          myLandbotInstance.open();
+          container.innerHTML = `<div style="padding: 20px; text-align: center; color: #22c55e;">התחברות מאובטחת הופעלה בהצלחה בצד המסך!</div>`;
+        });
+      };
       
-      // הצגת המודאל המעוצב שלך בדיוק כפי שהיה
-      document.getElementById('landbotModalContainer').style.display = 'flex';
+      // טעינת ה-SDK במידה ולא קיים בדף
+      if (typeof Landbot === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://static.landbot.io/landbot-3/landbot-3.0.0.js';
+        script.async = true;
+        script.onload = initLivechat;
+        document.body.appendChild(script);
+      } else {
+        initLivechat();
+      }
     }
 
     function closeWhatsAppConnectBot() {
       document.getElementById('landbotModalContainer').style.display = 'none';
-      const iframe = document.getElementById('landbotIframe');
-      if (iframe) {
-        iframe.src = "";
+      if (myLandbotInstance && typeof myLandbotInstance.destroy === 'function') {
+        myLandbotInstance.destroy();
       }
+      const container = document.getElementById('landbotIframe');
+      if (container) container.innerHTML = "";
     }
-
     function handleExcelImport() {
       const fileInput = document.getElementById('excelFileInput');
       const statusMsg = document.getElementById('excelStatusMsg');
