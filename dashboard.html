@@ -353,10 +353,9 @@
       else { alert("הלקוח אושר בהצלחה!"); await loadPendingUsersForAdmin(); }
     }
 
-   // משתנה גלובלי לניהול רכיב ההטמעה
-    let myLandbotContainerInstance = null;
+let myLandbotContainerInstance = null;
 
-   function openWhatsAppConnectBot(isSuperAdmin = false) {
+function openWhatsAppConnectBot(isSuperAdmin = false) {
   const title = document.getElementById('landbotModalTitle');
   const container = document.getElementById('landbotIframe');
   const encodedId = String(currentEventId || '');
@@ -365,22 +364,21 @@
     ? "👑 פאנל ניהול סופר-אדמין לוואטסאפ"
     : "📲 חיבור מכשיר וואטסאפ לאירוע";
 
-  // 1. מזריקים את ה-div המארח
+  // מזריקים את ה-div המארח
   container.innerHTML = '<div id="landbot-embedded-zone" style="width:100%;height:100%;min-height:520px;"></div>';
 
-  // 2. מציגים את המודאל קודם — כדי שה-div יהיה קיים פיזית
+  // מציגים את המודאל קודם — כדי שה-div יהיה קיים פיזית לפני האתחול
   document.getElementById('landbotModalContainer').style.display = 'flex';
 
   const customData = { event_id: encodedId, eventId: encodedId, EVENT_ID: encodedId };
   if (isSuperAdmin) { customData.admin_email = "sunorlovich@gmail.com"; }
 
   const initLandbot = () => {
-    // requestAnimationFrame מבטיח שהדפדפן צייר את ה-div לפני האתחול
     requestAnimationFrame(() => {
       const zone = document.getElementById('landbot-embedded-zone');
       if (!zone) { console.error('landbot zone missing'); return; }
       if (myLandbotContainerInstance?.destroy) {
-        try { myLandbotContainerInstance.destroy(); } catch(e){}
+        try { myLandbotContainerInstance.destroy(); } catch (e) {}
       }
       try {
         myLandbotContainerInstance = new window.Landbot.Container({
@@ -404,6 +402,17 @@
   } else {
     initLandbot();
   }
+}
+
+// זו הפונקציה שנמחקה — היא מה שגרם לשגיאה
+function closeWhatsAppConnectBot() {
+  document.getElementById('landbotModalContainer').style.display = 'none';
+  if (myLandbotContainerInstance?.destroy) {
+    try { myLandbotContainerInstance.destroy(); } catch (e) {}
+  }
+  myLandbotContainerInstance = null;
+  const container = document.getElementById('landbotIframe');
+  if (container) container.innerHTML = "";
 }
     function handleExcelImport() {
       const fileInput = document.getElementById('excelFileInput');
