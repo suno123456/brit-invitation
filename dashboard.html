@@ -428,27 +428,25 @@
     function exportForJoni() {
       if (globalGuestsData.length === 0) { alert('אין אורחים ברשימה לייצוא.'); return; }
 
-      // רק אורחים עם טלפון
       const rows = globalGuestsData.filter(g => g.phone && toIntlPhone(g.phone));
       if (rows.length === 0) { alert('אין אורחים עם מספר טלפון ברשימה. הוסיפו טלפונים (למשל דרך ייבוא אקסל).'); return; }
 
       // עמודה A = טלפון (חובה ל-JONI), ואז שדות דינמיים
-      let csv = "\uFEFFטלפון,שם,כמות,צד\n";
+      const data = [['טלפון', 'שם', 'כמות', 'צד']];
       rows.forEach(g => {
-        const phone = toIntlPhone(g.phone);
-        const name = (g.guest_name || '').replace(/,/g, ' ');
-        const count = g.guests_count || 1;
-        const side = (g.side || '').replace(/,/g, ' ');
-        csv += `${phone},${name},${count},${side}\n`;
+        data.push([
+          toIntlPhone(g.phone),
+          g.guest_name || '',
+          g.guests_count || 1,
+          g.side || ''
+        ]);
       });
 
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-      link.download = "רשימה_לוואטסאפ_JONI.csv";
-      document.body.appendChild(link); link.click(); document.body.removeChild(link);
-
-      // סימון שנשלחה אליהם הודעה (סטטוס)
-      // לא משנים סטטוס אוטומטית — השליחה בפועל נעשית ב-JONI, לא כאן.
+      // יצירת קובץ Excel אמיתי עם SheetJS
+      const ws = XLSX.utils.aoa_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'מוזמנים');
+      XLSX.writeFile(wb, 'רשימה_לוואטסאפ_JONI.xlsx');
     }
 
     function openJoniGuide() { document.getElementById('joniGuideModal').style.display = 'flex'; }
