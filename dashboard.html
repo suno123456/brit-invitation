@@ -359,7 +359,7 @@
     // 🔗 פונקציה לפתיחת הבוט של Landbot (ללא שינוי בעיצוב/גרפיקה/טאבים)
     function openWhatsAppConnectBot(isSuperAdmin = false) {
       const title = document.getElementById('landbotModalTitle');
-      const container = document.getElementById('landbotIframe'); // ה-div הקיים של ה-iframe במערכת שלך
+      const container = document.getElementById('landbotIframe'); // האלמנט הקיים במערכת שלך
       const encodedId = String(currentEventId || '');
       
       // הגדרת כותרת המודאל המקורי שלך בדיוק כפי שהייתה
@@ -369,11 +369,9 @@
         title.innerText = "📲 חיבור מכשיר וואטסאפ לאירוע";
       }
       
-      // ניקוי תוכן פנימי קודם כדי לאפשר טעינה חלקה מחדש
+      // ניקוי תוכן פנימי קודם כדי למנוע כפילויות
       container.innerHTML = "";
-      
-      // יצירת אלמנט פנימי ממוקד בגודל מלא שהבוט יתלבש עליו
-      container.innerHTML = `<div id="my-landbot-embed" style="width: 100%; height: 100%; min-height: 520px;"></div>`;
+      container.style.minHeight = "520px"; // הבטחת גובה מינימלי ויזואלי לבוט
       
       // הצגת המודאל המעוצב שלך בדיוק באותו מיקום
       document.getElementById('landbotModalContainer').style.display = 'flex';
@@ -387,18 +385,17 @@
         customDataVariables.admin_email = "sunorlovich@gmail.com";
       }
       
-      // פונקציית עזר פנימית שמפעילה את הבוט עם הגדרות האבטחה והדומיין המורשה
+      // פונקציית עזר פנימית שמפעילה את הבוט ישירות על ה-div הקיים שלך במערכת
       const launchBot = () => {
         activeLandbotInstance = new window.Landbot.Container({
-          container: '#my-landbot-embed',
+          container: '#landbotIframe', // מטרגט ישירות את האלמנט המקורי שלך!
           configUrl: 'https://storage.googleapis.com/landbot.online/v3/H-3472118-ACRK7VOOQQZOV18J/index.json',
           customData: customDataVariables,
-          // 🔒 כאן אנחנו מוסיפים את אישור הדומיין ישירות ל-SDK של לנדבוט כפי שהם ביקשו!
           allowedDomains: ['brit-invitation.vercel.app']
         });
       };
       
-      // טעינת הבוט הרשמי באמצעות הכתובת המדויקת מגוגל קלאוד
+      // טעינת הבוט הרשמי בצורה מאובטחת
       if (typeof Landbot === 'undefined') {
         const script = document.createElement('script');
         script.src = 'https://static.landbot.io/landbot-3/landbot-3.0.0.js';
@@ -413,7 +410,10 @@
     function closeWhatsAppConnectBot() {
       document.getElementById('landbotModalContainer').style.display = 'none';
       const container = document.getElementById('landbotIframe');
-      if (container) container.innerHTML = "";
+      if (container) {
+        container.innerHTML = "";
+        container.style.minHeight = "";
+      }
       activeLandbotInstance = null;
     }
 
