@@ -356,10 +356,10 @@
 // 👑 משתנה גלובלי לניהול הבוט ומניעת כפילויות בטעינה
     let activeLandbotInstance = null;
 
-   // 🔗 פונקציה לפתיחת הבוט של Landbot באמצעות עדכון ישיר של ה-Iframe הקיים
+   // 🔗 פונקציה לפתיחת הבוט של Landbot באמצעות iframe מובנה ומאובטח (ללא שינוי בעיצוב/גרפיקה)
     function openWhatsAppConnectBot(isSuperAdmin = false) {
       const title = document.getElementById('landbotModalTitle');
-      const iframe = document.getElementById('landbotIframe'); // ניגש ישירות ל-iframe הקיים שלך
+      const iframe = document.getElementById('landbotIframe');
       const encodedId = encodeURIComponent(currentEventId || '');
       
       // הגדרת כותרת המודאל המקורי שלך
@@ -369,14 +369,15 @@
         title.innerText = "📲 חיבור מכשיר וואטסאפ לאירוע";
       }
       
-      // שימוש בקישור ה-V3 הרשמי שחילצנו מההגדרות שלהם בגוגל קלאוד
-      let botUrl = `https://storage.googleapis.com/landbot.online/v3/H-3472118-ACRK7VOOQQZOV18J/index.html?event_id=${encodedId}&eventId=${encodedId}&EVENT_ID=${encodedId}`;
+      // הזרקת המשתנה בדיוק בפורמטים שהקוד שלהם מחפש כעת באייפריים (אותיות קטנות ו-CamelCase)
+      // הוספנו גם שבירת קש (v=) כדי לוודא שהשינוי נקלט מיד
+      let botUrl = `https://storage.googleapis.com/landbot.online/v3/H-3472118-ACRK7VOOQQZOV18J/index.html?event_id=${encodedId}&eventId=${encodedId}&v=${Date.now()}`;
       
       if (isSuperAdmin) {
-        botUrl += `&admin_email=sunorlovich%40gmail.com&adminEmail=sunorlovich%40gmail.com&ADMIN_EMAIL=sunorlovich%40gmail.com`;
+        botUrl += `&admin_email=sunorlovich%40gmail.com&adminEmail=sunorlovich%40gmail.com`;
       }
       
-      // עדכון ישיר של הכתובת ב-iframe הקיים – מונע כפל תגיות וחסימות אבטחה
+      // עדכון ישיר של ה-Iframe
       iframe.src = botUrl;
       
       // הצגת המודאל המעוצב שלך בדיוק כפי שהיה
@@ -387,7 +388,7 @@
       document.getElementById('landbotModalContainer').style.display = 'none';
       const iframe = document.getElementById('landbotIframe');
       if (iframe) {
-        iframe.src = ""; // איפוס הכתובת בסגירה כדי למנוע טעינה כפולה בביקור הבא
+        iframe.src = "";
       }
     }
 
