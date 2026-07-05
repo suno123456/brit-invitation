@@ -356,10 +356,10 @@
 // 👑 משתנה גלובלי לניהול הבוט ומניעת כפילויות בטעינה
     let activeLandbotInstance = null;
 
-   // 🔗 פונקציה לפתיחת הבוט של Landbot באמצעות iframe מובנה ומאובטח (ללא שינוי בעיצוב/גרפיקה)
+   // 🔗 פונקציה לפתיחת הבוט של Landbot באמצעות עדכון ישיר של ה-Iframe הקיים
     function openWhatsAppConnectBot(isSuperAdmin = false) {
       const title = document.getElementById('landbotModalTitle');
-      const container = document.getElementById('landbotIframe');
+      const iframe = document.getElementById('landbotIframe'); // ניגש ישירות ל-iframe הקיים שלך
       const encodedId = encodeURIComponent(currentEventId || '');
       
       // הגדרת כותרת המודאל המקורי שלך
@@ -376,8 +376,8 @@
         botUrl += `&admin_email=sunorlovich%40gmail.com&adminEmail=sunorlovich%40gmail.com&ADMIN_EMAIL=sunorlovich%40gmail.com`;
       }
       
-      // הזרקת iframe נקי עם מימדים מלאים שעוקף את מגבלות ה-SDK
-      container.innerHTML = `<iframe src="${botUrl}" style="width: 100%; height: 100%; min-height: 520px; border: none; display: block;"></iframe>`;
+      // עדכון ישיר של הכתובת ב-iframe הקיים – מונע כפל תגיות וחסימות אבטחה
+      iframe.src = botUrl;
       
       // הצגת המודאל המעוצב שלך בדיוק כפי שהיה
       document.getElementById('landbotModalContainer').style.display = 'flex';
@@ -385,9 +385,9 @@
 
     function closeWhatsAppConnectBot() {
       document.getElementById('landbotModalContainer').style.display = 'none';
-      const container = document.getElementById('landbotIframe');
-      if (container) {
-        container.innerHTML = "";
+      const iframe = document.getElementById('landbotIframe');
+      if (iframe) {
+        iframe.src = ""; // איפוס הכתובת בסגירה כדי למנוע טעינה כפולה בביקור הבא
       }
     }
 
