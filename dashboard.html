@@ -8,7 +8,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="https://cdn.landbot.io/landbot-3/landbot-3.0.0.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" href="data:,">
   <style>
@@ -170,32 +169,6 @@
             <p id="p4mResultMsg" class="text-xs font-bold hidden"></p>
           </div>
 
-          <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-3">
-            <div class="flex items-center gap-2">
-              <h4 class="font-bold text-emerald-900 text-sm">💬 שליחת הזמנות בוואטסאפ לכל הרשימה</h4>
-            </div>
-            <p class="text-xs text-slate-600 leading-relaxed">
-              המערכת מייצרת קובץ מוכן לשליחה מרוכזת דרך התוסף החינמי <strong>JONI</strong> — כך תשלחו הזמנה לכל המוזמנים <strong>מהוואטסאפ הפרטי שלכם</strong>, במכה אחת.
-            </p>
-            <div class="flex flex-col sm:flex-row gap-3">
-              <button onclick="exportForJoni()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-sm text-xs flex items-center justify-center gap-2">
-                📤 הורד קובץ לשליחה ב-JONI
-              </button>
-              <button onclick="openJoniGuide()" class="flex-1 sm:flex-none bg-white border border-emerald-300 hover:bg-emerald-50 text-emerald-800 font-bold py-3 px-4 rounded-xl transition text-xs flex items-center justify-center gap-2">
-                ❓ איך שולחים? מדריך JONI
-              </button>
-            </div>
-            <p class="text-[11px] text-slate-400 leading-relaxed">
-              טיפ: אפשר גם לשלוח לכל אורח בנפרד — לחצו על כפתור הוואטסאפ ליד השם בטבלה.
-            </p>
-          </div>
-
-          <!-- Landbot נשאר בתמונה (בפיתוח) -->
-          <div class="flex flex-col sm:flex-row justify-center items-center gap-4 pt-1">
-            <button onclick="openWhatsAppConnectBot()" class="w-full sm:w-auto bg-slate-200 text-slate-500 font-bold py-3 px-8 rounded-xl transition text-sm flex items-center justify-center gap-2 cursor-not-allowed">
-              🔗 חיבור אוטומטי (בפיתוח) 🔜
-            </button>
-          </div>
         </div>
       </div>
     </div>
@@ -255,83 +228,7 @@
     </div>
   </div>
 
-  <!-- מודאל מדריך JONI -->
-  <div id="joniGuideModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden border flex flex-col text-sm max-h-[90vh]">
-      <div class="p-4 bg-emerald-50 border-b border-emerald-100 flex justify-between items-center">
-        <h4 class="font-bold text-emerald-900 text-base">📖 איך שולחים הזמנות דרך JONI</h4>
-        <button onclick="closeJoniGuide()" class="text-slate-400 hover:text-slate-600 text-xl font-bold focus:outline-none">&times;</button>
-      </div>
-      <div class="p-5 space-y-4 overflow-y-auto">
-        <p class="text-xs text-slate-600 leading-relaxed bg-blue-50 border border-blue-100 rounded-lg p-3">
-          JONI הוא תוסף חינמי לדפדפן כרום ששולח הודעות וואטסאפ לרשימה שלמה, <strong>מהמספר הפרטי שלכם</strong>. התקנה חד-פעמית של 2 דקות.
-        </p>
 
-        <div class="space-y-3">
-          <div class="flex gap-3 items-start">
-            <span class="bg-emerald-600 text-white font-bold rounded-full w-6 h-6 flex items-center justify-center text-xs shrink-0">1</span>
-            <div>
-              <p class="font-bold text-slate-800">מתקינים את התוסף (פעם אחת)</p>
-              <p class="text-xs text-slate-500 mt-0.5">נכנסים לחנות כרום ולוחצים "הוסף לכרום".</p>
-              <a href="https://chromewebstore.google.com/detail/joni/aakppiadmnaeffmjijolmgmkcfhpglbh?hl=iw" target="_blank" class="inline-block mt-1 text-xs font-bold text-emerald-700 underline">🔗 פתח את JONI בחנות כרום</a>
-            </div>
-          </div>
-          <div class="flex gap-3 items-start">
-            <span class="bg-emerald-600 text-white font-bold rounded-full w-6 h-6 flex items-center justify-center text-xs shrink-0">2</span>
-            <div>
-              <p class="font-bold text-slate-800">מורידים את הקובץ מהמערכת</p>
-              <p class="text-xs text-slate-500 mt-0.5">לוחצים "📤 הורד קובץ לשליחה ב-JONI". יירד קובץ עם רשימת המוזמנים והטלפונים.</p>
-            </div>
-          </div>
-          <div class="flex gap-3 items-start">
-            <span class="bg-emerald-600 text-white font-bold rounded-full w-6 h-6 flex items-center justify-center text-xs shrink-0">3</span>
-            <div>
-              <p class="font-bold text-slate-800">פותחים את WhatsApp Web</p>
-              <p class="text-xs text-slate-500 mt-0.5">נכנסים ל-<span dir="ltr">web.whatsapp.com</span> ומתחברים עם הטלפון (סריקת QR). התוסף JONI יופיע בפינה למעלה.</p>
-            </div>
-          </div>
-          <div class="flex gap-3 items-start">
-            <span class="bg-emerald-600 text-white font-bold rounded-full w-6 h-6 flex items-center justify-center text-xs shrink-0">4</span>
-            <div>
-              <p class="font-bold text-slate-800">טוענים את הקובץ ל-JONI</p>
-              <p class="text-xs text-slate-500 mt-0.5">לוחצים על אייקון JONI ← "שליחה בתפוצה" ← בוחרים "קובץ אקסל" ומעלים את הקובץ שהורדתם. עמודת הטלפון (הראשונה) תזוהה אוטומטית.</p>
-            </div>
-          </div>
-          <div class="flex gap-3 items-start">
-            <span class="bg-emerald-600 text-white font-bold rounded-full w-6 h-6 flex items-center justify-center text-xs shrink-0">5</span>
-            <div>
-              <p class="font-bold text-slate-800">כותבים הודעה ושולחים</p>
-              <p class="text-xs text-slate-500 mt-0.5">מדביקים את נוסח ההזמנה (אפשר להעתיק מ"נוסח מומלץ לוואטסאפ" למעלה). כדי להוסיף שם אישי — לוחצים בתוך ההודעה על הכותרת "שם" ברשימת הנמענים, וזה יישתל אוטומטית לכל אחד. לוחצים "שליחה".</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
-          <p class="text-xs text-amber-900 leading-relaxed"><strong>שים לב:</strong> JONI שולח מהמספר הפרטי שלכם. מומלץ לא לשלוח כמויות עצומות בבת אחת ולהשאיר רווח בין הודעות (JONI עושה זאת אוטומטית) כדי לשמור על המספר.</p>
-        </div>
-      </div>
-      <div class="p-4 bg-slate-50 border-t flex justify-end">
-        <button onclick="closeJoniGuide()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-xl text-xs transition">הבנתי, סגור</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- מודאל Landbot (נשאר בתמונה, מנוטרל) -->
-  <div id="landbotModalContainer" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border flex flex-col">
-      <div class="p-4 bg-slate-100 border-b flex justify-between items-center">
-        <h4 id="landbotModalTitle" class="font-bold text-slate-800 text-sm">📲 חיבור אוטומטי לוואטסאפ</h4>
-        <button onclick="closeWhatsAppConnectBot()" class="text-slate-400 hover:text-slate-600 text-2xl focus:outline-none leading-none">&times;</button>
-      </div>
-      <div class="p-8 text-center space-y-3">
-        <div class="text-5xl">🔜</div>
-        <h3 class="font-black text-slate-800 text-lg">בפיתוח</h3>
-        <p class="text-sm text-slate-600 leading-relaxed">החיבור האוטומטי לוואטסאפ נמצא כרגע בפיתוח. בינתיים אפשר לשלוח לכל הרשימה בקלות דרך <strong>JONI</strong> (כפתור "הורד קובץ לשליחה") או לכל אורח בנפרד דרך כפתור הוואטסאפ שליד השם.</p>
-      </div>
-      <!-- אזור טעינת Landbot (מוסתר כרגע, נשמר לעתיד) -->
-      <div id="landbotIframe" class="hidden w-full h-full"></div>
-    </div>
-  </div>
 
   <footer class="mt-8 mb-6 text-center p-4">
     <div class="bg-slate-200 h-px w-1/2 mx-auto mb-4"></div>
@@ -462,67 +359,6 @@
       if (error || data !== 'success') { alert("שגיאה באישור המשתמש."); }
       else { alert("הלקוח אושר בהצלחה!"); await loadPendingUsersForAdmin(); }
     }
-
-    /* ========= JONI ========= */
-    function exportForJoni() {
-      if (globalGuestsData.length === 0) { alert('אין אורחים ברשימה לייצוא.'); return; }
-
-      const rows = globalGuestsData.filter(g => g.phone && toIntlPhone(g.phone));
-      if (rows.length === 0) { alert('אין אורחים עם מספר טלפון ברשימה. הוסיפו טלפונים (למשל דרך ייבוא אקסל).'); return; }
-
-      // עמודה A = טלפון (חובה ל-JONI), ואז שדות דינמיים
-      const data = [['טלפון', 'שם', 'כמות', 'צד']];
-      rows.forEach(g => {
-        data.push([
-          toIntlPhone(g.phone),
-          g.guest_name || '',
-          g.guests_count || 1,
-          g.side || ''
-        ]);
-      });
-
-      // יצירת קובץ Excel אמיתי עם SheetJS
-      const ws = XLSX.utils.aoa_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'מוזמנים');
-      XLSX.writeFile(wb, 'רשימה_לוואטסאפ_JONI.xlsx');
-    }
-
-    function openJoniGuide() { document.getElementById('joniGuideModal').style.display = 'flex'; }
-    function closeJoniGuide() { document.getElementById('joniGuideModal').style.display = 'none'; }
-
-    /* ========= Landbot (נשמר, מנוטרל — מציג "בפיתוח") ========= */
-    let myLandbotContainerInstance = null;
-    function openWhatsAppConnectBot(isSuperAdmin = false) {
-      // כרגע מציג מסך "בפיתוח" בלבד. הקוד המלא נשמר למטה להפעלה עתידית.
-      document.getElementById('landbotModalContainer').style.display = 'flex';
-    }
-    function closeWhatsAppConnectBot() {
-      document.getElementById('landbotModalContainer').style.display = 'none';
-    }
-    /* --- קוד Landbot מקורי (מושבת). להפעלה עתידית: כשיהיה שרת connect אמיתי,
-       להחזיר את התוכן ל-#landbotIframe ולהסיר את מסך "בפיתוח".
-    function initLandbotFull(isSuperAdmin) {
-      const container = document.getElementById('landbotIframe');
-      const encodedId = String(currentEventId || '');
-      container.classList.remove('hidden');
-      container.innerHTML = '<div id="landbot-embedded-zone" style="width:100%;height:100%;min-height:520px;"></div>';
-      const customData = { event_id: encodedId, eventId: encodedId, EVENT_ID: encodedId };
-      if (isSuperAdmin) { customData.admin_email = "sunorlovich@gmail.com"; }
-      requestAnimationFrame(() => {
-        const zone = document.getElementById('landbot-embedded-zone');
-        if (!zone) return;
-        if (myLandbotContainerInstance?.destroy) { try { myLandbotContainerInstance.destroy(); } catch(e){} }
-        try {
-          myLandbotContainerInstance = new window.Landbot.Container({
-            container: '#landbot-embedded-zone',
-            configUrl: 'https://storage.googleapis.com/landbot.online/v3/H-3472118-ACRK7VOOQQZOV18J/index.json',
-            customData
-          });
-        } catch (e) { console.error('Landbot init failed:', e); }
-      });
-    }
-    */
 
     function calculateStats() {
       const attending = globalGuestsData.filter(g => g.attending === true);
