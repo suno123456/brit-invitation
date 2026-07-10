@@ -133,6 +133,43 @@
 
         <div class="p-4 bg-slate-50 border-t space-y-4">
           <!-- אזור שליחת וואטסאפ -->
+          <!-- שליחה דרך תוסף PLAN4ME -->
+          <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 space-y-3">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <h4 class="font-bold text-indigo-900 text-sm">🚀 שליחה בקליק — תוסף PLAN4ME</h4>
+              <span id="p4mStatusBadge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500">בודק תוסף...</span>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              שליחת ההזמנות לכל הרשימה ישירות <strong>מהוואטסאפ הפרטי שלכם</strong> — בלי קבצים ובלי העתקות. לחיצה אחת, והשליחה מתחילה לבד בטאב וואטסאפ עם השהיות בטוחות.
+            </p>
+
+            <div id="p4mInstallBox" class="hidden bg-white border border-indigo-300 rounded-lg p-3 text-xs space-y-2">
+              <p class="font-bold text-slate-700">התוסף עדיין לא מותקן בדפדפן הזה (התקנה חד-פעמית, חינם):</p>
+              <a href="https://chromewebstore.google.com/detail/plleaopnlnhklknopoeaimlapechaghk" target="_blank" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition">🧩 התקן את תוסף PLAN4ME מחנות כרום</a>
+              <p class="text-slate-400">אחרי ההתקנה — רעננו את הדף הזה.</p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">נוסח ההודעה (ניתן לעריכה; <span class="bg-indigo-100 text-indigo-800 px-1 rounded">{שם}</span> יוחלף אוטומטית בשם האורח):</label>
+              <textarea id="p4mMessage" rows="6" class="w-full bg-white border p-3 rounded-lg text-sm text-slate-700"></textarea>
+            </div>
+
+            <label id="p4mImageWrap" class="hidden items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+              <input type="checkbox" id="p4mAttachImage" checked class="w-4 h-4 cursor-pointer">
+              🖼️ צרף את תמונת ההזמנה להודעה
+            </label>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+              <button id="p4mSendAllBtn" onclick="plan4meSendCampaign('all')" disabled class="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-xl transition shadow-sm text-xs flex items-center justify-center gap-2">
+                📤 שלח הזמנה לכל הרשימה
+              </button>
+              <button id="p4mSendReminderBtn" onclick="plan4meSendCampaign('reminder')" disabled class="flex-1 bg-amber-500 hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-xl transition shadow-sm text-xs flex items-center justify-center gap-2">
+                🔔 תזכורת למי שטרם ענה
+              </button>
+            </div>
+            <p id="p4mResultMsg" class="text-xs font-bold hidden"></p>
+          </div>
+
           <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-3">
             <div class="flex items-center gap-2">
               <h4 class="font-bold text-emerald-900 text-sm">💬 שליחת הזמנות בוואטסאפ לכל הרשימה</h4>
@@ -305,6 +342,7 @@
     </p>
   </footer>
 
+  <script src="dashboard-connect.js"></script>
   <script>
     const SUPABASE_URL = 'https://ghfgqwslakjqmxuboobn.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
@@ -381,6 +419,7 @@
       await loadDashboardData();
       document.getElementById('globalLoader').classList.add('hidden');
       document.getElementById('mainDashboard').classList.remove('hidden');
+      plan4meInitUI();
     }
 
     async function loadDashboardData() {
@@ -682,6 +721,134 @@
         }; img.src = event.target.result;
       }; reader.readAsDataURL(file);
     });
+
+    /* ========= PLAN4ME - שליחה דרך התוסף ========= */
+    let p4mInstalled = false;
+
+    function plan4meDefaultMessage() {
+      return 'היי {שם} 👋\n' + document.getElementById('whatsappTemplate').value;
+    }
+
+    async function plan4meInitUI() {
+      const badge = document.getElementById('p4mStatusBadge');
+      const installBox = document.getElementById('p4mInstallBox');
+      const btnAll = document.getElementById('p4mSendAllBtn');
+      const btnRem = document.getElementById('p4mSendReminderBtn');
+
+      // נוסח ברירת מחדל (התבנית + פנייה אישית)
+      const ta = document.getElementById('p4mMessage');
+      if (!ta.value.trim()) ta.value = plan4meDefaultMessage();
+
+      // הצגת אפשרות צירוף תמונה רק אם יש תמונת הזמנה לאירוע
+      if (document.getElementById('imageUrl').value) {
+        document.getElementById('p4mImageWrap').classList.remove('hidden');
+        document.getElementById('p4mImageWrap').classList.add('flex');
+      }
+
+      p4mInstalled = await plan4meIsInstalled();
+      if (p4mInstalled) {
+        badge.textContent = '✅ התוסף מחובר';
+        badge.className = 'text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700';
+        installBox.classList.add('hidden');
+        btnAll.disabled = false; btnRem.disabled = false;
+      } else {
+        badge.textContent = '⚠️ תוסף לא מותקן';
+        badge.className = 'text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700';
+        installBox.classList.remove('hidden');
+      }
+    }
+
+    // מושך את תמונת ההזמנה, מכווץ אותה (מקס 800px, JPEG) ומחזיר dataURL
+    async function plan4meCompressImage(url) {
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error('image fetch failed');
+      const blob = await resp.blob();
+      const rawDataUrl = await new Promise(function (res, rej) {
+        const r = new FileReader();
+        r.onload = function () { res(r.result); };
+        r.onerror = rej;
+        r.readAsDataURL(blob);
+      });
+      return await new Promise(function (resolve, reject) {
+        const img = new Image();
+        img.onload = function () {
+          const maxDim = 800;
+          let w = img.width, h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+            else { w = Math.round(w * maxDim / h); h = maxDim; }
+          }
+          const c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          let out = c.toDataURL('image/jpeg', 0.7);
+          if (out.length > 2000000) out = c.toDataURL('image/jpeg', 0.5);
+          resolve(out);
+        };
+        img.onerror = reject;
+        img.src = rawDataUrl;
+      });
+    }
+
+    function p4mShowResult(text, ok) {
+      const el = document.getElementById('p4mResultMsg');
+      el.textContent = text;
+      el.className = 'text-xs font-bold mt-1 ' + (ok ? 'text-emerald-700' : 'text-red-600');
+      el.classList.remove('hidden');
+    }
+
+    async function plan4meSendCampaign(mode) {
+      const message = document.getElementById('p4mMessage').value.trim();
+      if (!message) { alert('כתבו נוסח הודעה לשליחה.'); return; }
+
+      // בניית רשימת הנמענים
+      let list = globalGuestsData.filter(function (g) { return g.phone && toIntlPhone(g.phone); });
+      if (mode === 'reminder') {
+        list = list.filter(function (g) { return g.attending === null || g.attending === undefined; });
+      }
+      if (list.length === 0) {
+        alert(mode === 'reminder' ? 'אין אורחים שטרם ענו עם מספר טלפון. 🎉' : 'אין אורחים עם מספר טלפון ברשימה. הוסיפו טלפונים דרך ייבוא אקסל.');
+        return;
+      }
+
+      const label = mode === 'reminder' ? 'תזכורת למי שטרם ענה' : 'הזמנה לכל הרשימה';
+      if (!confirm('לשלוח ' + label + '?\n\nנמענים: ' + list.length + '\n\nהשליחה תתבצע מטאב הוואטסאפ שלכם עם השהיות בטוחות בין הודעות.')) return;
+
+      const btnAll = document.getElementById('p4mSendAllBtn');
+      const btnRem = document.getElementById('p4mSendReminderBtn');
+      btnAll.disabled = true; btnRem.disabled = true;
+      p4mShowResult('מכין את השליחה...', true);
+
+      // צירוף תמונת ההזמנה (אם סומן ויש תמונה)
+      let image = null;
+      const attach = document.getElementById('p4mAttachImage');
+      const imgUrl = document.getElementById('imageUrl').value;
+      if (attach && attach.checked && imgUrl && !document.getElementById('p4mImageWrap').classList.contains('hidden')) {
+        try {
+          p4mShowResult('מצרף את תמונת ההזמנה...', true);
+          image = await plan4meCompressImage(imgUrl);
+        } catch (e) {
+          if (!confirm('לא הצלחנו לצרף את תמונת ההזמנה. לשלוח בלי התמונה?')) {
+            btnAll.disabled = false; btnRem.disabled = false;
+            p4mShowResult('השליחה בוטלה.', false);
+            return;
+          }
+        }
+      }
+
+      const recipients = list.map(function (g) {
+        return { phone: toIntlPhone(g.phone), name: g.guest_name || '' };
+      });
+
+      try {
+        const res = await plan4meSend({ recipients: recipients, message: message, image: image, delayMin: 8, delayMax: 15 });
+        p4mShowResult('🚀 השליחה החלה! ' + res.count + ' נמענים. עברו לטאב וואטסאפ למעקב, או פתחו את הפופאפ של התוסף למונה חי.', true);
+      } catch (e) {
+        p4mShowResult('שגיאה: ' + e.message, false);
+      } finally {
+        btnAll.disabled = false; btnRem.disabled = false;
+      }
+    }
 
     window.addEventListener('DOMContentLoaded', init);
   </script>
