@@ -6,8 +6,8 @@
   <title>פאנל ניהול - מערכת אישורי הגעה והושבה</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" href="data:,">
   <style>
@@ -68,10 +68,17 @@
           <button onclick="copyHostessLink()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 rounded-lg transition text-sm w-full mt-auto">📋 העתק קישור למארחת</button>
         </div>
       </div>
-      <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-inner">
-        <h4 class="font-bold text-slate-700 mb-2 flex items-center gap-2">💬 נוסח מומלץ לוואטסאפ:</h4>
-        <textarea id="whatsappTemplate" readonly rows="5" class="w-full bg-slate-50 border p-3 rounded-lg text-sm text-slate-600 resize-none focus:outline-none"></textarea>
-        <button onclick="copyWhatsappMessage()" class="mt-2 w-full md:w-auto bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-2 px-4 rounded-lg transition">📋 העתק הודעה</button>
+      <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-inner">
+        <h4 class="font-bold text-slate-700 mb-1 flex items-center gap-2 text-base">💬 נוסח מומלץ לוואטסאפ</h4>
+        <p class="text-xs text-slate-400 mb-3">בחרו סגנון — הפרטים (שם האירוע, תאריך, שעה והקישור) נשלפים אוטומטית מהגדרות האירוע:</p>
+        <div class="flex flex-wrap gap-2 mb-3">
+          <button type="button" id="waStyleClassic" onclick="setTemplateStyle('classic')" class="text-xs font-bold px-3.5 py-1.5 rounded-full border transition">✨ קלאסי</button>
+          <button type="button" id="waStyleEmotional" onclick="setTemplateStyle('emotional')" class="text-xs font-bold px-3.5 py-1.5 rounded-full border transition">💖 מרגש</button>
+          <button type="button" id="waStyleShort" onclick="setTemplateStyle('short')" class="text-xs font-bold px-3.5 py-1.5 rounded-full border transition">⚡ קצר ולעניין</button>
+          <button type="button" id="waStyleFestive" onclick="setTemplateStyle('festive')" class="text-xs font-bold px-3.5 py-1.5 rounded-full border transition">🎉 חגיגי</button>
+        </div>
+        <textarea id="whatsappTemplate" readonly rows="8" class="w-full bg-slate-50 border p-3.5 rounded-lg text-sm text-slate-700 resize-none focus:outline-none leading-relaxed"></textarea>
+        <button onclick="copyWhatsappMessage()" class="mt-2 w-full md:w-auto bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-2.5 px-5 rounded-lg transition">📋 העתק הודעה</button>
       </div>
     </div>
 
@@ -91,14 +98,15 @@
             <div><label class="block font-bold mb-1">תמונת הזמנה</label><input type="file" id="imageUpload" accept="image/*" class="w-full border p-1.5 rounded-lg bg-slate-50"><input type="hidden" id="imageUrl"></div>
             <div><label class="block font-bold mb-1">תאריך האירוע</label><input type="date" id="eventDate" class="w-full border p-2 rounded-lg bg-slate-50" onchange="updateTemplate()"></div>
             <div><label class="block font-bold mb-1">שעת קבלת פנים</label><input type="time" id="eventTime" class="w-full border p-2 rounded-lg bg-slate-50" oninput="updateTemplate()"></div>
-            <div><label class="block font-bold mb-1">שם האולם/מקום</label><input type="text" id="locationName" required class="w-full border p-2 rounded-lg bg-slate-50"></div>
+            <div><label class="block font-bold mb-1">שם האולם/מקום</label><input type="text" id="locationName" required class="w-full border p-2 rounded-lg bg-slate-50" oninput="updateTemplate()"></div>
             <div><label class="block font-bold mb-1">כתובת (מייצר Waze אוטומטית)</label><input type="text" id="address" class="w-full border p-2 rounded-lg bg-slate-50"></div>
             <div class="md:col-span-2 border-t pt-4 mt-2">
-              <label class="block font-bold mb-2 text-blue-600">קבלת מתנות ב-Bit</label>
+              <label class="block font-bold mb-2 text-blue-600">💙 קבלת מתנות ב-Bit</label>
               <div class="flex flex-col md:flex-row gap-4 mb-2">
                 <div class="flex-1"><input type="text" id="bitLink" placeholder="הקישור יופיע כאן אוטומטית לאחר סריקת ה-QR..." class="w-full border border-blue-200 p-3 rounded-lg text-left bg-blue-50" dir="ltr"></div>
-                <div class="flex-1"><label class="block w-full text-sm font-bold bg-blue-100 text-blue-800 p-3 rounded-lg cursor-pointer text-center hover:bg-blue-200 transition border border-blue-300">📷 העלה תמונת QR של ביט<input type="file" id="bitQrUpload" accept="image/*" class="hidden"></label></div>
+                <div class="flex-1"><label class="block w-full text-sm font-bold bg-blue-100 text-blue-800 p-3 rounded-lg cursor-pointer text-center hover:bg-blue-200 transition border border-blue-300">📷 העלה תמונת QR של Bit<input type="file" id="bitQrUpload" accept="image/*" class="hidden"></label></div>
               </div>
+              <p class="text-xs text-slate-500 mt-1 leading-relaxed">איך משיגים? באפליקציית <b>Bit</b>: פרופיל ← <b>"הקישור שלי לקבלת תשלומים"</b> ← מעתיקים את הקישור ומדביקים כאן, <b>או</b> מצלמים את מסך ה-QR ומעלים את התמונה — הקישור יחולץ אוטומטית. הוא יופיע לאורחים בדף ההזמנה ובמסך התודה.</p>
             </div>
           </div>
           <button type="submit" id="saveEventBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition mt-4 w-full md:w-auto">שמור עדכונים</button>
@@ -611,18 +619,47 @@
     function copyLink() { document.getElementById('shareLink').select(); document.execCommand('copy'); alert('הועתק!'); }
     function copyHostessLink() { document.getElementById('hostessLink').select(); document.execCommand('copy'); alert('הועתק!'); }
     function copyWhatsappMessage() { document.getElementById('whatsappTemplate').select(); document.execCommand('copy'); alert('הועתק!'); }
-    function updateTemplate() { document.getElementById('whatsappTemplate').value = `משפחה וחברים יקרים ❤️\n\nאנחנו מתרגשים לקראת ${document.getElementById('eventName').value || '[שם]'} ומחכים לחגוג אתכם!\n\n📅 ${document.getElementById('eventDate').value ? new Date(document.getElementById('eventDate').value).toLocaleDateString('he-IL') : '[תאריך]'} | ⏰ בשעה ${document.getElementById('eventTime').value || '[שעה]'}\n\nנשמח מאוד לאישור ההגעה שלכם בקישור הבא:\n${document.getElementById('shareLink').value || '[קישור]'}\n\nמחכים לראותכם 🤍`; }
+    /* ===== נוסחים מומלצים לוואטסאפ - הכל נמשך מהגדרות האירוע ===== */
+    let selectedTemplateStyle = 'classic';
 
-    document.getElementById('bitQrUpload').addEventListener('change', function(e) {
-      const file = e.target.files[0]; if (!file) return; const reader = new FileReader();
-      reader.onload = function(event) {
-        const img = new Image(); img.onload = function() {
-          const canvas = document.createElement('canvas'); const context = canvas.getContext('2d'); canvas.width = img.width; canvas.height = img.height; context.drawImage(img, 0, 0, img.width, img.height);
-          const code = jsQR(context.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
-          if (code && code.data.includes('bitpay')) { document.getElementById('bitLink').value = code.data; alert('הקישור חולץ!'); } else { alert('לא זיהינו קישור.'); }
-        }; img.src = event.target.result;
-      }; reader.readAsDataURL(file);
-    });
+    function waTemplateValues() {
+      return {
+        name: document.getElementById('eventName').value || '[שם האירוע]',
+        date: document.getElementById('eventDate').value ? new Date(document.getElementById('eventDate').value).toLocaleDateString('he-IL') : '[תאריך]',
+        time: document.getElementById('eventTime').value || '[שעה]',
+        place: document.getElementById('locationName').value || '[מקום]',
+        link: document.getElementById('shareLink').value || '[קישור]'
+      };
+    }
+
+    const waTemplates = {
+      classic: v => `משפחה וחברים יקרים ❤️\n\nאנחנו מתרגשים לקראת ${v.name} ומחכים לחגוג אתכם!\n\n📅 ${v.date} | ⏰ בשעה ${v.time}\n\nנשמח מאוד לאישור ההגעה שלכם בקישור הבא:\n${v.link}\n\nמחכים לראותכם 🤍`,
+      emotional: v => `יקרים שלנו 💖\n\nיש רגעים שמחכים להם כל החיים — ו${v.name} הוא בדיוק רגע כזה.\nלא נוכל לדמיין את היום הזה בלעדיכם.\n\n📅 ${v.date} | ⏰ ${v.time} | 📍 ${v.place}\n\nאשרו לנו שאתם באים, זה ייקח רק רגע:\n${v.link}\n\nמחכים לחגוג אתכם באהבה 🤍`,
+      short: v => `היי! מזמינים אתכם ל${v.name} 🎊\n📅 ${v.date} | ⏰ ${v.time} | 📍 ${v.place}\n\nאישור הגעה בקליק:\n${v.link}\n\nנתראה! 🥂`,
+      festive: v => `🎉 חוגגים! 🎉\n\nהתרגשנו, הזמנו אולם, סגרנו תאריך — ועכשיו חסרים רק אתם!\nמוזמנים בשמחה ל${v.name} 🥳\n\n📅 ${v.date}\n⏰ קבלת פנים בשעה ${v.time}\n📍 ${v.place}\n\nלחצו לאישור הגעה (לוקח 10 שניות):\n${v.link}\n\nבואו מוכנים לרחבה! 💃🕺`
+    };
+
+    function setTemplateStyle(style) {
+      selectedTemplateStyle = style;
+      updateTemplate();
+    }
+
+    function updateTemplate() {
+      const v = waTemplateValues();
+      const build = waTemplates[selectedTemplateStyle] || waTemplates.classic;
+      document.getElementById('whatsappTemplate').value = build(v);
+      // סימון הכפתור הפעיל
+      const styles = { classic: 'waStyleClassic', emotional: 'waStyleEmotional', short: 'waStyleShort', festive: 'waStyleFestive' };
+      Object.keys(styles).forEach(k => {
+        const btn = document.getElementById(styles[k]);
+        if (!btn) return;
+        if (k === selectedTemplateStyle) {
+          btn.className = 'text-xs font-bold px-3.5 py-1.5 rounded-full border transition bg-slate-800 text-white border-slate-800';
+        } else {
+          btn.className = 'text-xs font-bold px-3.5 py-1.5 rounded-full border transition bg-white text-slate-600 border-slate-300 hover:bg-slate-100';
+        }
+      });
+    }
 
     /* ========= PLAN4ME - שליחה דרך התוסף ========= */
     let p4mInstalled = false;
@@ -751,6 +788,17 @@
         btnAll.disabled = false; btnRem.disabled = false;
       }
     }
+
+    document.getElementById('bitQrUpload').addEventListener('change', function(e) {
+      const file = e.target.files[0]; if (!file) return; const reader = new FileReader();
+      reader.onload = function(event) {
+        const img = new Image(); img.onload = function() {
+          const canvas = document.createElement('canvas'); const context = canvas.getContext('2d'); canvas.width = img.width; canvas.height = img.height; context.drawImage(img, 0, 0, img.width, img.height);
+          const code = jsQR(context.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
+          if (code && code.data.includes('bitpay')) { document.getElementById('bitLink').value = code.data; alert('הקישור חולץ בהצלחה!'); } else { alert('לא זיהינו קישור Bit בתמונה. נסו תמונה ברורה יותר.'); }
+        }; img.src = event.target.result;
+      }; reader.readAsDataURL(file);
+    });
 
     window.addEventListener('DOMContentLoaded', init);
   </script>
