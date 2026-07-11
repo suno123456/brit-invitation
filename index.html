@@ -84,9 +84,15 @@
             <label class="block text-sm font-bold mb-1 theme-color">כמות מגיעים:</label>
             <input type="number" name="guests" value="1" min="1" class="w-full border p-2.5 rounded-xl bg-slate-50 text-center">
           </div>
-          <div>
-            <label class="block text-sm font-bold mb-1 theme-color">ברכה:</label>
-            <textarea name="blessing" rows="2" class="w-full border p-2.5 rounded-xl bg-slate-50 resize-none"></textarea>
+          <div class="bg-gradient-to-br from-amber-50 to-rose-50 border-2 border-amber-200 rounded-2xl p-4 shadow-inner">
+            <label class="block text-base font-extrabold mb-1 text-amber-800 text-center">💌 גלוית ברכה לבעלי השמחה</label>
+            <p class="text-xs text-slate-500 text-center mb-3">כמה מילים חמות מכם — זה החלק שהכי ישמח אותם! אפשר לבחור סגנון או לכתוב חופשי:</p>
+            <div class="flex flex-wrap justify-center gap-2 mb-3">
+              <button type="button" onclick="fillBlessing('classic')" class="text-xs font-bold bg-white border border-amber-300 text-amber-800 px-3 py-1.5 rounded-full hover:bg-amber-100 transition">✨ קלאסי</button>
+              <button type="button" onclick="fillBlessing('emotional')" class="text-xs font-bold bg-white border border-rose-300 text-rose-700 px-3 py-1.5 rounded-full hover:bg-rose-100 transition">💖 מרגש</button>
+              <button type="button" onclick="fillBlessing('funny')" class="text-xs font-bold bg-white border border-blue-300 text-blue-700 px-3 py-1.5 rounded-full hover:bg-blue-100 transition">😄 מצחיק</button>
+            </div>
+            <textarea name="blessing" id="blessingField" rows="4" placeholder="כתבו כאן את הברכה שלכם..." class="w-full border-2 border-amber-200 p-3.5 rounded-xl bg-white resize-none text-slate-700 focus:outline-none focus:border-amber-400 leading-relaxed"></textarea>
           </div>
           <button type="submit" id="submitBtn" class="w-full bg-theme text-white text-lg font-bold py-3.5 rounded-xl shadow-md transition mt-2 hover:opacity-90">
             שליחת אישור
@@ -196,6 +202,18 @@
       }
       alertBox.className = "p-4 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-xl shadow border border-emerald-500 text-center animate-fade-in";
       alertBox.classList.remove('hidden'); alertBox.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // תבניות ברכה - נקודת פתיחה שהאורח יכול לערוך
+    const blessingTemplates = {
+      classic: 'מזל טוב! מאחלים לכם המון אושר, בריאות ושמחה. שתזכו לשנים רבות של אהבה ונחת. 🥂',
+      emotional: 'איזו התרגשות! מאחלים לכם שהיום המיוחד הזה יהיה רק ההתחלה של דרך מלאה באהבה, צחוק ורגעים קסומים. אוהבים אתכם! 💖',
+      funny: 'מזל טוב! שיהיה אירוע מטורף, אוכל בשפע ורחבה מלאה — אנחנו כבר מחממים את נעלי הריקוד! 🕺💃'
+    };
+    function fillBlessing(style) {
+      const field = document.getElementById('blessingField');
+      field.value = blessingTemplates[style] || '';
+      field.focus();
     }
 
     document.getElementById('rsvpForm').addEventListener('submit', async (e) => {

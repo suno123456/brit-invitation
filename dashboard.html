@@ -46,13 +46,27 @@
       <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center shadow-sm"><p class="text-xs text-amber-700 font-semibold">🏁 הגיעו לאולם</p><p id="statArrivedCount" class="text-2xl font-bold text-amber-800 mt-1">0</p></div>
     </div>
     <div class="bg-blue-50 rounded-2xl shadow-sm border border-blue-200 p-6 space-y-6">
-      <div class="text-center border-b pb-4">
-        <h3 class="text-lg font-bold text-blue-800 mb-2">הקישור שלכם לשליחה לאורחים:</h3>
-        <div class="flex flex-col md:flex-row justify-center items-center gap-4"><input type="text" id="shareLink" readonly class="w-full md:w-2/3 bg-white border border-blue-300 rounded-lg p-3 text-left text-sm" dir="ltr"><button onclick="copyLink()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition w-full md:w-auto">העתק קישור</button></div>
-      </div>
-      <div class="text-center bg-amber-50 border border-amber-200 p-4 rounded-xl">
-        <h3 class="text-sm font-bold text-amber-900 mb-2">💁‍♀️ קישור דיגיטלי למארחת בכניסה לאולם:</h3>
-        <div class="flex flex-col md:flex-row justify-center items-center gap-3"><input type="text" id="hostessLink" readonly class="w-full md:w-2/3 bg-white border border-amber-300 rounded-lg p-2.5 text-left text-xs text-amber-900 font-mono" dir="ltr"><button onclick="copyHostessLink()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 px-5 rounded-lg transition text-xs w-full md:w-auto whitespace-nowrap">העתק למארחת</button></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-b pb-5">
+        <!-- קישור למוזמנים -->
+        <div class="bg-white border-2 border-blue-300 rounded-xl p-4 text-center flex flex-col">
+          <div class="flex items-center justify-center gap-2 mb-1">
+            <span class="text-2xl">📨</span>
+            <h3 class="text-base font-extrabold text-blue-800">קישור למוזמנים</h3>
+          </div>
+          <p class="text-xs text-slate-500 mb-3 leading-relaxed"><b>למי שולחים?</b> לכל האורחים, בהזמנה בוואטסאפ.<br>בקישור הזה הם רואים את ההזמנה ומאשרים הגעה.</p>
+          <input type="text" id="shareLink" readonly class="w-full bg-slate-50 border border-blue-200 rounded-lg p-2.5 text-left text-xs mb-2" dir="ltr">
+          <button onclick="copyLink()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition text-sm w-full mt-auto">📋 העתק קישור למוזמנים</button>
+        </div>
+        <!-- קישור למארחת -->
+        <div class="bg-amber-50 border-2 border-amber-300 rounded-xl p-4 text-center flex flex-col">
+          <div class="flex items-center justify-center gap-2 mb-1">
+            <span class="text-2xl">💁‍♀️</span>
+            <h3 class="text-base font-extrabold text-amber-900">קישור למארחת</h3>
+          </div>
+          <p class="text-xs text-amber-800/80 mb-3 leading-relaxed"><b>למי שולחים?</b> רק לצוות הקבלה ביום האירוע.<br>עמדה לסימון הגעה באולם — <b>לא</b> לשלוח לאורחים!</p>
+          <input type="text" id="hostessLink" readonly class="w-full bg-white border border-amber-200 rounded-lg p-2.5 text-left text-xs text-amber-900 font-mono mb-2" dir="ltr">
+          <button onclick="copyHostessLink()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 rounded-lg transition text-sm w-full mt-auto">📋 העתק קישור למארחת</button>
+        </div>
       </div>
       <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-inner">
         <h4 class="font-bold text-slate-700 mb-2 flex items-center gap-2">💬 נוסח מומלץ לוואטסאפ:</h4>
@@ -188,6 +202,21 @@
             <div><h4 class="font-bold text-amber-900">אורחים שאישרו ועדיין לא הושבו:</h4></div>
             <span id="unseatedCount" class="bg-amber-600 text-white font-extrabold text-base px-3 py-1 rounded-full">0</span>
           </div>
+
+          <!-- סקיצת האולם -->
+          <div class="bg-white p-5 rounded-2xl shadow-md border">
+            <div class="flex justify-between items-center mb-1">
+              <h4 class="font-bold text-slate-800 text-base">🗺️ סקיצת האולם</h4>
+              <div class="flex gap-3 text-[10px] font-bold">
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span> פנוי</span>
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span> מתמלא</span>
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-400 inline-block"></span> מלא</span>
+              </div>
+            </div>
+            <p class="text-xs text-slate-400 mb-4">מבט-על על כל השולחנות והתפוסה שלהם, כמו מפת אולם.</p>
+            <div id="hallSketch" class="flex flex-wrap gap-4 justify-center bg-slate-50 border border-dashed border-slate-300 rounded-xl p-5 min-h-[120px]"></div>
+          </div>
+
           <div id="tablesContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
         </div>
       </div>
@@ -394,11 +423,37 @@
       document.getElementById('totalGuests').innerText = `סה"כ מגיעים: ${totalCount}`;
     }
 
+    function renderHallSketch(attendingGuests) {
+      const sketch = document.getElementById('hallSketch');
+      sketch.innerHTML = '';
+      if (allTables.length === 0) {
+        sketch.innerHTML = '<p class="text-xs text-slate-400 self-center">צרו שולחנות כדי לראות את מפת האולם.</p>';
+        return;
+      }
+      allTables.forEach(table => {
+        const seated = attendingGuests.filter(g => g.table_id === table.id)
+                                      .reduce((acc, g) => acc + (g.guests_count || 0), 0);
+        const cap = table.capacity || 10;
+        const ratio = cap > 0 ? seated / cap : 0;
+        let color = 'bg-emerald-100 border-emerald-400 text-emerald-900';       // פנוי
+        if (ratio >= 1) color = 'bg-rose-100 border-rose-400 text-rose-900';    // מלא
+        else if (ratio >= 0.7) color = 'bg-amber-100 border-amber-400 text-amber-900'; // מתמלא
+        const circle = document.createElement('div');
+        circle.className = 'w-24 h-24 rounded-full border-4 ' + color + ' flex flex-col items-center justify-center text-center shadow-sm shrink-0';
+        circle.title = table.table_name + ' — תפוסה: ' + seated + '/' + cap;
+        circle.innerHTML = '<span class="font-extrabold text-xs leading-tight px-1">' + esc(table.table_name) + '</span>' +
+                           '<span class="font-black text-base leading-tight">' + seated + '/' + cap + '</span>';
+        sketch.appendChild(circle);
+      });
+    }
+
     function renderTablesAndSeating() {
       const container = document.getElementById('tablesContainer'); container.innerHTML = '';
       const attendingGuests = globalGuestsData.filter(g => g.attending);
       const unseatedGuests = attendingGuests.filter(g => !g.table_id);
       document.getElementById('unseatedCount').innerText = unseatedGuests.reduce((acc, g) => acc + (g.guests_count || 0), 0);
+
+      renderHallSketch(attendingGuests);
 
       if (allTables.length === 0) { container.innerHTML = `<p class="text-xs text-slate-400 p-4 text-center bg-white rounded-xl border col-span-2">אין שולחנות כרגע.</p>`; return; }
       allTables.forEach(table => {
@@ -524,14 +579,15 @@
 
     function exportToExcel() {
       if (globalGuestsData.length === 0) return;
-      let csvContent = "\uFEFFשם האורח,מגיע/ה?,כמות,טלפון,ברכה,תאריך אישור\n";
+      let csvContent = "\uFEFFשם האורח,מגיע/ה?,כמות,טלפון,ברכה,מתנה,תאריך אישור\n";
       globalGuestsData.forEach(g => {
         let statusText = 'טרם ענה';
         if (g.attending === true) statusText = 'כן';
         if (g.attending === false) statusText = 'לא';
         let phoneText = g.phone ? String(g.phone).replace(/,/g, '') : '';
         let blessingText = g.blessing ? g.blessing.replace(/,/g, ' -').replace(/\n/g, ' ') : '';
-        csvContent += `${g.guest_name ? g.guest_name.replace(/,/g, '') : ''},${statusText},${g.guests_count || 0},${phoneText},${blessingText},${new Date(g.created_at).toLocaleDateString('he-IL')}\n`;
+        // עמודת "מתנה" נשארת ריקה בכוונה - בעלי האירוע ממלאים אותה באקסל אחרי האירוע
+        csvContent += `${g.guest_name ? g.guest_name.replace(/,/g, '') : ''},${statusText},${g.guests_count || 0},${phoneText},${blessingText},,${new Date(g.created_at).toLocaleDateString('he-IL')}\n`;
       });
       const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })); link.download = "רשימת_אורחים.csv"; document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
