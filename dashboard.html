@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>פאנל ניהול - מערכת אישורי הגעה והושבה</title>
+  <title>PLAN4ME - מערכת אישורי הגעה והושבה</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -19,8 +19,13 @@
 </head>
 <body class="text-slate-800 flex flex-col min-h-screen">
 
-  <nav class="bg-white shadow-sm p-4 flex justify-between items-center border-b-4 border-blue-500 z-10 relative">
-    <h1 class="text-xl font-bold text-blue-600">מערכת אישורי הגעה והושבה</h1>
+  <nav class="bg-white shadow-sm p-3 md:p-4 flex justify-between items-center border-b-4 border-blue-500 z-10 relative">
+    <div class="flex items-center gap-3">
+      <img src="logo.png" alt="PLAN4ME" class="h-10 md:h-12 w-auto" onerror="this.style.display='none';document.getElementById('brandFallback').style.display='inline';">
+      <span id="brandFallback" class="text-xl font-extrabold text-slate-900 tracking-wide" style="display:none;">PLAN4ME</span>
+      <div class="h-8 w-px bg-slate-200 hidden sm:block"></div>
+      <h1 class="text-sm md:text-base font-bold text-slate-600 hidden sm:block">מערכת אישורי הגעה והושבה</h1>
+    </div>
     <button id="logoutBtn" class="text-sm bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-lg font-medium transition">התנתק</button>
   </nav>
 
