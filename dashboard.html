@@ -431,7 +431,17 @@
 
     async function seatGuestInTable(select, tableId) { if (!select.value) return; await mySupabase.from('guests').update({ table_id: tableId }).eq('id', select.value); loadDashboardData(); }
     async function removeGuestFromTable(guestId) { await mySupabase.from('guests').update({ table_id: null }).eq('id', guestId); loadDashboardData(); }
-    async function createNewTable() { const name = document.getElementById('newTableName').value.trim(); const cap = parseInt(document.getElementById('newTableCapacity').value) || 10; if (!name) return; await mySupabase.from('tables').insert([{ event_id: currentEventId, table_name: name, capacity: cap }]); document.getElementById('newTableName').value = ''; loadDashboardData(); }
+    async function createNewTable() {
+      const name = document.getElementById('newTableName').value.trim();
+      const cap = parseInt(document.getElementById('newTableCapacity').value) || 10;
+      if (!name) return;
+      // מניעת שולחן כפול (למשל "שולחן 2" פעמיים)
+      const exists = allTables.some(t => (t.table_name || '').trim() === name);
+      if (exists) { alert('⚠️ כבר קיים שולחן בשם "' + name + '" באירוע הזה. בחרו שם/מספר אחר.'); return; }
+      await mySupabase.from('tables').insert([{ event_id: currentEventId, table_name: name, capacity: cap }]);
+      document.getElementById('newTableName').value = '';
+      loadDashboardData();
+    }
     async function deleteTable(tableId) { if (confirm("למחוק את השולחן?")) { await mySupabase.from('tables').delete().eq('id', tableId); loadDashboardData(); } }
     async function deleteGuest(id) { if(confirm('למחוק אורח זה?')) { await mySupabase.from('guests').delete().eq('id', id); loadDashboardData(); } }
 

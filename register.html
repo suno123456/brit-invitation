@@ -3,80 +3,124 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>רכישת מערכת אישורי הגעה</title>
+  <title>רכישת מערכת אישורי הגעה | PLAN4ME</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" href="data:,">
   <style> body { font-family: 'Assistant', sans-serif; background-color: #f8fafc; } </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body class="flex flex-col items-center min-h-screen">
 
-  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border-t-4 border-blue-600">
-    <div class="bg-blue-600 p-6 text-center text-white">
-      <h2 class="text-2xl font-bold">רכישת מערכת אישורי הגעה</h2>
-      <p class="text-blue-100 mt-2 text-sm">הפכו את האירוע שלכם לחכם ומסודר ב-2 צעדים פשוטים!</p>
+  <!-- פאנל מותג עליון -->
+  <div class="w-full bg-slate-900 py-8 px-4 text-center">
+    <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-wide">PLAN4ME</h1>
+    <p class="text-slate-300 mt-2 text-base md:text-lg font-semibold">מערכת אישורי הגעה, הושבה ושליחת הזמנות בוואטסאפ — לאירוע שלכם</p>
+    <div class="flex flex-wrap justify-center gap-3 mt-5 text-xs font-bold">
+      <span class="bg-slate-800 text-emerald-300 px-3 py-1.5 rounded-full border border-slate-700">✓ אישורי הגעה בקליק</span>
+      <span class="bg-slate-800 text-emerald-300 px-3 py-1.5 rounded-full border border-slate-700">✓ שליחת הזמנות בוואטסאפ</span>
+      <span class="bg-slate-800 text-emerald-300 px-3 py-1.5 rounded-full border border-slate-700">✓ סידורי הושבה</span>
+      <span class="bg-slate-800 text-emerald-300 px-3 py-1.5 rounded-full border border-slate-700">✓ עמדת מארחת ביום האירוע</span>
     </div>
+  </div>
 
-    <div class="p-6 md:p-8 space-y-8">
-      <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 text-center">
-        <span class="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">שלב 1</span>
-        <h3 class="text-lg font-bold text-blue-800 mt-3 mb-1">תשלום מאובטח ב-Bit</h3>
-        <p class="text-sm font-semibold text-slate-700 mb-4">כדי להפעיל את המערכת שלכם לחצו כאן 👇</p>
-        <div class="text-center mb-4 bg-white p-3 rounded-xl border border-blue-100 inline-block px-8 shadow-sm">
-          <span class="text-slate-400 line-through text-sm block">מחיר מלא: 99 ₪</span>
-          <span class="text-3xl font-extrabold text-blue-600 block mt-1">רק 79 ₪</span>
-          <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-md font-bold block mt-1">מבצע השקה לזמן מוגבל!</span>
-        </div>
-        <button onclick="redirectToBit()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition duration-300 shadow-md text-lg flex items-center justify-center gap-2">
-          💳 מעבר להעברת 79 ₪ ב-Bit
-        </button>
-      </div>
+  <div class="w-full max-w-lg px-4 -mt-0 pb-4 flex-1">
+    <div class="bg-white rounded-2xl shadow-xl w-full overflow-hidden border border-slate-200 mt-6">
 
-      <div class="border border-gray-200 rounded-xl p-5">
-        <div class="text-center mb-4">
-          <span class="bg-slate-700 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">שלב 2</span>
-          <h3 class="text-lg font-bold text-slate-800 mt-3">יצירת חשבון מנהל</h3>
-          <p class="text-sm text-slate-500">לאחר התשלום, מלאו את הפרטים לקבלת גישה מיידית.</p>
-        </div>
+      <div class="p-6 md:p-8 space-y-8">
 
-        <form id="registerForm" class="space-y-4">
-          <div>
-            <label class="block text-sm font-bold mb-1 text-slate-700">שם מלא (כפי שמופיע בביט):</label>
-            <input type="text" id="fullName" required placeholder="למשל: ישראל ישראלי" class="w-full border border-gray-300 p-3 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-right">
+        <!-- שלב 1: תשלום -->
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 text-center">
+          <span class="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">שלב 1</span>
+          <h3 class="text-lg font-bold text-blue-800 mt-3 mb-1">תשלום חד-פעמי בביט</h3>
+          <p class="text-sm font-semibold text-slate-700 mb-4">תשלום אחד לאירוע אחד — ללא מנוי וללא תשלומים נסתרים.</p>
+          <div class="text-center mb-4 bg-white p-3 rounded-xl border border-blue-100 inline-block px-8 shadow-sm">
+            <span class="text-slate-400 line-through text-sm block">מחיר מלא: 99 ₪</span>
+            <span class="text-3xl font-extrabold text-blue-600 block mt-1">רק 79 ₪</span>
+            <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-md font-bold block mt-1">מבצע השקה לזמן מוגבל!</span>
           </div>
-          <div>
-            <label class="block text-sm font-bold mb-1 text-slate-700">מספר נייד:</label>
-            <input type="tel" id="phone" required placeholder="050-0000000" class="w-full border border-gray-300 p-3 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-right" dir="ltr">
-          </div>
-          <div>
-            <label class="block text-sm font-bold mb-1 text-slate-700">כתובת אימייל (לכניסה למערכת):</label>
-            <input type="email" id="email" required placeholder="example@gmail.com" class="w-full border border-gray-300 p-3 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-right">
-          </div>
-          <div>
-            <label class="block text-sm font-bold mb-1 text-slate-700">בחירת סיסמה (לפחות 6 תווים):</label>
-            <input type="password" id="password" required placeholder="******" minlength="6" class="w-full border border-gray-300 p-3 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-right">
-          </div>
-          
-          <div class="flex items-start gap-2 mt-4 bg-red-50 p-3 rounded-lg border border-red-100">
-            <input type="checkbox" id="confirmPayment" required class="mt-1 w-4 h-4 cursor-pointer">
-            <label for="confirmPayment" class="text-xs text-slate-700 font-medium cursor-pointer">
-              <span class="text-red-600 font-bold">חובה לסמן:</span> אני מאשר/ת שביצעתי כעת העברה בביט על סך 79 ₪. ידוע לי שחשבונות שיפתחו ללא תשלום מאומת יימחקו לצמיתות מהמערכת בתוך מספר שעות.
-            </label>
-          </div>
-          
-          <button type="submit" id="submitBtn" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl transition duration-300 shadow-md mt-2">
-            שילמתי בביט - פתח לי את המערכת!
+          <button onclick="redirectToBit()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition duration-300 shadow-md text-lg flex items-center justify-center gap-2">
+            💳 מעבר לתשלום 79 ₪ בביט
           </button>
-        </form>
-        <p id="errorMsg" class="text-red-500 mt-4 hidden font-medium text-sm text-center"></p>
-      </div>
+          <p class="text-xs text-slate-500 mt-3">התשלום מתבצע באפליקציית ביט המאובטחת, ישירות מהנייד שלכם.</p>
+        </div>
 
-      <div class="text-center text-sm text-slate-500 pt-4 border-t">
-        כבר רכשתם ויש לכם חשבון? <a href="login.html" class="text-blue-600 font-bold hover:underline">התחברו כאן</a>
+        <!-- שלב 2: יצירת חשבון -->
+        <div class="border border-gray-200 rounded-xl p-5">
+          <div class="text-center mb-4">
+            <span class="bg-slate-700 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">שלב 2</span>
+            <h3 class="text-lg font-bold text-slate-800 mt-3">יצירת חשבון מנהל</h3>
+            <p class="text-sm text-slate-500">לאחר התשלום, מלאו את הפרטים — ואנחנו נפעיל לכם את המערכת.</p>
+          </div>
+
+          <form id="registerForm" class="space-y-4">
+            <div>
+              <label class="block text-sm font-bold mb-1 text-slate-700">שם מלא (כפי שמופיע בביט):</label>
+              <input type="text" id="fullName" required placeholder="למשל: ישראל ישראלי" class="w-full border border-gray-300 p-3 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-right">
+            </div>
+            <div>
+              <label class="block text-sm font-bold mb-1 text-slate-700">מספר נייד:</label>
+              <input type="tel" id="phone" required placeholder="050-0000000" class="w-full border border-gray-300 p-3 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-right" dir="ltr">
+            </div>
+            <div>
+              <label class="block text-sm font-bold mb-1 text-slate-700">כתובת אימייל (לכניסה למערכת):</label>
+              <input type="email" id="email" required placeholder="example@gmail.com" class="w-full border border-gray-300 p-3 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-right">
+            </div>
+            <div>
+              <label class="block text-sm font-bold mb-1 text-slate-700">בחירת סיסמה (לפחות 6 תווים):</label>
+              <input type="password" id="password" required placeholder="******" minlength="6" class="w-full border border-gray-300 p-3 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-right">
+            </div>
+
+            <div class="flex items-start gap-2 mt-4 bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <input type="checkbox" id="confirmPayment" required class="mt-1 w-4 h-4 cursor-pointer">
+              <label for="confirmPayment" class="text-xs text-slate-700 font-medium cursor-pointer">
+                אני מאשר/ת שביצעתי העברה בביט על סך 79 ₪, ומסכים/ה ל<a href="terms.html" target="_blank" class="text-blue-600 font-bold underline">תקנון ולמדיניות הביטולים</a>.
+              </label>
+            </div>
+
+            <button type="submit" id="submitBtn" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl transition duration-300 shadow-md mt-2">
+              שילמתי בביט — פתחו לי את המערכת
+            </button>
+          </form>
+          <p id="errorMsg" class="text-red-500 mt-4 hidden font-medium text-sm text-center"></p>
+
+          <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-4">
+            <p class="text-xs text-amber-900 leading-relaxed"><b>מה קורה אחרי ההרשמה?</b> החשבון עובר אימות תשלום ידני ומופעל בדרך כלל <b>בתוך מספר שעות, ולכל היותר עד יום עסקים</b>. תקבלו גישה מלאה למערכת ותוכלו להתחיל לבנות את האירוע כבר עכשיו.</p>
+          </div>
+        </div>
+
+        <!-- למה אפשר לסמוך עלינו -->
+        <div class="border border-emerald-200 bg-emerald-50 rounded-xl p-5 space-y-3">
+          <h3 class="text-base font-bold text-emerald-900 text-center">🤝 קונים בראש שקט</h3>
+          <ul class="text-sm text-slate-700 space-y-2">
+            <li class="flex gap-2 items-start"><span class="text-emerald-600 font-black shrink-0">✓</span><span><b>החזר כספי מלא</b> — לא אישרנו את החשבון? קיבלתם את הכסף בחזרה, בלי שאלות. <a href="terms.html" target="_blank" class="text-blue-600 font-bold underline">מדיניות ביטולים מלאה</a>.</span></li>
+            <li class="flex gap-2 items-start"><span class="text-emerald-600 font-black shrink-0">✓</span><span><b>ליווי אישי</b> — מענה לכל שאלה עד יום עסקים, לפני ואחרי הרכישה.</span></li>
+            <li class="flex gap-2 items-start"><span class="text-emerald-600 font-black shrink-0">✓</span><span><b>שקיפות מלאה</b> — <a href="terms.html" target="_blank" class="text-blue-600 font-bold underline">תקנון</a>, <a href="privacy.html" target="_blank" class="text-blue-600 font-bold underline">מדיניות פרטיות</a> ופרטי יצירת קשר גלויים.</span></li>
+            <li class="flex gap-2 items-start"><span class="text-emerald-600 font-black shrink-0">✓</span><span><b>הנתונים שלכם מוגנים</b> — רשימת המוזמנים נשמרת במסד נתונים מאובטח ונמחקת אוטומטית אחרי האירוע.</span></li>
+          </ul>
+          <div class="text-center pt-1">
+            <a href="mailto:sunorlovich@gmail.com" class="inline-block text-sm font-bold text-emerald-800 underline">✉️ יש שאלה לפני הרכישה? דברו איתנו: sunorlovich@gmail.com</a>
+          </div>
+        </div>
+
+        <div class="text-center text-sm text-slate-500 pt-2 border-t">
+          כבר רכשתם ויש לכם חשבון? <a href="login.html" class="text-blue-600 font-bold hover:underline">התחברו כאן</a>
+        </div>
       </div>
     </div>
   </div>
+
+  <footer class="mt-4 mb-8 text-center p-4">
+    <div class="bg-slate-200 h-px w-64 mx-auto mb-4"></div>
+    <p class="text-sm font-bold text-slate-700">© כל הזכויות שמורות לסאן אורלביץ'.</p>
+    <p class="text-xs text-slate-500 mt-2 space-x-2 space-x-reverse">
+      <a href="terms.html" class="underline hover:text-slate-700">תקנון ומדיניות ביטולים</a>
+      <span>·</span>
+      <a href="privacy.html" class="underline hover:text-slate-700">מדיניות פרטיות</a>
+      <span>·</span>
+      <a href="mailto:sunorlovich@gmail.com" class="underline hover:text-slate-700">יצירת קשר</a>
+    </p>
+  </footer>
 
   <script>
     const SUPABASE_URL = 'https://ghfgqwslakjqmxuboobn.supabase.co';
@@ -91,9 +135,9 @@
 
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       if (!document.getElementById('confirmPayment').checked) {
-        alert("חובה לאשר את ביצוע התשלום לפני פתיחת החשבון."); return;
+        alert("יש לאשר את ביצוע התשלום ואת התקנון לפני פתיחת החשבון."); return;
       }
 
       const fullName = document.getElementById('fullName').value;
@@ -111,17 +155,17 @@
       if (error) {
         errorMsg.classList.remove('hidden');
         errorMsg.innerText = 'אירעה שגיאה או שהאימייל כבר קיים במערכת.';
-        btn.disabled = false; btn.innerText = 'שילמתי בביט - פתח לי את המערכת!';
+        btn.disabled = false; btn.innerText = 'שילמתי בביט — פתחו לי את המערכת';
         return;
-      } 
-      
+      }
+
       if (data.user) {
-        await mySupabase.from('profiles').upsert([{ 
+        await mySupabase.from('profiles').upsert([{
           id: data.user.id, email: email, full_name: fullName, phone: phone
         }]);
       }
 
-      // שליחת המייל עם קישור האישור הדינמי החדש
+      // שליחת המייל עם קישור האישור הדינמי
       try {
         await fetch('https://api.web3forms.com/submit', {
           method: 'POST',
@@ -134,7 +178,7 @@
           })
         });
       } catch (err) { console.error("שגיאה בשליחת המייל", err); }
-      
+
       window.location.href = 'dashboard.html';
     });
   </script>
