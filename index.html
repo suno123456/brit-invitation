@@ -43,6 +43,11 @@
               <p class="text-xs text-gray-500 mb-0.5">בשעה</p>
               <p id="displayTime" class="font-bold text-lg">-</p>
             </div>
+            <div id="chuppahSep" class="h-8 border-l border-theme-light opacity-50 hidden"></div>
+            <div id="chuppahRow" class="text-center hidden">
+              <p class="text-xs text-gray-500 mb-0.5">💍 חופה</p>
+              <p id="displayChuppah" class="font-bold text-lg">-</p>
+            </div>
           </div>
           
           <div class="text-center mb-4">
@@ -163,6 +168,11 @@
       if (isToday) document.getElementById('dayOfEventSection').classList.remove('hidden');
 
       document.getElementById('displayTime').innerText = event.event_time || '-';
+      if (event.chuppah_time) {
+        document.getElementById('displayChuppah').innerText = event.chuppah_time;
+        document.getElementById('chuppahRow').classList.remove('hidden');
+        document.getElementById('chuppahSep').classList.remove('hidden');
+      }
       document.getElementById('displayLocation').innerText = event.location_name || '-';
       if(event.waze_link) document.getElementById('displayWaze').href = event.waze_link;
       else document.getElementById('displayWaze').classList.add('hidden');
