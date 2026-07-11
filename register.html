@@ -14,8 +14,11 @@
 
   <!-- פאנל מותג עליון -->
   <div class="w-full bg-slate-900 py-8 px-4 text-center">
-    <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-wide">PLAN4ME</h1>
-    <p class="text-slate-300 mt-2 text-base md:text-lg font-semibold">מערכת אישורי הגעה, הושבה ושליחת הזמנות בוואטסאפ לאירוע שלכם</p>
+    <div class="bg-white rounded-2xl px-8 py-3 inline-block shadow-lg">
+      <img src="logo.png" alt="PLAN4ME" class="h-14 md:h-16 w-auto" onerror="this.style.display='none';document.getElementById('brandFallback').style.display='inline';">
+      <span id="brandFallback" class="text-3xl font-extrabold text-slate-900 tracking-wide" style="display:none;">PLAN4ME</span>
+    </div>
+    <p class="text-slate-300 mt-2 text-base md:text-lg font-semibold">מערכת אישורי הגעה, הושבה ושליחת הזמנות בוואטסאפ — לאירוע שלכם</p>
     <div class="flex flex-wrap justify-center gap-3 mt-5 text-xs font-bold">
       <span class="bg-slate-800 text-emerald-300 px-3 py-1.5 rounded-full border border-slate-700">✓ אישורי הגעה בקליק</span>
       <span class="bg-slate-800 text-emerald-300 px-3 py-1.5 rounded-full border border-slate-700">✓ שליחת הזמנות בוואטסאפ</span>
@@ -32,7 +35,7 @@
         <!-- שלב 1: תשלום -->
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 text-center">
           <span class="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">שלב 1</span>
-          <h3 class="text-lg font-bold text-blue-800 mt-3 mb-1">תשלום חד-פעמי ב-Bit</h3>
+          <h3 class="text-lg font-bold text-blue-800 mt-3 mb-1">תשלום חד-פעמי בביט</h3>
           <p class="text-sm font-semibold text-slate-700 mb-4">תשלום אחד לאירוע אחד — ללא מנוי וללא תשלומים נסתרים.</p>
           <div class="text-center mb-4 bg-white p-3 rounded-xl border border-blue-100 inline-block px-8 shadow-sm">
             <span class="text-slate-400 line-through text-sm block">מחיר מלא: 99 ₪</span>
@@ -40,7 +43,7 @@
             <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-md font-bold block mt-1">מבצע השקה לזמן מוגבל!</span>
           </div>
           <button onclick="redirectToBit()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition duration-300 shadow-md text-lg flex items-center justify-center gap-2">
-            💳 מעבר לתשלום 79 ₪ ב-Bit
+            💳 מעבר לתשלום 79 ₪ בביט
           </button>
           <p class="text-xs text-slate-500 mt-3">התשלום מתבצע באפליקציית ביט המאובטחת, ישירות מהנייד שלכם.</p>
         </div>

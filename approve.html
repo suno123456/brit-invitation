@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>אישור לקוח - מנהל מערכת</title>
+  <title>PLAN4ME - אישור לקוח</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;800&display=swap" rel="stylesheet">
@@ -13,6 +13,8 @@
 <body class="flex items-center justify-center min-h-screen p-4">
 
   <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center border-t-4 border-slate-800">
+    <img src="logo.png" alt="PLAN4ME" class="h-12 w-auto mx-auto mb-4" onerror="this.style.display='none';document.getElementById('brandFallback').style.display='inline';">
+    <span id="brandFallback" class="text-xl font-extrabold text-slate-900 tracking-wide" style="display:none;">PLAN4ME</span>
     <div id="statusIcon" class="text-6xl mb-4 animate-bounce">⏳</div>
     <h2 id="statusTitle" class="text-2xl font-black text-slate-800 mb-2">מאמת הרשאות מנהל...</h2>
     <p id="statusDesc" class="text-slate-500 font-medium mb-6">אנא המתן בזמן שהמערכת מאשרת את הלקוח.</p>
