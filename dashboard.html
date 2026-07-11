@@ -223,6 +223,15 @@
             </div>
             <p class="text-xs text-slate-400 mb-4">מבט-על על כל השולחנות והתפוסה שלהם, כמו מפת אולם.</p>
             <div id="hallSketch" class="flex flex-wrap gap-4 justify-center bg-slate-50 border border-dashed border-slate-300 rounded-xl p-5 min-h-[120px]"></div>
+            <div class="flex flex-col sm:flex-row gap-3 mt-4 pt-4 border-t">
+              <button onclick="exportSeatingToExcel()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-sm text-xs flex items-center justify-center gap-2">
+                📊 ייצוא סידורי ההושבה לאקסל
+              </button>
+              <button onclick="exportSeatingToPdf()" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl transition shadow-sm text-xs flex items-center justify-center gap-2">
+                🖨️ הורדה כ-PDF / הדפסה
+              </button>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-2 text-center">מושלם להעברה למנהל האירוע או לבעלי האולם — שידעו בדיוק איך האולם צריך להיראות.</p>
           </div>
 
           <div id="tablesContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
@@ -431,6 +440,108 @@
       document.getElementById('totalGuests').innerText = `סה"כ מגיעים: ${totalCount}`;
     }
 
+    /* ===== ייצוא סידורי הושבה (למנהל האירוע / בעלי האולם) ===== */
+    function seatingSnapshot() {
+      const attendingGuests = globalGuestsData.filter(g => g.attending);
+      const tables = allTables.map(t => {
+        const seated = attendingGuests.filter(g => g.table_id === t.id);
+        const occupancy = seated.reduce((acc, g) => acc + (g.guests_count || 0), 0);
+        return { name: t.table_name, capacity: t.capacity || 0, occupancy: occupancy, guests: seated };
+      });
+      const unseated = attendingGuests.filter(g => !g.table_id);
+      return { tables: tables, unseated: unseated };
+    }
+
+    function exportSeatingToExcel() {
+      if (allTables.length === 0) { alert('אין שולחנות לייצוא. צרו שולחנות קודם.'); return; }
+      const snap = seatingSnapshot();
+      const data = [['שולחן', 'קיבולת', 'תפוסה', 'אורח', 'כמות']];
+      snap.tables.forEach(t => {
+        if (t.guests.length === 0) {
+          data.push([t.name, t.capacity, t.occupancy, '(השולחן ריק)', '']);
+        } else {
+          t.guests.forEach((g, i) => {
+            data.push([i === 0 ? t.name : '', i === 0 ? t.capacity : '', i === 0 ? t.occupancy : '', g.guest_name || '', g.guests_count || 1]);
+          });
+        }
+      });
+      if (snap.unseated.length > 0) {
+        data.push(['', '', '', '', '']);
+        data.push(['אישרו וטרם הושבו:', '', '', '', '']);
+        snap.unseated.forEach(g => data.push(['', '', '', g.guest_name || '', g.guests_count || 1]));
+      }
+      const ws = XLSX.utils.aoa_to_sheet(data);
+      ws['!cols'] = [{ wch: 16 }, { wch: 8 }, { wch: 8 }, { wch: 26 }, { wch: 8 }];
+      const wb = XLSX.utils.book_new();
+      wb.Workbook = { Views: [{ RTL: true }] };
+      XLSX.utils.book_append_sheet(wb, ws, 'סידורי הושבה');
+      const evName = (document.getElementById('eventName').value || 'האירוע').replace(/[\\/:*?"<>|]/g, '');
+      XLSX.writeFile(wb, 'סידורי_הושבה_' + evName + '.xlsx');
+    }
+
+    function exportSeatingToPdf() {
+      if (allTables.length === 0) { alert('אין שולחנות לייצוא. צרו שולחנות קודם.'); return; }
+      const snap = seatingSnapshot();
+      const evName = esc(document.getElementById('eventName').value || 'האירוע');
+      const evDateRaw = document.getElementById('eventDate').value;
+      const evDate = evDateRaw ? new Date(evDateRaw).toLocaleDateString('he-IL') : '';
+      const evPlace = esc(document.getElementById('locationName').value || '');
+      const totalSeated = snap.tables.reduce((acc, t) => acc + t.occupancy, 0);
+
+      let cards = '';
+      snap.tables.forEach(t => {
+        let rows = t.guests.length === 0
+          ? '<li class="empty">— השולחן ריק —</li>'
+          : t.guests.map(g => '<li>👤 ' + esc(g.guest_name) + ' <b>(' + (g.guests_count || 1) + ')</b></li>').join('');
+        const full = t.capacity > 0 && t.occupancy >= t.capacity;
+        cards += '<div class="table-card' + (full ? ' full' : '') + '">'
+              + '<div class="table-head"><span class="tname">🪑 ' + esc(t.name) + '</span>'
+              + '<span class="tocc">' + t.occupancy + ' / ' + t.capacity + '</span></div>'
+              + '<ul>' + rows + '</ul></div>';
+      });
+
+      let unseatedHtml = '';
+      if (snap.unseated.length > 0) {
+        unseatedHtml = '<div class="unseated"><h3>⚠️ אישרו הגעה וטרם הושבו (' + snap.unseated.length + '):</h3><p>'
+          + snap.unseated.map(g => esc(g.guest_name) + ' (' + (g.guests_count || 1) + ')').join(' · ')
+          + '</p></div>';
+      }
+
+      const html = '<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="UTF-8">'
+        + '<title>סידורי הושבה - ' + evName + '</title>'
+        + '<style>'
+        + "body{font-family:Arial,'Assistant',sans-serif;color:#1e293b;margin:24px;}"
+        + 'h1{text-align:center;margin:0 0 4px;font-size:24px;}'
+        + '.sub{text-align:center;color:#64748b;font-size:13px;margin-bottom:6px;}'
+        + '.summary{text-align:center;font-size:13px;font-weight:bold;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:10px;padding:8px;margin:12px auto 20px;max-width:480px;}'
+        + '.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}'
+        + '.table-card{border:2px solid #cbd5e1;border-radius:12px;padding:12px;page-break-inside:avoid;}'
+        + '.table-card.full{border-color:#f43f5e;background:#fff1f2;}'
+        + '.table-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0;padding-bottom:6px;margin-bottom:8px;}'
+        + '.tname{font-weight:800;font-size:15px;}'
+        + '.tocc{font-weight:800;font-size:13px;background:#e2e8f0;border-radius:12px;padding:2px 10px;}'
+        + 'ul{list-style:none;margin:0;padding:0;font-size:13px;line-height:1.9;}'
+        + '.empty{color:#94a3b8;font-style:italic;}'
+        + '.unseated{margin-top:22px;border:2px dashed #f59e0b;background:#fffbeb;border-radius:12px;padding:12px;font-size:13px;page-break-inside:avoid;}'
+        + '.unseated h3{margin:0 0 6px;font-size:14px;color:#92400e;}'
+        + '.footer{text-align:center;color:#94a3b8;font-size:11px;margin-top:26px;}'
+        + '@media print{body{margin:10mm;} .noprint{display:none;}}'
+        + '</style></head><body>'
+        + '<h1>🪑 סידורי הושבה — ' + evName + '</h1>'
+        + '<p class="sub">' + (evDate ? '📅 ' + evDate : '') + (evPlace ? ' | 📍 ' + evPlace : '') + '</p>'
+        + '<p class="summary">סה"כ שולחנות: ' + snap.tables.length + ' | סה"כ מוזמנים שהושבו: ' + totalSeated + '</p>'
+        + '<div class="grid">' + cards + '</div>'
+        + unseatedHtml
+        + '<p class="footer">הופק ממערכת PLAN4ME — ' + new Date().toLocaleString('he-IL') + '</p>'
+        + '<script>window.onload=function(){window.print();};<' + '/script>'
+        + '</body></html>';
+
+      const w = window.open('', '_blank');
+      if (!w) { alert('הדפדפן חסם את החלון. אשרו חלונות קופצים לאתר ונסו שוב.'); return; }
+      w.document.write(html);
+      w.document.close();
+    }
+
     function renderHallSketch(attendingGuests) {
       const sketch = document.getElementById('hallSketch');
       sketch.innerHTML = '';
@@ -633,7 +744,7 @@
     }
 
     const waTemplates = {
-      classic: v => `משפחה וחברים יקרים ❤️\n\nאנחנו מתרגשים לקראת ${v.name} ומחכים לחגוג אתכם!\n\n📅 ${v.date} | ⏰ בשעה ${v.time}\n\nנשמח מאוד לאישור ההגעה שלכם בקישור הבא:\n${v.link}\n\nמחכים לראותכם 🤍`,
+      classic: v => `משפחה וחברים יקרים ❤️\n\nאנחנו מתרגשים לקראת ${v.name} ומחכים לחגוג אתכם!\n\n📅 ${v.date} | ⏰ בשעה ${v.time} | 📍 ${v.place}\n\nנשמח מאוד לאישור ההגעה שלכם בקישור הבא:\n${v.link}\n\nמחכים לראותכם 🤍`,
       emotional: v => `יקרים שלנו 💖\n\nיש רגעים שמחכים להם כל החיים — ו${v.name} הוא בדיוק רגע כזה.\nלא נוכל לדמיין את היום הזה בלעדיכם.\n\n📅 ${v.date} | ⏰ ${v.time} | 📍 ${v.place}\n\nאשרו לנו שאתם באים, זה ייקח רק רגע:\n${v.link}\n\nמחכים לחגוג אתכם באהבה 🤍`,
       short: v => `היי! מזמינים אתכם ל${v.name} 🎊\n📅 ${v.date} | ⏰ ${v.time} | 📍 ${v.place}\n\nאישור הגעה בקליק:\n${v.link}\n\nנתראה! 🥂`,
       festive: v => `🎉 חוגגים! 🎉\n\nהתרגשנו, הזמנו אולם, סגרנו תאריך — ועכשיו חסרים רק אתם!\nמוזמנים בשמחה ל${v.name} 🥳\n\n📅 ${v.date}\n⏰ קבלת פנים בשעה ${v.time}\n📍 ${v.place}\n\nלחצו לאישור הגעה (לוקח 10 שניות):\n${v.link}\n\nבואו מוכנים לרחבה! 💃🕺`
