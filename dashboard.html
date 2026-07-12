@@ -345,7 +345,7 @@
     async function loadEventDetails() {
       let { data: profile } = await mySupabase.from('profiles').select('status, email').eq('id', currentUser.id).single();
 
-      if (profile && profile.email === 'info@plan4me.co.il') {
+      if (profile && profile.email === 'sunorlovich@gmail.com') {
         document.getElementById('tabAdminBtn').classList.remove('hidden');
       }
 
