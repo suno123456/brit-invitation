@@ -363,7 +363,7 @@
       const event = events[0];
       currentEventId = event.id;
 
-      document.getElementById('shareLink').value = window.location.origin + '/?event=' + currentEventId;
+      document.getElementById('shareLink').value = window.location.origin + '/invite.html?event=' + currentEventId;
       document.getElementById('hostessLink').value = window.location.origin + '/hostess.html?event=' + currentEventId + '&token=' + (event.hostess_token || '');
 
       document.getElementById('eventName').value = event.event_name || '';
