@@ -35,7 +35,7 @@
         <!-- שלב 1: תשלום -->
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 text-center">
           <span class="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">שלב 1</span>
-          <h3 class="text-lg font-bold text-blue-800 mt-3 mb-1">תשלום חד-פעמי בביט</h3>
+          <h3 class="text-lg font-bold text-blue-800 mt-3 mb-1">תשלום חד-פעמי ב-Bit</h3>
           <p class="text-sm font-semibold text-slate-700 mb-4">תשלום אחד לאירוע אחד — ללא מנוי וללא תשלומים נסתרים.</p>
           <div class="text-center mb-4 bg-white p-3 rounded-xl border border-blue-100 inline-block px-8 shadow-sm">
             <span class="text-slate-400 line-through text-sm block">מחיר מלא: 99 ₪</span>
@@ -43,9 +43,9 @@
             <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-md font-bold block mt-1">מבצע השקה לזמן מוגבל!</span>
           </div>
           <button onclick="redirectToBit()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition duration-300 shadow-md text-lg flex items-center justify-center gap-2">
-            💳 מעבר לתשלום 79 ₪ בביט
+            💳 מעבר לתשלום 79 ₪ ב-Bit
           </button>
-          <p class="text-xs text-slate-500 mt-3">התשלום מתבצע באפליקציית ביט המאובטחת, ישירות מהנייד שלכם.</p>
+          <p class="text-xs text-slate-500 mt-3">התשלום מתבצע באפליקציית Bit המאובטחת, ישירות מהנייד שלכם.</p>
         </div>
 
         <!-- שלב 2: יצירת חשבון -->
@@ -58,7 +58,7 @@
 
           <form id="registerForm" class="space-y-4">
             <div>
-              <label class="block text-sm font-bold mb-1 text-slate-700">שם מלא (כפי שמופיע בביט):</label>
+              <label class="block text-sm font-bold mb-1 text-slate-700">שם מלא (כפי שמופיע ב-Bit):</label>
               <input type="text" id="fullName" required placeholder="למשל: ישראל ישראלי" class="w-full border border-gray-300 p-3 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-right">
             </div>
             <div>
@@ -77,12 +77,12 @@
             <div class="flex items-start gap-2 mt-4 bg-slate-50 p-3 rounded-lg border border-slate-200">
               <input type="checkbox" id="confirmPayment" required class="mt-1 w-4 h-4 cursor-pointer">
               <label for="confirmPayment" class="text-xs text-slate-700 font-medium cursor-pointer">
-                אני מאשר/ת שביצעתי העברה בביט על סך 79 ₪, ומסכים/ה ל<a href="terms.html" target="_blank" class="text-blue-600 font-bold underline">תקנון ולמדיניות הביטולים</a>.
+                אני מאשר/ת שביצעתי העברה ב-Bit על סך 79 ₪, ומסכים/ה ל<a href="terms.html" target="_blank" class="text-blue-600 font-bold underline">תקנון ולמדיניות הביטולים</a>.
               </label>
             </div>
 
             <button type="submit" id="submitBtn" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl transition duration-300 shadow-md mt-2">
-              שילמתי בביט — פתחו לי את המערכת
+              שילמתי ב-Bit — פתחו לי את המערכת
             </button>
           </form>
           <p id="errorMsg" class="text-red-500 mt-4 hidden font-medium text-sm text-center"></p>
@@ -132,7 +132,7 @@
     const WEB3FORMS_ACCESS_KEY = '2733bd06-8639-4b9f-8a73-56195b1b4a3a';
 
     function redirectToBit() {
-      alert("שימו לב: באפליקציית ביט שתיפתח כעת, יש להזין ידנית את סכום המבצע: 79 ₪ עבור המערכת.");
+      alert("שימו לב: באפליקציית Bit שתיפתח כעת, יש להזין ידנית את סכום המבצע: 79 ₪ עבור המערכת.");
       window.open("https://www.bitpay.co.il/app/me/D4AE99EF-ACE6-96F6-3BB9-0D9CC8616EC99B68", "_blank");
     }
 
@@ -158,7 +158,7 @@
       if (error) {
         errorMsg.classList.remove('hidden');
         errorMsg.innerText = 'אירעה שגיאה או שהאימייל כבר קיים במערכת.';
-        btn.disabled = false; btn.innerText = 'שילמתי בביט — פתחו לי את המערכת';
+        btn.disabled = false; btn.innerText = 'שילמתי ב-Bit — פתחו לי את המערכת';
         return;
       }
 
@@ -177,7 +177,7 @@
             access_key: WEB3FORMS_ACCESS_KEY,
             subject: '🚀 לקוח חדש נרשם למערכת (אימות 79 ש"ח)!',
             from_name: 'מערכת המכירות',
-            message: `יש לך לקוח חדש שסימן ששילם 79 ש"ח בביט!\n\nשם מלא: ${fullName}\nטלפון: ${phone}\nאימייל: ${email}\n\nלאישור מיידי של הלקוח ופתיחת המערכת ישירות מהנייד, לחץ כאן:\n${window.location.origin}/approve.html?uid=${data.user.id}`
+            message: `יש לך לקוח חדש שסימן ששילם 79 ש"ח ב-Bit!\n\nשם מלא: ${fullName}\nטלפון: ${phone}\nאימייל: ${email}\n\nלאישור מיידי של הלקוח ופתיחת המערכת ישירות מהנייד, לחץ כאן:\n${window.location.origin}/approve.html?uid=${data.user.id}`
           })
         });
       } catch (err) { console.error("שגיאה בשליחת המייל", err); }

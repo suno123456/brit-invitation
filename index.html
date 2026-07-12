@@ -3,147 +3,264 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PLAN4ME - מערכת אישורי הגעה, הושבה ושליחת הזמנות בוואטסאפ</title>
-  <meta name="description" content="PLAN4ME - מערכת חכמה לאירועים: הזמנה דיגיטלית, אישורי הגעה בקליק, שליחת הזמנות בוואטסאפ, סידורי הושבה ועמדת מארחת. תשלום חד-פעמי לאירוע.">
-  <script>
-    // תאימות לאחור: קישורי הזמנה ישנים (/?event=...) מועברים לדף ההזמנה
-    (function () {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('event')) {
-        window.location.replace('invite.html' + window.location.search);
-      }
-    })();
-  </script>
+  <title>הזמנה לאירוע</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="icon" href="data:,">
-  <style> body { font-family: 'Assistant', sans-serif; } </style>
+  <style>
+    body { font-family: 'Assistant', sans-serif; background-color: #fcfbf8; }
+    .theme-color { color: #6b8eb3; }
+    .bg-theme { background-color: #6b8eb3; }
+    .border-theme-light { border-color: #bfa473; }
+    .loader { border: 4px solid #f3f3f3; border-top: 4px solid #6b8eb3; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-700">
+<body class="text-slate-700 p-4 flex justify-center items-center min-h-screen">
 
-  <!-- Hero -->
-  <header class="bg-slate-900 text-white">
-    <div class="max-w-5xl mx-auto px-4 py-14 md:py-20 text-center">
-      <div class="bg-white rounded-2xl px-8 py-3 inline-block shadow-lg mb-6">
-        <img src="logo.png" alt="PLAN4ME" class="h-14 md:h-20 w-auto" onerror="this.style.display='none';document.getElementById('brandFallback').style.display='inline';">
-        <span id="brandFallback" class="text-3xl font-extrabold text-slate-900 tracking-wide" style="display:none;">PLAN4ME</span>
-      </div>
-      <h1 class="text-3xl md:text-5xl font-extrabold leading-tight mb-4">האירוע שלכם, מסודר.<br class="hidden md:block"> מההזמנה ועד השולחן.</h1>
-      <p class="text-slate-300 text-base md:text-lg max-w-2xl mx-auto mb-8">
-        מערכת אחת לכל האירוע: הזמנה דיגיטלית מעוצבת, שליחת הזמנות בוואטסאפ בקליק, אישורי הגעה בזמן אמת, סידורי הושבה חכמים ועמדת מארחת ביום האירוע.
-      </p>
-      <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <a href="register.html" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-xl transition shadow-lg text-lg">🚀 מתחילים עכשיו — 79 ₪ לאירוע</a>
-        <a href="login.html" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 px-10 rounded-xl transition border border-slate-600 text-lg">כניסה למערכת</a>
-      </div>
-      <p class="text-slate-400 text-xs mt-4">תשלום חד-פעמי · ללא מנוי · הפעלה עד יום עסקים</p>
+  <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden text-center border-t-4 border-theme-light my-4 min-h-[400px] flex flex-col relative">
+    
+    <div id="loadingScreen" class="absolute inset-0 bg-white flex flex-col items-center justify-center z-50">
+      <div class="loader mb-4"></div>
+      <p class="text-slate-500 font-bold">טוען את פרטי ההזמנה...</p>
     </div>
-  </header>
 
-  <!-- Features -->
-  <section class="max-w-5xl mx-auto px-4 py-14">
-    <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 text-center mb-2">כל מה שאירוע צריך, במקום אחד</h2>
-    <p class="text-slate-500 text-center mb-10">בלי אקסלים מתפזרים, בלי טלפונים אין-סופיים לאורחים.</p>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    <img id="displayImage" src="" alt="הזמנה" class="w-full h-auto object-cover border-b border-gray-100 hidden">
 
-      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-        <div class="text-3xl mb-3">💬</div>
-        <h3 class="font-extrabold text-slate-800 mb-1">שליחת הזמנות בוואטסאפ</h3>
-        <p class="text-sm text-slate-500 leading-relaxed">מעלים רשימת מוזמנים, בוחרים נוסח — והמערכת שולחת לכל אחד הודעה אישית עם שמו, תמונת ההזמנה וקישור לאישור. הכל מהוואטסאפ שלכם.</p>
-      </div>
+    <div class="p-6 md:p-8 flex-1">
+      
+      <div id="mainContent" class="hidden space-y-6">
+        <h2 id="displayEventName" class="text-2xl font-bold theme-color mb-4">נשמח לראותכם! 💙</h2>
 
-      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-        <div class="text-3xl mb-3">✅</div>
-        <h3 class="font-extrabold text-slate-800 mb-1">אישורי הגעה בזמן אמת</h3>
-        <p class="text-sm text-slate-500 leading-relaxed">האורחים מאשרים בקליק מהנייד — כמות מגיעים, ברכה אישית, הכל מתעדכן אצלכם מיד. תזכורת אוטומטית למי שטרם ענה.</p>
-      </div>
+        <div class="bg-slate-50 rounded-2xl p-4 border border-gray-100">
+          <div class="flex justify-center items-center space-x-8 space-x-reverse theme-color mb-4">
+            <div class="text-center">
+              <p class="text-xs text-gray-500 mb-0.5">תאריך</p>
+              <p id="displayDate" class="font-bold text-lg">-</p>
+            </div>
+            <div class="h-8 border-l border-theme-light opacity-50"></div>
+            <div class="text-center">
+              <p class="text-xs text-gray-500 mb-0.5">בשעה</p>
+              <p id="displayTime" class="font-bold text-lg">-</p>
+            </div>
+            <div id="chuppahSep" class="h-8 border-l border-theme-light opacity-50 hidden"></div>
+            <div id="chuppahRow" class="text-center hidden">
+              <p class="text-xs text-gray-500 mb-0.5">💍 חופה</p>
+              <p id="displayChuppah" class="font-bold text-lg">-</p>
+            </div>
+          </div>
+          
+          <div class="text-center mb-4">
+            <p id="displayLocation" class="text-sm font-bold theme-color">-</p>
+          </div>
 
-      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-        <div class="text-3xl mb-3">🪑</div>
-        <h3 class="font-extrabold text-slate-800 mb-1">סידורי הושבה חכמים</h3>
-        <p class="text-sm text-slate-500 leading-relaxed">משבצים אורחים לשולחנות, רואים סקיצת אולם חיה, ומייצאים לאקסל או PDF מוכן להעברה למנהל האירוע.</p>
-      </div>
-
-      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-        <div class="text-3xl mb-3">💁‍♀️</div>
-        <h3 class="font-extrabold text-slate-800 mb-1">עמדת מארחת דיגיטלית</h3>
-        <p class="text-sm text-slate-500 leading-relaxed">ביום האירוע: המארחת מסמנת הגעה מהנייד, האורח מחפש את השולחן שלו לבד — ואתם רואים תפוסה חיה של האולם.</p>
-      </div>
-
-      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-        <div class="text-3xl mb-3">🎁</div>
-        <h3 class="font-extrabold text-slate-800 mb-1">מתנות בביט וברכות</h3>
-        <p class="text-sm text-slate-500 leading-relaxed">קישור Bit לקבלת מתנות ישירות מדף ההזמנה, וגלוית ברכה דיגיטלית שכל אורח ממלא — מזכרת שנשארת אחרי האירוע.</p>
-      </div>
-
-      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-        <div class="text-3xl mb-3">📊</div>
-        <h3 class="font-extrabold text-slate-800 mb-1">שליטה מלאה מכל מקום</h3>
-        <p class="text-sm text-slate-500 leading-relaxed">דשבורד ניהול מהמחשב או מהנייד: סטטיסטיקות חיות, ייבוא מאקסל, ייצוא דוחות, וניווט Waze לאורחים.</p>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- How it works -->
-  <section class="bg-white border-y border-slate-100">
-    <div class="max-w-5xl mx-auto px-4 py-14">
-      <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 text-center mb-10">איך זה עובד? שלושה צעדים</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-        <div class="p-4">
-          <div class="w-12 h-12 rounded-full bg-blue-600 text-white font-extrabold text-xl flex items-center justify-center mx-auto mb-3">1</div>
-          <h3 class="font-bold text-slate-800 mb-1">יוצרים אירוע</h3>
-          <p class="text-sm text-slate-500">מגדירים תאריך, מקום ותמונת הזמנה — ומעלים את רשימת המוזמנים מאקסל.</p>
+          <a id="displayWaze" href="#" target="_blank" class="flex items-center justify-center w-full border border-theme-light text-yellow-700 hover:bg-yellow-50 font-bold py-2 rounded-xl transition duration-300 text-sm">
+            ניווט לאירוע ב-Waze
+          </a>
         </div>
-        <div class="p-4">
-          <div class="w-12 h-12 rounded-full bg-blue-600 text-white font-extrabold text-xl flex items-center justify-center mx-auto mb-3">2</div>
-          <h3 class="font-bold text-slate-800 mb-1">שולחים בקליק</h3>
-          <p class="text-sm text-slate-500">המערכת שולחת לכל אורח הזמנה אישית בוואטסאפ, עם קישור לאישור הגעה.</p>
+
+        <div id="dayOfEventSection" class="bg-amber-50/60 border border-amber-200 rounded-2xl p-4 text-right space-y-3 hidden">
+          <h4 class="text-sm font-bold text-amber-900">🧭 ברוכים הבאים לאולם! גלו את השולחן שלכם:</h4>
+          <div class="flex gap-2">
+            <input type="text" id="seatingSearchInput" placeholder="הקלידו שם מלא כפי שאישרתם..." class="flex-1 border border-amber-300 p-2 text-sm rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500 bg-white">
+            <button onclick="findMyTableAndMarkArrival()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-4 rounded-xl transition shadow-sm">חפש שולחן</button>
+          </div>
+          
+          <div id="seatingAlertBox" class="hidden p-4 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-xl shadow border border-emerald-500 text-center animate-fade-in">
+            <span class="text-2xl block mb-1">👑</span>
+            <p id="seatingAlertText" class="text-sm font-bold leading-relaxed"></p>
+          </div>
         </div>
-        <div class="p-4">
-          <div class="w-12 h-12 rounded-full bg-blue-600 text-white font-extrabold text-xl flex items-center justify-center mx-auto mb-3">3</div>
-          <h3 class="font-bold text-slate-800 mb-1">הכל מתנהל לבד</h3>
-          <p class="text-sm text-slate-500">אישורים נכנסים בזמן אמת, תזכורות למי ששכח, הושבה מסודרת — ואתם פנויים לחגוג.</p>
+
+        <form id="rsvpForm" class="space-y-4 text-right border-t pt-4">
+          <h4 class="text-sm font-bold theme-color mb-2">✍️ אישור הגעה לאירוע:</h4>
+          <div>
+            <label class="block text-sm font-bold mb-1 theme-color">שם מלא:</label>
+            <input type="text" name="name" required class="w-full border p-2.5 rounded-xl bg-slate-50">
+          </div>
+          <div>
+            <label class="block text-sm font-bold mb-1 theme-color">האם תגיעו?</label>
+            <select name="attending" id="attending" onchange="document.getElementById('guestField').classList.toggle('hidden', this.value==='no')" class="w-full border p-2.5 rounded-xl bg-slate-50 cursor-pointer">
+              <option value="yes">כן, נגיע בשמחה!</option>
+              <option value="no">לצערי לא נוכל להגיע</option>
+            </select>
+          </div>
+          <div id="guestField">
+            <label class="block text-sm font-bold mb-1 theme-color">כמות מגיעים:</label>
+            <input type="number" name="guests" value="1" min="1" class="w-full border p-2.5 rounded-xl bg-slate-50 text-center">
+          </div>
+          <div class="bg-gradient-to-br from-amber-50 to-rose-50 border-2 border-amber-200 rounded-2xl p-4 shadow-inner">
+            <label class="block text-base font-extrabold mb-1 text-amber-800 text-center">💌 גלוית ברכה לבעלי השמחה</label>
+            <p class="text-xs text-slate-500 text-center mb-3">כמה מילים חמות מכם — זה החלק שהכי ישמח אותם! אפשר לבחור סגנון או לכתוב חופשי:</p>
+            <div class="flex flex-wrap justify-center gap-2 mb-3">
+              <button type="button" onclick="fillBlessing('classic')" class="text-xs font-bold bg-white border border-amber-300 text-amber-800 px-3 py-1.5 rounded-full hover:bg-amber-100 transition">✨ קלאסי</button>
+              <button type="button" onclick="fillBlessing('emotional')" class="text-xs font-bold bg-white border border-rose-300 text-rose-700 px-3 py-1.5 rounded-full hover:bg-rose-100 transition">💖 מרגש</button>
+              <button type="button" onclick="fillBlessing('funny')" class="text-xs font-bold bg-white border border-blue-300 text-blue-700 px-3 py-1.5 rounded-full hover:bg-blue-100 transition">😄 מצחיק</button>
+            </div>
+            <textarea name="blessing" id="blessingField" rows="4" placeholder="כתבו כאן את הברכה שלכם..." class="w-full border-2 border-amber-200 p-3.5 rounded-xl bg-white resize-none text-slate-700 focus:outline-none focus:border-amber-400 leading-relaxed"></textarea>
+          </div>
+          <button type="submit" id="submitBtn" class="w-full bg-theme text-white text-lg font-bold py-3.5 rounded-xl shadow-md transition mt-2 hover:opacity-90">
+            שליחת אישור
+          </button>
+        </form>
+
+        <div id="bitSection" class="mt-8 pt-6 border-t border-gray-200 text-center hidden">
+          <p class="text-sm text-slate-500 mb-3 font-medium">רוצים לשמח במתנה?</p>
+          <a id="displayBit" href="#" target="_blank" class="inline-flex items-center justify-center border-2 border-blue-400 text-blue-600 hover:bg-blue-50 font-bold py-3 px-8 rounded-xl transition text-base w-full">
+            🎁 שליחת מתנה ב-Bit
+          </a>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- Pricing -->
-  <section class="max-w-3xl mx-auto px-4 py-14 text-center">
-    <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 mb-2">מחיר אחד. פשוט.</h2>
-    <p class="text-slate-500 mb-8">בלי מנויים, בלי הפתעות — משלמים פעם אחת לאירוע.</p>
-    <div class="bg-white rounded-3xl border-2 border-blue-200 shadow-xl p-8 inline-block w-full max-w-md">
-      <span class="text-slate-400 line-through text-lg block">99 ₪</span>
-      <span class="text-5xl font-extrabold text-blue-600 block my-1">79 ₪</span>
-      <span class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold inline-block mb-5">מבצע השקה לזמן מוגבל</span>
-      <ul class="text-sm text-slate-600 text-right space-y-2 mb-6 max-w-xs mx-auto">
-        <li>✓ הזמנה דיגיטלית + אישורי הגעה ללא הגבלה</li>
-        <li>✓ שליחת הזמנות ותזכורות בוואטסאפ</li>
-        <li>✓ סידורי הושבה + עמדת מארחת</li>
-        <li>✓ ברכות, מתנות בביט וייצוא דוחות</li>
-        <li>✓ ליווי אישי עד יום עסקים</li>
-      </ul>
-      <a href="register.html" class="block bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition shadow-md text-lg">להתחיל עכשיו</a>
-      <p class="text-[11px] text-slate-400 mt-3">החזר כספי מלא אם החשבון לא אושר · <a href="terms.html" class="underline">מדיניות ביטולים</a></p>
-    </div>
-  </section>
+      <div id="successMessage" class="hidden py-4 animate-fade-in">
+        <div class="theme-color text-5xl mb-4">🎉</div>
+        <h3 class="text-3xl font-bold theme-color mb-2">תודה רבה!</h3>
+        <p id="successText" class="text-slate-600 font-medium mb-6 text-lg">האישור התקבל.</p>
+        
+        <div id="successBitSection" class="bg-blue-50 rounded-2xl p-6 border border-blue-100 mt-4 hidden shadow-sm">
+          <p class="text-base text-slate-700 mb-4 font-bold">לנוחיותכם, ניתן להעביר מתנה ב-Bit:</p>
+          <a id="successBitLink" href="#" target="_blank" class="flex items-center justify-center w-full bg-theme text-white font-bold py-4 rounded-xl shadow-md text-lg hover:opacity-90">
+            🎁 מעבר מהיר ל-Bit
+          </a>
+        </div>
+      </div>
 
-  <!-- Footer -->
-  <footer class="bg-slate-900 text-slate-300">
-    <div class="max-w-5xl mx-auto px-4 py-10 text-center">
-      <p class="font-extrabold text-white text-lg tracking-wide mb-1">PLAN4ME</p>
-      <p class="text-sm text-slate-400 mb-4">מערכת אישורי הגעה והושבה לאירועים</p>
-      <p class="text-xs space-x-2 space-x-reverse mb-4">
-        <a href="terms.html" class="underline hover:text-white">תקנון ומדיניות ביטולים</a>
-        <span>·</span>
-        <a href="privacy.html" class="underline hover:text-white">מדיניות פרטיות</a>
-        <span>·</span>
-        <a href="mailto:sunorlovich@gmail.com" class="underline hover:text-white">יצירת קשר</a>
-      </p>
-      <p class="text-xs text-slate-500">© כל הזכויות שמורות לסאן אורלביץ'.</p>
     </div>
-  </footer>
 
+    <div class="border-t border-slate-100 py-2.5 text-center bg-slate-50/60">
+      <span class="inline-flex items-center justify-center gap-2 align-middle">
+        <span class="text-[10px] text-slate-400 font-bold">ההזמנה הופקה במערכת</span>
+        <img src="logo.png" alt="PLAN4ME" class="h-4 w-auto opacity-80 inline-block" onerror="this.style.display='none';document.getElementById('brandFallbackInv').style.display='inline';">
+        <b id="brandFallbackInv" class="text-[10px] text-slate-500" style="display:none;">PLAN4ME</b>
+      </span>
+      <span class="block text-[10px] text-slate-400 mt-1">
+        <a href="terms.html" target="_blank" class="underline hover:text-slate-600">תקנון</a>
+        <span class="mx-1">·</span>
+        <a href="privacy.html" target="_blank" class="underline hover:text-slate-600">מדיניות פרטיות</a>
+      </span>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://ghfgqwslakjqmxuboobn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZmdxd3NsYWtqcW14dWJvb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2Mzc0NDksImV4cCI6MjA5ODIxMzQ0OX0.c5QuVRyTrmbGr_JZJDyokxG_ZnT0zi8FpVsBocJ-BIA';
+    const mySupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get('event');
+
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      if (!eventId) {
+        document.getElementById('loadingScreen').innerHTML = '<p class="text-red-500 font-bold p-6">שגיאה: חסר מזהה אירוע בקישור.</p>';
+        return;
+      }
+      const { data: eventData, error } = await mySupabase.rpc('get_public_event', { target_event_id: eventId });
+      if (error || !eventData || eventData.length === 0) {
+        document.getElementById('loadingScreen').innerHTML = '<p class="text-red-500 font-bold p-6">האירוע לא נמצא.</p>';
+        return;
+      }
+      const event = eventData[0];
+      if(event.image_url) {
+        const img = document.getElementById('displayImage');
+        img.src = event.image_url; img.classList.remove('hidden');
+      }
+      document.getElementById('displayEventName').innerText = event.event_name;
+      
+      let formattedDate = '-'; let isToday = false;
+      if (event.event_date) {
+        const datePart = event.event_date.split('T')[0];
+        formattedDate = datePart.split('-').reverse().join('.');
+        if (datePart === new Date().toLocaleDateString('he-IL', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('.').reverse().join('-')) {
+          isToday = true;
+        }
+      }
+      document.getElementById('displayDate').innerText = formattedDate;
+      if (isToday) document.getElementById('dayOfEventSection').classList.remove('hidden');
+
+      document.getElementById('displayTime').innerText = event.event_time || '-';
+      if (event.chuppah_time) {
+        document.getElementById('displayChuppah').innerText = event.chuppah_time;
+        document.getElementById('chuppahRow').classList.remove('hidden');
+        document.getElementById('chuppahSep').classList.remove('hidden');
+      }
+      document.getElementById('displayLocation').innerText = event.location_name || '-';
+      if(event.waze_link) document.getElementById('displayWaze').href = event.waze_link;
+      else document.getElementById('displayWaze').classList.add('hidden');
+
+      if(event.bit_link) {
+        document.getElementById('bitSection').classList.remove('hidden');
+        document.getElementById('displayBit').href = event.bit_link;
+        document.getElementById('successBitSection').classList.remove('hidden');
+        document.getElementById('successBitLink').href = event.bit_link;
+      }
+      document.getElementById('loadingScreen').classList.add('hidden');
+      document.getElementById('mainContent').classList.remove('hidden');
+    });
+
+    async function findMyTableAndMarkArrival() {
+      const searchInput = document.getElementById('seatingSearchInput');
+      const alertBox = document.getElementById('seatingAlertBox');
+      const alertText = document.getElementById('seatingAlertText');
+      const nameQuery = searchInput.value.trim();
+
+      if (!nameQuery) { alert("אנא הקלידו שם מלא לחיפוש השולחן."); return; }
+      alertBox.classList.add('hidden');
+
+      const { data, error } = await mySupabase.rpc('arrive_and_find_table', { p_event_id: eventId, p_name: nameQuery });
+
+      if (error || !data || data.length === 0) {
+        alertText.innerText = `לא מצאנו אישור הגעה פעיל על השם "${nameQuery}". ודאו שהשם מאויית נכון.`;
+        alertBox.className = "p-4 bg-rose-100 text-rose-800 rounded-xl border border-rose-300 text-center";
+        alertBox.classList.remove('hidden');
+        return;
+      }
+      const guest = data[0];
+      if (guest.table_id) {
+        alertText.innerHTML = `ברוכים הבאים, <span class="font-extrabold">${esc(guest.guest_name)}</span>! 🎉<br>שובצתם ב-<span class="text-yellow-200 font-black text-lg underline">${esc(guest.table_name)}</span>.<br><span class="text-xs opacity-90 font-medium">כניסתכם עודכנה אוטומטית במערכת האולם.</span>`;
+      } else {
+        alertText.innerHTML = `ברוכים הבאים, <span class="font-extrabold">${esc(guest.guest_name)}</span>!<br>נרשמה כניסתכם באולם, המארחת תפנה אתכם לשולחן הרלוונטי.`;
+      }
+      alertBox.className = "p-4 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-xl shadow border border-emerald-500 text-center animate-fade-in";
+      alertBox.classList.remove('hidden'); alertBox.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // תבניות ברכה - נקודת פתיחה שהאורח יכול לערוך
+    const blessingTemplates = {
+      classic: 'מזל טוב! מאחלים לכם המון אושר, בריאות ושמחה. שתזכו לשנים רבות של אהבה ונחת. 🥂',
+      emotional: 'איזו התרגשות! מאחלים לכם שהיום המיוחד הזה יהיה רק ההתחלה של דרך מלאה באהבה, צחוק ורגעים קסומים. אוהבים אתכם! 💖',
+      funny: 'מזל טוב! שיהיה אירוע מטורף, אוכל בשפע ורחבה מלאה — אנחנו כבר מחממים את נעלי הריקוד! 🕺💃'
+    };
+    function fillBlessing(style) {
+      const field = document.getElementById('blessingField');
+      field.value = blessingTemplates[style] || '';
+      field.focus();
+    }
+
+    document.getElementById('rsvpForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("submitBtn"); btn.disabled = true; btn.innerText = "שולח...";
+      const form = e.target; const isAttending = form.attending.value === "yes";
+      
+      const { error } = await mySupabase.rpc('submit_public_rsvp', {
+        p_event_id: eventId,
+        p_name: form.name.value,
+        p_attending: isAttending,
+        p_count: isAttending ? parseInt(form.guests.value) : 0,
+        p_blessing: form.blessing.value
+      });
+
+      if (error) {
+        alert("שגיאה בשמירה. נסה שנית."); btn.disabled = false; btn.innerText = "שליחת אישור";
+      } else {
+        document.getElementById("mainContent").classList.add("hidden");
+        document.getElementById("successText").innerText = isAttending ? "האישור התקבל, נשמח לראותכם 💙" : "תודה שעדכנתם, ניפגש בשמחות 💙";
+        document.getElementById("successMessage").classList.remove("hidden");
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+  </script>
 </body>
 </html>
