@@ -79,6 +79,10 @@
             <input type="text" name="name" required class="w-full border p-2.5 rounded-xl bg-slate-50">
           </div>
           <div>
+            <label class="block text-sm font-bold mb-1 theme-color">טלפון נייד:</label>
+            <input type="tel" name="phone" required inputmode="tel" placeholder="050-0000000" class="w-full border p-2.5 rounded-xl bg-slate-50 text-left" dir="ltr">
+          </div>
+          <div>
             <label class="block text-sm font-bold mb-1 theme-color">האם תגיעו?</label>
             <select name="attending" id="attending" onchange="document.getElementById('guestField').classList.toggle('hidden', this.value==='no')" class="w-full border p-2.5 rounded-xl bg-slate-50 cursor-pointer">
               <option value="yes">כן, נגיע בשמחה!</option>
@@ -247,6 +251,7 @@
       const { error } = await mySupabase.rpc('submit_public_rsvp', {
         p_event_id: eventId,
         p_name: form.name.value,
+        p_phone: form.phone.value,
         p_attending: isAttending,
         p_count: isAttending ? parseInt(form.guests.value) : 0,
         p_blessing: form.blessing.value
