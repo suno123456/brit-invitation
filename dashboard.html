@@ -132,6 +132,7 @@
               <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden">
             </label>
           </div>
+          <button onclick="downloadExcelTemplate()" type="button" class="w-full sm:w-auto bg-slate-700 hover:bg-slate-800 text-white font-bold py-3.5 px-6 rounded-xl transition shadow text-xs whitespace-nowrap mb-2 sm:mb-0 sm:ml-2">📥 הורדת תבנית אקסל ריקה</button>
           <button onclick="handleExcelImport()" id="importExcelBtn" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 px-6 rounded-xl transition shadow text-xs whitespace-nowrap">
             🚀 קרא ועבד קובץ
           </button>
@@ -218,6 +219,24 @@
           <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex justify-between items-center text-sm">
             <div><h4 class="font-bold text-amber-900">אורחים שאישרו ועדיין לא הושבו:</h4></div>
             <span id="unseatedCount" class="bg-amber-600 text-white font-extrabold text-base px-3 py-1 rounded-full">0</span>
+          </div>
+
+          <!-- רשימת מאשרי הגעה נגללת (רק מי שאישר; מי שהושב - מסומן בקו) -->
+          <div class="bg-white rounded-2xl shadow-md border p-4">
+            <div class="flex items-center justify-between mb-2 gap-2 flex-wrap">
+              <h4 class="font-bold text-slate-800 text-sm">📋 מאשרי הגעה</h4>
+              <div class="flex items-center gap-2 text-xs">
+                <select id="seatingSideFilter" onchange="renderConfirmedSeatingList()" class="border rounded-lg p-1.5 bg-slate-50 text-xs">
+                  <option value="">כל הצדדים</option>
+                </select>
+                <label class="flex items-center gap-1 cursor-pointer font-bold text-slate-600 bg-slate-50 border rounded-lg px-2 py-1.5">
+                  <input type="checkbox" id="seatingUnseatedOnly" onchange="renderConfirmedSeatingList()" class="w-3.5 h-3.5 cursor-pointer">
+                  רק שטרם הושבו
+                </label>
+              </div>
+            </div>
+            <input type="text" id="seatingNameSearch" oninput="renderConfirmedSeatingList()" placeholder="🔍 חיפוש לפי שם..." class="w-full border rounded-lg p-2 bg-slate-50 text-xs mb-2">
+            <div id="confirmedSeatingList" class="max-h-64 overflow-y-auto space-y-1 pl-1"></div>
           </div>
 
           <!-- סקיצת האולם -->
@@ -560,6 +579,60 @@
       w.document.close();
     }
 
+    // ===== הורדת תבנית אקסל ריקה =====
+    function downloadExcelTemplate() {
+      const headers = ['שם', 'טלפון', 'כמות', 'צד', 'קטגוריה'];
+      const example = ['ישראל ישראלי', '0501234567', 2, 'חתן', 'משפחה'];
+      const ws = XLSX.utils.aoa_to_sheet([headers, example]);
+      ws['!cols'] = [{ wch: 20 }, { wch: 15 }, { wch: 8 }, { wch: 12 }, { wch: 14 }];
+      const wb = XLSX.utils.book_new();
+      wb.Workbook = { Views: [{ RTL: true }] };
+      XLSX.utils.book_append_sheet(wb, ws, 'רשימת מוזמנים');
+      XLSX.writeFile(wb, 'תבנית_רשימת_מוזמנים_PLAN4ME.xlsx');
+    }
+
+    // ===== רשימת מאשרי הגעה נגללת בטאב הושבה =====
+    // ממלא את בורר הצדדים לפי הערכים הקיימים בפועל
+    function populateSeatingSideFilter() {
+      const sel = document.getElementById('seatingSideFilter');
+      if (!sel) return;
+      const current = sel.value;
+      const sides = [...new Set(globalGuestsData.filter(g => g.attending && g.side).map(g => g.side))].sort();
+      sel.innerHTML = '<option value="">כל הצדדים</option>' + sides.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+      sel.value = current;
+    }
+
+    function renderConfirmedSeatingList() {
+      const box = document.getElementById('confirmedSeatingList');
+      if (!box) return;
+      const sideFilter = document.getElementById('seatingSideFilter').value;
+      const unseatedOnly = document.getElementById('seatingUnseatedOnly').checked;
+      const search = document.getElementById('seatingNameSearch').value.trim().toLowerCase();
+
+      let list = globalGuestsData.filter(g => g.attending === true);
+      if (sideFilter) list = list.filter(g => (g.side || '') === sideFilter);
+      if (unseatedOnly) list = list.filter(g => !g.table_id);
+      if (search) list = list.filter(g => (g.guest_name || '').toLowerCase().includes(search));
+
+      if (list.length === 0) {
+        box.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">אין אורחים תואמים.</p>';
+        return;
+      }
+
+      box.innerHTML = '';
+      list.sort((a,b) => (a.guest_name||'').localeCompare(b.guest_name||'', 'he')).forEach(g => {
+        const seated = !!g.table_id;
+        const table = seated ? allTables.find(t => t.id === g.table_id) : null;
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between text-xs px-2 py-1.5 rounded-lg border ' + (seated ? 'bg-slate-50 border-slate-100' : 'bg-white border-slate-200');
+        const nameCls = seated ? 'line-through text-slate-400' : 'text-slate-700 font-bold';
+        const sideTag = g.side ? `<span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">${esc(g.side)}</span>` : '';
+        const tableTag = seated ? `<span class="text-[10px] text-emerald-600 font-bold">🪑 ${esc(table ? table.table_name : '')}</span>` : '';
+        row.innerHTML = `<span class="flex items-center gap-1.5"><span class="${nameCls}">${esc(g.guest_name)} (${g.guests_count || 1})</span>${sideTag}</span>${tableTag}`;
+        box.appendChild(row);
+      });
+    }
+
     function renderHallSketch(attendingGuests) {
       const sketch = document.getElementById('hallSketch');
       sketch.innerHTML = '';
@@ -591,6 +664,8 @@
       document.getElementById('unseatedCount').innerText = unseatedGuests.reduce((acc, g) => acc + (g.guests_count || 0), 0);
 
       renderHallSketch(attendingGuests);
+      populateSeatingSideFilter();
+      renderConfirmedSeatingList();
 
       if (allTables.length === 0) { container.innerHTML = `<p class="text-xs text-slate-400 p-4 text-center bg-white rounded-xl border col-span-2">אין שולחנות כרגע.</p>`; return; }
       allTables.forEach(table => {
