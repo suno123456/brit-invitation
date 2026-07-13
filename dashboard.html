@@ -214,12 +214,6 @@
             <div><label class="block font-bold text-slate-600 mb-1">תכולת שולחן (כיסאות):</label><input type="number" id="newTableCapacity" value="10" min="1" class="w-full border p-2 rounded-lg bg-slate-50"></div>
             <button onclick="createNewTable()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition shadow-sm">🔨 צור שולחן</button>
           </div>
-        </div>
-        <div class="md:col-span-2 space-y-4">
-          <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex justify-between items-center text-sm">
-            <div><h4 class="font-bold text-amber-900">אורחים שאישרו ועדיין לא הושבו:</h4></div>
-            <span id="unseatedCount" class="bg-amber-600 text-white font-extrabold text-base px-3 py-1 rounded-full">0</span>
-          </div>
 
           <!-- רשימת מאשרי הגעה נגללת (רק מי שאישר; מי שהושב - מסומן בקו) -->
           <div class="bg-white rounded-2xl shadow-md border p-4">
@@ -237,6 +231,11 @@
             </div>
             <input type="text" id="seatingNameSearch" oninput="renderConfirmedSeatingList()" placeholder="🔍 חיפוש לפי שם..." class="w-full border rounded-lg p-2 bg-slate-50 text-xs mb-2">
             <div id="confirmedSeatingList" class="max-h-64 overflow-y-auto space-y-1 pl-1"></div>
+        </div>
+        <div class="md:col-span-2 space-y-4">
+          <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex justify-between items-center text-sm">
+            <div><h4 class="font-bold text-amber-900">אורחים שאישרו ועדיין לא הושבו:</h4></div>
+            <span id="unseatedCount" class="bg-amber-600 text-white font-extrabold text-base px-3 py-1 rounded-full">0</span>
           </div>
 
           <!-- סקיצת האולם -->
@@ -677,7 +676,11 @@
         let dropdownHtml = `<select onchange="seatGuestInTable(this, '${table.id}')" class="w-full text-xs border p-2 rounded-lg bg-slate-50"><option value="">➕ הושב אורח...</option>`;
         unseatedGuests.forEach(g => { dropdownHtml += `<option value="${g.id}">${esc(g.guest_name)} (${g.guests_count})</option>`; });
         dropdownHtml += `</select>`;
-        tableCard.innerHTML = `<div><div class="flex justify-between items-start border-b pb-2 mb-2"><div><h4 class="font-bold text-slate-800">${esc(table.table_name)}</h4><p class="text-xs text-slate-500">תפוסה: ${seatedInTable.reduce((acc, g) => acc + (g.guests_count || 0), 0)} / ${table.capacity}</p></div><button onclick="deleteTable('${table.id}')" class="text-xs text-slate-400 hover:text-red-500">🗑️ מחק</button></div>${guestsListHtml}</div><div class="pt-2 border-t mt-2">${dropdownHtml}</div>`;
+        const occ = seatedInTable.reduce((acc, g) => acc + (g.guests_count || 0), 0);
+        const over = occ > table.capacity;
+        const occClass = over ? 'text-rose-600 font-extrabold' : 'text-slate-500';
+        const overBadge = over ? ` <span class="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-bold">⚠️ חריגה</span>` : '';
+        tableCard.innerHTML = `<div><div class="flex justify-between items-start border-b pb-2 mb-2"><div><h4 class="font-bold text-slate-800">${esc(table.table_name)}</h4><p class="text-xs ${occClass}">תפוסה: ${occ} / ${table.capacity}${overBadge}</p></div><button onclick="deleteTable('${table.id}')" class="text-xs text-slate-400 hover:text-red-500">🗑️ מחק</button></div>${guestsListHtml}</div><div class="pt-2 border-t mt-2">${dropdownHtml}</div>`;
         container.appendChild(tableCard);
       });
     }
@@ -696,8 +699,67 @@
       });
     }
 
-    async function seatGuestInTable(select, tableId) { if (!select.value) return; await mySupabase.from('guests').update({ table_id: tableId }).eq('id', select.value); loadDashboardData(); }
-    async function removeGuestFromTable(guestId) { await mySupabase.from('guests').update({ table_id: null }).eq('id', guestId); loadDashboardData(); }
+    // הושבת אורח בשולחן - עם בדיקת קיבולת ואפשרות פיצול (אפשרות א')
+    async function seatGuestInTable(select, tableId) {
+      if (!select.value) return;
+      const guestId = select.value;
+      const guest = globalGuestsData.find(g => g.id === guestId);
+      const table = allTables.find(t => t.id === tableId);
+      if (!guest || !table) { select.value = ''; return; }
+
+      const partySize = guest.guests_count || 1;
+      const cap = table.capacity || 0;
+      const occupied = globalGuestsData
+        .filter(g => g.table_id === tableId && g.attending)
+        .reduce((acc, g) => acc + (g.guests_count || 0), 0);
+      const free = cap - occupied;
+
+      // מספיק מקום - הושבה רגילה
+      if (partySize <= free) {
+        await mySupabase.from('guests').update({ table_id: tableId }).eq('id', guestId);
+        loadDashboardData();
+        return;
+      }
+
+      // אין מספיק מקום
+      select.value = '';
+      if (free <= 0) {
+        alert('⚠️ שולחן "' + table.table_name + '" מלא (' + occupied + '/' + cap + '). פנו מקום או בחרו שולחן אחר.');
+        return;
+      }
+
+      // יש מקום חלקי - מציעים פיצול
+      const msg = 'לאורח "' + guest.guest_name + '" יש ' + partySize + ' מקומות, אך בשולחן "' +
+                  table.table_name + '" נותרו רק ' + free + '.\n\n' +
+                  'לחצו "אישור" כדי להושיב כאן ' + free + ' מהם, והשאר (' + (partySize - free) + ') יחזרו לרשימת ההמתנה לשיבוץ בשולחן אחר.\n' +
+                  'לחצו "ביטול" כדי לא להושיב כלל.';
+      if (!confirm(msg)) return;
+
+      const seatHere = free;
+      const remainder = partySize - free;
+
+      // הרשומה הנוכחית: מצטמצמת ל-seatHere ומשובצת כאן
+      await mySupabase.from('guests').update({ table_id: tableId, guests_count: seatHere }).eq('id', guestId);
+
+      // רשומת שארית חדשה: אותו אורח, יתרת המקומות, ללא שולחן
+      await mySupabase.from('guests').insert([{
+        event_id: currentEventId,
+        guest_name: guest.guest_name + ' (המשך)',
+        phone: guest.phone || null,
+        attending: true,
+        guests_count: remainder,
+        table_id: null,
+        side: guest.side || null,
+        category: guest.category || null
+      }]);
+
+      loadDashboardData();
+    }
+
+    async function removeGuestFromTable(guestId) {
+      await mySupabase.from('guests').update({ table_id: null }).eq('id', guestId);
+      loadDashboardData();
+    }
     async function createNewTable() {
       const name = document.getElementById('newTableName').value.trim();
       const cap = parseInt(document.getElementById('newTableCapacity').value) || 10;
