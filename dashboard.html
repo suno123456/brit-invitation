@@ -199,10 +199,17 @@
               </button>
             </div>
             <div class="border-t border-indigo-100 pt-3 mt-1">
-              <button id="p4mSendThanksBtn" onclick="plan4meSendThankYou()" disabled class="w-full bg-rose-500 hover:bg-rose-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-xl transition shadow-sm text-xs flex items-center justify-center gap-2">
-                💙 שליחת הודעת תודה (לאחר האירוע — רק למי שהגיע)
+              <button type="button" onclick="toggleThanksBox()" id="p4mThanksToggle" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold py-2.5 px-4 rounded-xl transition text-xs flex items-center justify-center gap-2 border border-rose-200">
+                💙 הודעת תודה לאחר האירוע (רק למי שהגיע) ▾
               </button>
-              <p class="text-[11px] text-slate-400 mt-1.5 text-center">שולח נוסח תודה למאשרי ההגעה. מומלץ להריץ יום אחרי האירוע.</p>
+              <div id="p4mThanksBox" class="hidden mt-2 space-y-2">
+                <label class="block text-xs font-bold text-slate-700">נוסח הודעת התודה (<span class="bg-rose-100 text-rose-700 px-1 rounded">{שם}</span> יוחלף בשם):</label>
+                <textarea id="p4mThanksMessage" rows="6" class="w-full bg-white border p-3 rounded-lg text-sm text-slate-700"></textarea>
+                <button id="p4mSendThanksBtn" onclick="plan4meSendThankYou()" disabled class="w-full bg-rose-500 hover:bg-rose-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-xl transition shadow-sm text-xs">
+                  💙 שלח הודעת תודה למאשרי ההגעה
+                </button>
+                <p class="text-[11px] text-slate-400 text-center">מומלץ להריץ יום אחרי האירוע.</p>
+              </div>
             </div>
             <p id="p4mResultMsg" class="text-xs font-bold hidden"></p>
           </div>
@@ -225,16 +232,16 @@
           <div class="bg-white rounded-2xl shadow-md border p-4">
             <div class="flex items-center justify-between mb-2 gap-2 flex-wrap">
               <h4 class="font-bold text-slate-800 text-sm">📋 מאשרי הגעה</h4>
-              <div class="flex items-center gap-2 text-xs">
+              <div class="flex items-center gap-2 text-xs flex-wrap justify-end">
                 <select id="seatingSideFilter" onchange="renderConfirmedSeatingList()" class="border rounded-lg p-1.5 bg-slate-50 text-xs">
                   <option value="">כל הצדדים</option>
                 </select>
                 <select id="seatingCategoryFilter" onchange="renderConfirmedSeatingList()" class="border rounded-lg p-1.5 bg-slate-50 text-xs">
                   <option value="">כל הקטגוריות</option>
                 </select>
-                <label class="flex items-center gap-1 cursor-pointer font-bold text-slate-600 bg-slate-50 border rounded-lg px-2 py-1.5">
-                  <input type="checkbox" id="seatingUnseatedOnly" onchange="renderConfirmedSeatingList()" class="w-3.5 h-3.5 cursor-pointer">
-                  רק שטרם הושבו
+                <label class="flex items-center gap-1 cursor-pointer font-bold text-slate-600 bg-slate-50 border rounded-lg px-2 py-1.5 whitespace-nowrap">
+                  <input type="checkbox" id="seatingUnseatedOnly" onchange="renderConfirmedSeatingList()" class="w-3.5 h-3.5 cursor-pointer shrink-0">
+                  <span>רק שטרם הושבו</span>
                 </label>
               </div>
             </div>
@@ -762,10 +769,12 @@
       // הרשומה הנוכחית: מצטמצמת ל-seatHere ומשובצת כאן
       await mySupabase.from('guests').update({ table_id: tableId, guests_count: seatHere }).eq('id', guestId);
 
-      // רשומת שארית חדשה: אותו אורח, יתרת המקומות, ללא שולחן
+      // רשומת שארית חדשה: אותו אורח, יתרת המקומות, ללא שולחן.
+      // שם הבסיס נשמר זהה למקור (בלי סיומת), כדי שנוכל לאחד בחזרה בהסרה.
+      const baseName = (guest.guest_name || '').replace(/ \(המשך\)$/,'');
       await mySupabase.from('guests').insert([{
         event_id: currentEventId,
-        guest_name: guest.guest_name + ' (המשך)',
+        guest_name: baseName + ' (המשך)',
         phone: guest.phone || null,
         attending: true,
         guests_count: remainder,
@@ -773,12 +782,43 @@
         side: guest.side || null,
         category: guest.category || null
       }]);
+      // מוודא שהרשומה המקורית נושאת את שם הבסיס הנקי
+      if (guest.guest_name !== baseName) {
+        await mySupabase.from('guests').update({ guest_name: baseName }).eq('id', guestId);
+      }
 
       loadDashboardData();
     }
 
     async function removeGuestFromTable(guestId) {
-      await mySupabase.from('guests').update({ table_id: null }).eq('id', guestId);
+      const guest = globalGuestsData.find(g => g.id === guestId);
+      if (!guest) return;
+
+      // שם הבסיס (בלי הסיומת "(המשך)")
+      const baseName = (guest.guest_name || '').replace(/ \(המשך\)$/,'');
+
+      // מאתר את כל החלקים של אותו אורח (מקור + כל השאריות) באירוע
+      const siblings = globalGuestsData.filter(g =>
+        (g.guest_name || '').replace(/ \(המשך\)$/,'') === baseName &&
+        (g.phone || '') === (guest.phone || '')
+      );
+
+      if (siblings.length > 1) {
+        // אורח מפוצל - מאחדים הכל חזרה לרשומה אחת לא-משובצת
+        const totalCount = siblings.reduce((acc, g) => acc + (g.guests_count || 0), 0);
+        const keep = siblings[0];
+        const removeIds = siblings.slice(1).map(g => g.id);
+        // הרשומה שנשמרת: שם בסיס נקי, סכום כל המקומות, ללא שולחן
+        await mySupabase.from('guests').update({
+          guest_name: baseName, guests_count: totalCount, table_id: null
+        }).eq('id', keep.id);
+        if (removeIds.length > 0) {
+          await mySupabase.from('guests').delete().in('id', removeIds);
+        }
+      } else {
+        // אורח רגיל - פשוט מסירים מהשולחן
+        await mySupabase.from('guests').update({ table_id: null }).eq('id', guestId);
+      }
       loadDashboardData();
     }
     async function createNewTable() {
@@ -1047,14 +1087,26 @@
       el.classList.remove('hidden');
     }
 
+    // פותח/סוגר את תיבת הודעת התודה וממלא נוסח ברירת מחדל
+    function toggleThanksBox() {
+      const box = document.getElementById('p4mThanksBox');
+      const ta = document.getElementById('p4mThanksMessage');
+      if (box.classList.contains('hidden')) {
+        box.classList.remove('hidden');
+        if (!ta.value.trim()) {
+          const v = waTemplateValues();
+          ta.value = 'היי {שם} 💙\n\nרצינו להגיד תודה ענקית שהגעתם וחגגתם איתנו את ' + v.name + '!\n' +
+            'הנוכחות שלכם עשתה לנו את היום, ואנחנו עדיין מלאים בהתרגשות ובאהבה 🤍\n\nתודה מכל הלב 🥂';
+        }
+      } else {
+        box.classList.add('hidden');
+      }
+    }
+
     // הודעת תודה לאחר האירוע - רק למי שאישר הגעה
     async function plan4meSendThankYou() {
-      const v = waTemplateValues();
-      const defaultThanks = 'היי {שם} 💙\n\nרצינו להגיד תודה ענקית שהגעתם וחגגתם איתנו את ' + v.name + '!\n' +
-        'הנוכחות שלכם עשתה לנו את היום, ואנחנו עדיין מלאים בהתרגשות ובאהבה 🤍\n\nתודה מכל הלב 🥂';
-      const message = prompt('נוסח הודעת התודה (ניתן לעריכה; {שם} יוחלף בשם האורח):', defaultThanks);
-      if (message === null) return; // ביטול
-      if (!message.trim()) { alert('נוסח ריק - לא נשלח.'); return; }
+      const message = document.getElementById('p4mThanksMessage').value;
+      if (!message.trim()) { alert('נוסח ריק - כתבו הודעה.'); return; }
 
       const list = globalGuestsData.filter(g => g.attending === true && g.phone && toIntlPhone(g.phone));
       if (list.length === 0) { alert('אין מאשרי הגעה עם טלפון לשליחה.'); return; }
