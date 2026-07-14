@@ -200,13 +200,19 @@
             </div>
             <div class="border-t border-indigo-100 pt-3 mt-1">
               <button type="button" onclick="toggleThanksBox()" id="p4mThanksToggle" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold py-2.5 px-4 rounded-xl transition text-xs flex items-center justify-center gap-2 border border-rose-200">
-                💙 הודעת תודה לאחר האירוע (רק למי שהגיע) ▾
+                הודעת תודה לאחר האירוע (רק למי שהגיע) 💙 ▾
               </button>
               <div id="p4mThanksBox" class="hidden mt-2 space-y-2">
-                <label class="block text-xs font-bold text-slate-700">נוסח הודעת התודה (<span class="bg-rose-100 text-rose-700 px-1 rounded">{שם}</span> יוחלף בשם):</label>
+                <label class="block text-xs font-bold text-slate-700">בחרו נוסח (<span class="bg-rose-100 text-rose-700 px-1 rounded">{שם}</span> יוחלף בשם):</label>
+                <div class="flex flex-wrap gap-2">
+                  <button type="button" id="thxStyleWarm" onclick="setThanksStyle('warm')" class="text-xs font-bold px-3 py-1.5 rounded-full border transition">💙 חם ומרגש</button>
+                  <button type="button" id="thxStyleShort" onclick="setThanksStyle('short')" class="text-xs font-bold px-3 py-1.5 rounded-full border transition">⚡ קצר</button>
+                  <button type="button" id="thxStyleFun" onclick="setThanksStyle('fun')" class="text-xs font-bold px-3 py-1.5 rounded-full border transition">😄 כיפי</button>
+                  <button type="button" id="thxStyleElegant" onclick="setThanksStyle('elegant')" class="text-xs font-bold px-3 py-1.5 rounded-full border transition">✨ אלגנטי</button>
+                </div>
                 <textarea id="p4mThanksMessage" rows="6" class="w-full bg-white border p-3 rounded-lg text-sm text-slate-700"></textarea>
                 <button id="p4mSendThanksBtn" onclick="plan4meSendThankYou()" disabled class="w-full bg-rose-500 hover:bg-rose-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-xl transition shadow-sm text-xs">
-                  💙 שלח הודעת תודה למאשרי ההגעה
+                  שלח הודעת תודה למאשרי ההגעה 💙
                 </button>
                 <p class="text-[11px] text-slate-400 text-center">מומלץ להריץ יום אחרי האירוע.</p>
               </div>
@@ -1087,17 +1093,42 @@
       el.classList.remove('hidden');
     }
 
-    // פותח/סוגר את תיבת הודעת התודה וממלא נוסח ברירת מחדל
+    // נוסחי תודה - הכל נמשך משם האירוע
+    let selectedThanksStyle = 'warm';
+    const thanksTemplates = {
+      warm: v => 'היי {שם} 💙\n\nרצינו להגיד תודה ענקית שהגעתם וחגגתם איתנו את ' + v.name + '!\n' +
+        'הנוכחות שלכם עשתה לנו את היום, ואנחנו עדיין מלאים בהתרגשות ובאהבה 🤍\n\nתודה מכל הלב 🥂',
+      short: v => 'היי {שם}! 💙\nתודה רבה שהגעתם ל' + v.name + ' וחגגתם איתנו. היה מושלם! 🥂',
+      fun: v => 'וואו {שם}, איזו מסיבה! 🎉\n\nתודה שבאתם, רקדתם וחגגתם איתנו את ' + v.name + ' עד הסוף!\nאתם הכי טובים — כבר מתגעגעים 💃🕺💙',
+      elegant: v => 'לכבוד {שם},\n\nבשם כל המשפחה, תודה מקרב לב על נוכחותכם ב' + v.name + '.\n' +
+        'שמחתם אותנו והפכתם את היום למיוחד באמת. אנו אסירי תודה ✨\n\nבהוקרה ובחיבה 🤍'
+    };
+
+    function applyThanksTemplate() {
+      const v = waTemplateValues();
+      const build = thanksTemplates[selectedThanksStyle] || thanksTemplates.warm;
+      document.getElementById('p4mThanksMessage').value = build(v);
+      const map = { warm:'thxStyleWarm', short:'thxStyleShort', fun:'thxStyleFun', elegant:'thxStyleElegant' };
+      Object.keys(map).forEach(k => {
+        const b = document.getElementById(map[k]);
+        if (!b) return;
+        b.className = 'text-xs font-bold px-3 py-1.5 rounded-full border transition ' +
+          (k === selectedThanksStyle ? 'bg-rose-500 text-white border-rose-500' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100');
+      });
+    }
+
+    function setThanksStyle(style) {
+      selectedThanksStyle = style;
+      applyThanksTemplate();
+    }
+
+    // פותח/סוגר את תיבת הודעת התודה
     function toggleThanksBox() {
       const box = document.getElementById('p4mThanksBox');
       const ta = document.getElementById('p4mThanksMessage');
       if (box.classList.contains('hidden')) {
         box.classList.remove('hidden');
-        if (!ta.value.trim()) {
-          const v = waTemplateValues();
-          ta.value = 'היי {שם} 💙\n\nרצינו להגיד תודה ענקית שהגעתם וחגגתם איתנו את ' + v.name + '!\n' +
-            'הנוכחות שלכם עשתה לנו את היום, ואנחנו עדיין מלאים בהתרגשות ובאהבה 🤍\n\nתודה מכל הלב 🥂';
-        }
+        if (!ta.value.trim()) applyThanksTemplate();
       } else {
         box.classList.add('hidden');
       }
