@@ -198,6 +198,12 @@
                 🔔 תזכורת למי שטרם ענה
               </button>
             </div>
+            <div class="border-t border-indigo-100 pt-3 mt-1">
+              <button id="p4mSendThanksBtn" onclick="plan4meSendThankYou()" disabled class="w-full bg-rose-500 hover:bg-rose-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-xl transition shadow-sm text-xs flex items-center justify-center gap-2">
+                💙 שליחת הודעת תודה (לאחר האירוע — רק למי שהגיע)
+              </button>
+              <p class="text-[11px] text-slate-400 mt-1.5 text-center">שולח נוסח תודה למאשרי ההגעה. מומלץ להריץ יום אחרי האירוע.</p>
+            </div>
             <p id="p4mResultMsg" class="text-xs font-bold hidden"></p>
           </div>
 
@@ -222,6 +228,9 @@
               <div class="flex items-center gap-2 text-xs">
                 <select id="seatingSideFilter" onchange="renderConfirmedSeatingList()" class="border rounded-lg p-1.5 bg-slate-50 text-xs">
                   <option value="">כל הצדדים</option>
+                </select>
+                <select id="seatingCategoryFilter" onchange="renderConfirmedSeatingList()" class="border rounded-lg p-1.5 bg-slate-50 text-xs">
+                  <option value="">כל הקטגוריות</option>
                 </select>
                 <label class="flex items-center gap-1 cursor-pointer font-bold text-slate-600 bg-slate-50 border rounded-lg px-2 py-1.5">
                   <input type="checkbox" id="seatingUnseatedOnly" onchange="renderConfirmedSeatingList()" class="w-3.5 h-3.5 cursor-pointer">
@@ -595,22 +604,32 @@
     // ממלא את בורר הצדדים לפי הערכים הקיימים בפועל
     function populateSeatingSideFilter() {
       const sel = document.getElementById('seatingSideFilter');
-      if (!sel) return;
-      const current = sel.value;
-      const sides = [...new Set(globalGuestsData.filter(g => g.attending && g.side).map(g => g.side))].sort();
-      sel.innerHTML = '<option value="">כל הצדדים</option>' + sides.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
-      sel.value = current;
+      if (sel) {
+        const current = sel.value;
+        const sides = [...new Set(globalGuestsData.filter(g => g.attending && g.side).map(g => g.side))].sort();
+        sel.innerHTML = '<option value="">כל הצדדים</option>' + sides.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+        sel.value = current;
+      }
+      const catSel = document.getElementById('seatingCategoryFilter');
+      if (catSel) {
+        const currentCat = catSel.value;
+        const cats = [...new Set(globalGuestsData.filter(g => g.attending && g.category).map(g => g.category))].sort();
+        catSel.innerHTML = '<option value="">כל הקטגוריות</option>' + cats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+        catSel.value = currentCat;
+      }
     }
 
     function renderConfirmedSeatingList() {
       const box = document.getElementById('confirmedSeatingList');
       if (!box) return;
       const sideFilter = document.getElementById('seatingSideFilter').value;
+      const catFilter = document.getElementById('seatingCategoryFilter').value;
       const unseatedOnly = document.getElementById('seatingUnseatedOnly').checked;
       const search = document.getElementById('seatingNameSearch').value.trim().toLowerCase();
 
       let list = globalGuestsData.filter(g => g.attending === true);
       if (sideFilter) list = list.filter(g => (g.side || '') === sideFilter);
+      if (catFilter) list = list.filter(g => (g.category || '') === catFilter);
       if (unseatedOnly) list = list.filter(g => !g.table_id);
       if (search) list = list.filter(g => (g.guest_name || '').toLowerCase().includes(search));
 
@@ -627,8 +646,9 @@
         row.className = 'flex items-center justify-between text-xs px-2 py-1.5 rounded-lg border ' + (seated ? 'bg-slate-50 border-slate-100' : 'bg-white border-slate-200');
         const nameCls = seated ? 'line-through text-slate-400' : 'text-slate-700 font-bold';
         const sideTag = g.side ? `<span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">${esc(g.side)}</span>` : '';
+        const catTag = g.category ? `<span class="text-[10px] bg-indigo-50 text-indigo-500 px-1.5 py-0.5 rounded">${esc(g.category)}</span>` : '';
         const tableTag = seated ? `<span class="text-[10px] text-emerald-600 font-bold">🪑 ${esc(table ? table.table_name : '')}</span>` : '';
-        row.innerHTML = `<span class="flex items-center gap-1.5"><span class="${nameCls}">${esc(g.guest_name)} (${g.guests_count || 1})</span>${sideTag}</span>${tableTag}`;
+        row.innerHTML = `<span class="flex items-center gap-1.5 flex-wrap"><span class="${nameCls}">${esc(g.guest_name)} (${g.guests_count || 1})</span>${sideTag}${catTag}</span>${tableTag}`;
         box.appendChild(row);
       });
     }
@@ -979,6 +999,8 @@
         badge.className = 'text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700';
         installBox.classList.add('hidden');
         btnAll.disabled = false; btnRem.disabled = false;
+        const btnThx = document.getElementById('p4mSendThanksBtn');
+        if (btnThx) btnThx.disabled = false;
       } else {
         badge.textContent = '⚠️ תוסף לא מותקן';
         badge.className = 'text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700';
@@ -1023,6 +1045,35 @@
       el.textContent = text;
       el.className = 'text-xs font-bold mt-1 ' + (ok ? 'text-emerald-700' : 'text-red-600');
       el.classList.remove('hidden');
+    }
+
+    // הודעת תודה לאחר האירוע - רק למי שאישר הגעה
+    async function plan4meSendThankYou() {
+      const v = waTemplateValues();
+      const defaultThanks = 'היי {שם} 💙\n\nרצינו להגיד תודה ענקית שהגעתם וחגגתם איתנו את ' + v.name + '!\n' +
+        'הנוכחות שלכם עשתה לנו את היום, ואנחנו עדיין מלאים בהתרגשות ובאהבה 🤍\n\nתודה מכל הלב 🥂';
+      const message = prompt('נוסח הודעת התודה (ניתן לעריכה; {שם} יוחלף בשם האורח):', defaultThanks);
+      if (message === null) return; // ביטול
+      if (!message.trim()) { alert('נוסח ריק - לא נשלח.'); return; }
+
+      const list = globalGuestsData.filter(g => g.attending === true && g.phone && toIntlPhone(g.phone));
+      if (list.length === 0) { alert('אין מאשרי הגעה עם טלפון לשליחה.'); return; }
+
+      if (!confirm('לשלוח הודעת תודה ל-' + list.length + ' אורחים שהגיעו?\n\nמומלץ להריץ יום אחרי האירוע.')) return;
+
+      const btn = document.getElementById('p4mSendThanksBtn');
+      btn.disabled = true;
+      p4mShowResult('מכין את הודעות התודה...', true);
+
+      const recipients = list.map(g => ({ phone: toIntlPhone(g.phone), name: g.guest_name || '' }));
+      try {
+        const res = await plan4meSend({ recipients, message, image: null, delayMin: 8, delayMax: 15 });
+        p4mShowResult('💙 הודעות התודה בדרך! ' + res.count + ' נמענים. עברו לטאב וואטסאפ למעקב.', true);
+      } catch (e) {
+        p4mShowResult('שגיאה: ' + e.message, false);
+      } finally {
+        btn.disabled = false;
+      }
     }
 
     async function plan4meSendCampaign(mode) {
