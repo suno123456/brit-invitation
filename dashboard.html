@@ -11,20 +11,223 @@
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" href="data:,">
   <style>
-    body { font-family: 'Assistant', sans-serif; background-color: #f8fafc; }
-    .tab-section { display: none; } .tab-section.active { display: block; }
-    .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto; }
+    body {
+      font-family: 'Assistant', sans-serif;
+      background:
+        radial-gradient(700px 360px at 88% -6%, rgba(37,99,235,.07), transparent 60%),
+        radial-gradient(600px 400px at 2% 30%, rgba(14,28,64,.05), transparent 60%),
+        #f8fafc;
+    }
+    .tab-section:not(.active) { display: none !important; } .tab-section.active { animation: section-in .4s cubic-bezier(.2,.7,.3,1) both; }
+    @keyframes section-in { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: none; } }
+    .loader { border: 4px solid #EFF6FF; border-top: 4px solid #2563EB; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* ═══ שכבת ליטוש PLAN4ME — עיצוב בלבד ═══ */
+    nav.p4m-nav {
+      background:
+        radial-gradient(420px 120px at 50% 0%, rgba(37,99,235,.3), transparent 70%),
+        #0F172A !important;
+      border-bottom: 1px solid rgba(96,165,250,.3) !important;
+      box-shadow: 0 6px 24px rgba(2,6,23,.25);
+    }
+    nav.p4m-nav h1 { color: #CBD5E1 !important; }
+    nav.p4m-nav .p4m-sep { background: rgba(148,163,184,.35) !important; }
+    #logoutBtn {
+      background: rgba(30,41,59,.85) !important; color: #E2E8F0 !important;
+      border: 1px solid rgba(148,163,184,.3);
+    }
+    #logoutBtn:hover { border-color: rgba(96,165,250,.5); color: #fff !important; }
+
+    /* כרטיסי סטטיסטיקה: ריחוף וספרות נקיות */
+    #mainDashboard .grid > div { transition: transform .25s cubic-bezier(.2,.7,.3,1), box-shadow .25s ease; }
+    #mainDashboard > .grid:first-child > div:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(2,6,23,.1); }
+    #statAttending, #statDeclined, #statSeated, #statArrivedCount, #liveArrivedCount { font-variant-numeric: tabular-nums; }
+
+    /* אינטראקציות גלובליות עדינות */
+    #mainDashboard input:focus, #mainDashboard select:focus, #mainDashboard textarea:focus {
+      outline: none; border-color: #60A5FA !important; box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+    }
+    #mainDashboard input, #mainDashboard select, #mainDashboard textarea { transition: border-color .2s ease, box-shadow .2s ease; }
+    #mainDashboard button { transition: transform .15s ease, background-color .2s ease, box-shadow .2s ease, border-color .2s ease, color .2s ease; }
+    #mainDashboard button:active { transform: scale(.97); }
+
+    /* טבלאות: שורות עם ריחוף */
+    #mainDashboard tbody tr { transition: background-color .15s ease; }
+    #mainDashboard tbody tr:hover { background-color: #F1F5F9; }
+
+    /* פס גלילה מעודן */
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: #F1F5F9; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 99px; border: 2px solid #F1F5F9; }
+    ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* קו הטאב הפעיל: הצבע שה-JS מזריק תמיד מנצח את השקוף */
+    #tabsNavigationContainer button { border-bottom-width: 3px !important; }
+    #tabsNavigationContainer button.border-blue-600 { border-color: #2563EB !important; }
+    #tabsNavigationContainer button.border-purple-600 { border-color: #9333EA !important; }
+
+    /* ═══ ליטוש טאב הגדרות ורשימות ═══ */
+    /* כרטיסים: מסגרת עדינה וצל רך יותר */
+    .tab-section > .bg-white { border: 1px solid #E8EDF5; box-shadow: 0 6px 24px rgba(15,23,42,.05) !important; }
+    /* כותרות כרטיסים: פס מותג קטן בצד */
+    .tab-section .bg-slate-50.border-b h3 { position: relative; padding-inline-start: 14px; }
+    .tab-section .bg-slate-50.border-b h3::before {
+      content: ""; position: absolute; inset-inline-start: 0; top: 50%; transform: translateY(-50%);
+      width: 4px; height: 1.2em; border-radius: 99px;
+      background: linear-gradient(180deg, #60A5FA, #2563EB);
+    }
+    /* שדות הטופס: נדיבים יותר, מתבהרים בפוקוס */
+    #eventSettingsForm input[type=text], #eventSettingsForm input[type=date], #eventSettingsForm input[type=time] {
+      padding: 10px 13px !important; border-radius: 10px !important; border-color: #DDE4EE;
+    }
+    #eventSettingsForm input:focus { background: #fff !important; }
+    #eventSettingsForm label { color: #33475F; }
+    /* כפתור שמירה: גרדיאנט מותג */
+    #saveEventBtn {
+      background: linear-gradient(120deg, #3B82F6, #2563EB 60%, #1D4ED8) !important;
+      box-shadow: 0 8px 22px rgba(37,99,235,.3);
+    }
+    #saveEventBtn:hover { box-shadow: 0 12px 30px rgba(37,99,235,.45); }
+    /* הודעת שמירה: גלולה ירוקה */
+    #saveMsg { display: inline-block; background: #ECFDF5; border: 1px solid #A7F3D0; color: #047857 !important; padding: 7px 16px; border-radius: 99px; font-size: .8rem; }
+    #saveMsg.hidden { display: none; }
+    /* אזור האקסל: דרופזון שמזמין */
+    #sectionSettings label.border-dashed { transition: transform .2s ease, background-color .2s ease, border-color .2s ease; }
+    #sectionSettings label.border-dashed:hover { transform: translateY(-2px); border-color: #34D399; }
+    /* טבלת אורחים: כותרת דביקה בגלילה פנימית */
+    #guestsTableBody { scroll-behavior: smooth; }
+    #sectionSettings thead th { position: sticky; top: 0; background: #F1F5F9; z-index: 5; }
+    /* טבלת אורחים: זברה + כותרת נקייה */
+    #guestsTableBody tr:nth-child(even) { background-color: #FAFBFD; }
+    #guestsTableBody td { border-bottom: 1px solid #F1F5F9; }
+    /* פאנל התוסף: הדגשת פרימיום */
+    #sectionSettings .bg-indigo-50 {
+      background: linear-gradient(165deg, #EEF2FF, #F5F7FF 60%) !important;
+      border-color: #C7D2FE !important;
+      box-shadow: 0 10px 30px rgba(79,70,229,.08);
+    }
+    #p4mSendAllBtn:not(:disabled) { background: linear-gradient(120deg, #6366F1, #4F46E5) !important; box-shadow: 0 8px 22px rgba(79,70,229,.3); }
+
+    /* שדה קישור Bit: הקישור עצמו LTR, אבל ה-placeholder העברי קריא מימין */
+    #bitLink::placeholder { direction: rtl; text-align: right; unicode-bidi: plaintext; }
+
+    /* דוח נוכחות: כותרת דביקה וזברה */
+    #sectionArrived thead th { position: sticky; top: 0; background: #F8FAFC; z-index: 5; }
+    #arrivedGuestsTableBody tr:nth-child(even) { background-color: #FAFBFD; }
+
+    /* ═══ ליטוש טאב סידורי הושבה ═══ */
+    /* הסקיצה: רקע נייר-שרטוט עם משבצות כחלחלות */
+    #hallSketch {
+      resize: vertical; overflow: hidden; /* ידית בפינה — מותחים את האזור לגובה */
+      background-color: #F8FAFF;
+      background-image:
+        linear-gradient(rgba(37,99,235,.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37,99,235,.055) 1px, transparent 1px);
+      background-size: 26px 26px;
+      border: 1px solid #DCE6F5 !important;
+      border-radius: 14px;
+      box-shadow: inset 0 2px 10px rgba(15,23,42,.04);
+      transition: background-color .3s ease;
+    }
+    /* שולחן עם כיסאות */
+    .p4m-table-wrap { position: relative; cursor: grab; touch-action: none; user-select: none; }
+    .p4m-table-wrap.dragging { cursor: grabbing; z-index: 20; }
+    .p4m-table-wrap.dragging .p4m-table-top { box-shadow: 0 18px 40px rgba(15,23,42,.3); }
+    .p4m-table-top {
+      position: absolute; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      box-shadow: 0 4px 12px rgba(15,23,42,.1), inset 0 1px 0 rgba(255,255,255,.8);
+    }
+    .p4m-chair {
+      position: absolute; border-radius: 99px; /* משענת מעוגלת, כמו בלוגו */
+      background: #fff; border: 1.5px solid #B9C6D8;
+      box-shadow: 0 1px 3px rgba(15,23,42,.12);
+      transform: rotate(var(--rot, 0deg));
+      transition: background-color .3s ease, border-color .3s ease, transform .3s ease;
+    }
+    .p4m-chair.taken {
+      background: linear-gradient(135deg, #60A5FA, #1D4ED8);
+      border-color: #1E40AF;
+      box-shadow: 0 1px 5px rgba(37,99,235,.45);
+    }
+    .p4m-table-wrap:hover .p4m-chair.taken { transform: rotate(var(--rot, 0deg)) scale(1.25); }
+
+    /* השולחנות בתוך הסקיצה: צל וריחוף עדין */
+    #hallSketch > * { transition: transform .2s cubic-bezier(.2,.7,.3,1), box-shadow .2s ease; }
+    #hallSketch > *:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 10px 24px rgba(15,23,42,.14); z-index: 2; }
+    /* כותרות הכרטיסים הקטנים בטאב: פס מותג */
+    #sectionTables h3, #sectionTables h4.font-bold.text-slate-800 { position: relative; padding-inline-start: 12px; }
+    #sectionTables h3::before, #sectionTables h4.font-bold.text-slate-800::before {
+      content: ""; position: absolute; inset-inline-start: 0; top: 50%; transform: translateY(-50%);
+      width: 3.5px; height: 1.1em; border-radius: 99px;
+      background: linear-gradient(180deg, #60A5FA, #2563EB);
+    }
+    /* רשימת מאשרי ההגעה: שורות עם ריחוף */
+    #confirmedSeatingList > * { border-radius: 8px; transition: background-color .15s ease; }
+    #confirmedSeatingList > *:hover { background-color: #F1F5F9; }
+    /* באנר הממתינים: כשיש ממתינים — פעימה עדינה למספר */
+    #unseatedCount { transition: transform .2s ease; }
+    /* כרטיסי השולחנות למטה: ריחוף */
+    #tablesContainer > * { transition: transform .25s cubic-bezier(.2,.7,.3,1), box-shadow .25s ease; }
+    #tablesContainer > *:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(15,23,42,.1); }
+
+    /* ═══ שכבת חיות ═══ */
+    nav.p4m-nav { overflow: hidden; }
+    .nav-sweep {
+      position: absolute; top: 0; bottom: 0; width: 30%; left: 0;
+      pointer-events: none; will-change: transform;
+      background: linear-gradient(105deg, transparent, rgba(147,197,253,.13), transparent);
+      transform: translateX(-160%) skewX(-18deg);
+      animation: nav-sweep 6s ease-in-out infinite;
+    }
+    @keyframes nav-sweep { 0%, 50% { transform: translateX(-160%) skewX(-18deg); } 90%, 100% { transform: translateX(460%) skewX(-18deg); } }
+    .nav-orb {
+      position: absolute; border-radius: 50%; filter: blur(22px); pointer-events: none;
+      width: 120px; height: 120px; top: -40px; background: rgba(59,130,246,.28);
+      animation: orb-drift 10s ease-in-out infinite;
+    }
+    .nav-orb.b { right: auto; left: 14%; width: 90px; height: 90px; top: auto; bottom: -35px; background: rgba(147,197,253,.18); animation-duration: 12s; animation-direction: reverse; }
+    .nav-orb.a { right: 22%; }
+    @keyframes orb-drift { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-16px, 8px) scale(1.1); } }
+
+    /* כניסת כרטיסי הסטטיסטיקה במדורג */
+    #mainDashboard > .grid:first-child > div { animation: rise .5s cubic-bezier(.2,.7,.3,1) both; }
+    #mainDashboard > .grid:first-child > div:nth-child(1) { animation-delay: .05s }
+    #mainDashboard > .grid:first-child > div:nth-child(2) { animation-delay: .13s }
+    #mainDashboard > .grid:first-child > div:nth-child(3) { animation-delay: .21s }
+    #mainDashboard > .grid:first-child > div:nth-child(4) { animation-delay: .29s }
+    @keyframes rise { 0% { opacity: 0; transform: translateY(12px); } 100% { opacity: 1; transform: none; } }
+
+    /* מונה שקופץ כשהערך משתנה */
+    .stat-pop { animation: stat-pop .35s cubic-bezier(.34,1.56,.64,1); }
+    @keyframes stat-pop { 0% { transform: scale(1); } 45% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+    /* שורות טבלה נכנסות ברכות אחרי רינדור */
+    #mainDashboard tbody tr { animation: row-in .22s ease both; }
+    @keyframes row-in { 0% { opacity: 0; } 100% { opacity: 1; } }
+
+    /* כפתורים: הרמה קלה בריחוף */
+    #mainDashboard button:hover { transform: translateY(-1px); }
+    #mainDashboard button:active { transform: scale(.97); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
   </style>
 </head>
 <body class="text-slate-800 flex flex-col min-h-screen">
 
-  <nav class="bg-white shadow-sm p-3 md:p-4 flex justify-between items-center border-b-4 border-blue-500 z-10 relative">
-    <div class="flex items-center gap-3">
-      <img src="logo.png" alt="PLAN4ME" class="h-10 md:h-12 w-auto" onerror="this.style.display='none';document.getElementById('brandFallback').style.display='inline';">
-      <span id="brandFallback" class="text-xl font-extrabold text-slate-900 tracking-wide" style="display:none;">PLAN4ME</span>
-      <div class="h-8 w-px bg-slate-200 hidden sm:block"></div>
-      <h1 class="text-sm md:text-base font-bold text-slate-600 hidden sm:block">מערכת אישורי הגעה והושבה</h1>
+  <nav class="p4m-nav bg-white shadow-sm p-3 md:p-4 flex justify-between items-center z-10 relative">
+    <div class="nav-sweep" aria-hidden="true"></div>
+    <div class="nav-orb a" aria-hidden="true"></div>
+    <div class="nav-orb b" aria-hidden="true"></div>
+    <div class="flex flex-col items-center gap-0.5">
+      <img src="data:image/png;base64,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" alt="PLAN4ME" class="h-9 md:h-11 w-auto">
+      <h1 class="text-[9px] md:text-[11px] font-bold text-slate-400 whitespace-nowrap">מערכת אישורי הגעה והושבה</h1>
+    </div>
+    <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center pointer-events-none px-24 md:px-40">
+      <h2 id="navEventTitle" class="text-base md:text-2xl font-extrabold text-white truncate transition-opacity duration-300">טוען אירוע...</h2>
     </div>
     <button id="logoutBtn" class="text-sm bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-lg font-medium transition">התנתק</button>
   </nav>
@@ -43,15 +246,15 @@
     <button onclick="location.reload()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-8 py-3 rounded-xl mt-4 transition shadow-md w-full">בדוק סטטוס ורענן עמוד</button>
   </div>
 
-  <div id="mainDashboard" class="hidden max-w-4xl mx-auto p-4 mt-6 space-y-8 flex-1 w-full text-sm">
+  <div id="mainDashboard" class="hidden max-w-[1400px] mx-auto p-4 md:px-8 mt-6 space-y-8 flex-1 w-full text-sm">
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center shadow-sm"><p class="text-xs text-emerald-700 font-semibold">אישרו הגעה (כמות)</p><p id="statAttending" class="text-2xl font-bold text-emerald-800 mt-1">0</p></div>
       <div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-center shadow-sm"><p class="text-xs text-rose-700 font-semibold">לא מגיעים</p><p id="statDeclined" class="text-2xl font-bold text-rose-800 mt-1">0</p></div>
       <div class="bg-slate-100 border border-slate-200 rounded-2xl p-4 text-center shadow-sm"><p class="text-xs text-slate-600 font-semibold">סה"כ שובצו</p><p id="statSeated" class="text-2xl font-bold text-slate-800 mt-1">0</p></div>
       <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center shadow-sm"><p class="text-xs text-amber-700 font-semibold">🏁 הגיעו לאולם</p><p id="statArrivedCount" class="text-2xl font-bold text-amber-800 mt-1">0</p></div>
     </div>
-    <div class="bg-blue-50 rounded-2xl shadow-sm border border-blue-200 p-6 space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-b pb-5">
+    <div class="bg-blue-50 rounded-2xl shadow-sm border border-blue-200 p-6 space-y-6 xl:grid xl:grid-cols-5 xl:gap-6 xl:space-y-0 xl:items-start">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-b pb-5 xl:col-span-2 xl:grid-cols-1 xl:border-b-0 xl:pb-0">
         <!-- קישור למוזמנים -->
         <div class="bg-white border-2 border-blue-300 rounded-xl p-4 text-center flex flex-col">
           <div class="flex items-center justify-center gap-2 mb-1">
@@ -73,7 +276,7 @@
           <button onclick="copyHostessLink()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 rounded-lg transition text-sm w-full mt-auto">📋 העתק קישור למארחת</button>
         </div>
       </div>
-      <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-inner">
+      <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-inner xl:col-span-3">
         <h4 class="font-bold text-slate-700 mb-1 flex items-center gap-2 text-base">💬 נוסח מומלץ לוואטסאפ</h4>
         <p class="text-xs text-slate-400 mb-3">בחרו סגנון — הפרטים (שם האירוע, תאריך, שעה והקישור) נשלפים אוטומטית מהגדרות האירוע:</p>
         <div class="flex flex-wrap gap-2 mb-3">
@@ -88,18 +291,18 @@
     </div>
 
     <div id="tabsNavigationContainer" class="flex border-b border-gray-200 bg-white p-2 rounded-t-xl gap-2 shadow-sm">
-      <button id="tabSettingsBtn" onclick="switchTab('settings')" class="flex-1 py-3 text-center font-bold text-sm border-b-2 border-blue-600 text-blue-600 focus:outline-none rounded-t-xl transition">⚙️ הגדרות ורשימות</button>
+      <button id="tabSettingsBtn" onclick="switchTab('settings')" class="flex-1 py-3 text-center font-bold text-sm border-b-2 border-transparent border-blue-600 text-blue-600 focus:outline-none rounded-t-xl transition">⚙️ הגדרות ורשימות</button>
       <button id="tabTablesBtn" onclick="switchTab('tables')" class="flex-1 py-3 text-center font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 focus:outline-none rounded-t-xl transition">🪑 סידורי הושבה</button>
       <button id="tabArrivedBtn" onclick="switchTab('arrived')" class="flex-1 py-3 text-center font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-800 focus:outline-none rounded-t-xl transition">✨ דוח נוכחות אולם</button>
       <button id="tabAdminBtn" onclick="switchTab('admin')" class="flex-1 py-3 text-center font-bold text-sm border-b-2 border-transparent text-purple-600 hover:text-purple-800 focus:outline-none rounded-t-xl transition hidden">👑 ניהול לקוחות (אדמין)</button>
     </div>
 
-    <div id="sectionSettings" class="space-y-8 tab-section active">
+    <div id="sectionSettings" class="space-y-8 tab-section active xl:grid xl:grid-cols-2 xl:gap-8 xl:space-y-0 xl:items-start">
       <div class="bg-white rounded-2xl shadow-md overflow-hidden">
         <div class="p-6 bg-slate-50 border-b border-slate-100"><h3 class="text-lg font-bold">הגדרות האירוע</h3></div>
-        <form id="eventSettingsForm" class="p-6 space-y-4 text-sm">
+        <form id="eventSettingsForm" data-align-anchor class="p-6 space-y-4 text-sm">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><label class="block font-bold mb-1">שם האירוע</label><input type="text" id="eventName" required class="w-full border p-2 rounded-lg bg-slate-50" oninput="updateTemplate()"></div>
+            <div><label class="block font-bold mb-1">שם האירוע</label><input type="text" id="eventName" required class="w-full border p-2 rounded-lg bg-slate-50" oninput="updateTemplate();document.getElementById('navEventTitle').innerText=this.value||'האירוע שלכם'"></div>
             <div><label class="block font-bold mb-1">תמונת הזמנה</label><input type="file" id="imageUpload" accept="image/*" class="w-full border p-1.5 rounded-lg bg-slate-50"><input type="hidden" id="imageUrl"></div>
             <div><label class="block font-bold mb-1">תאריך האירוע</label><input type="date" id="eventDate" class="w-full border p-2 rounded-lg bg-slate-50" onchange="updateTemplate()"></div>
             <div><label class="block font-bold mb-1">שעת קבלת פנים</label><input type="time" id="eventTime" class="w-full border p-2 rounded-lg bg-slate-50" oninput="updateTemplate()"></div>
@@ -120,6 +323,29 @@
         </form>
       </div>
 
+      <div class="space-y-8">
+      <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+        <div class="p-6 bg-slate-50 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div class="flex items-center gap-3">
+            <h3 class="text-lg font-bold">ניהול אורחים</h3>
+            <span id="totalGuests" class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">סה"כ מגיעים: 0</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition shadow-sm">📥 הורד רשימה לאקסל</button>
+            <button onclick="deleteAllGuests()" class="bg-white hover:bg-red-50 text-red-600 border border-red-300 text-xs font-bold py-2 px-4 rounded-lg transition shadow-sm">🗑️ מחק את כל הרשימה</button>
+          </div>
+        </div>
+        <div id="guestsScrollBox" class="overflow-x-auto max-h-[460px] overflow-y-auto">
+          <table class="w-full text-right border-collapse">
+            <thead>
+              <tr class="bg-slate-100 text-slate-600 text-xs font-bold border-b">
+                <th class="p-4">שם האורח</th><th class="p-4">סטטוס מענה</th><th class="p-4 text-center">כמות</th><th class="p-4">ברכה / קטגוריה</th><th class="p-4 text-center">פעולות</th>
+              </tr>
+            </thead>
+            <tbody id="guestsTableBody" class="text-sm"><tr><td colspan="5" class="p-6 text-center text-slate-500">טוען אורחים...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
       <div class="bg-white rounded-2xl shadow-md p-6 border border-slate-100 space-y-4">
         <div>
           <h3 class="text-base font-bold text-slate-800">📥 העלאת רשימת מוזמנים מתוך אקסל</h3>
@@ -150,28 +376,12 @@
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-md overflow-hidden">
-        <div class="p-6 bg-slate-50 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div class="flex items-center gap-3">
-            <h3 class="text-lg font-bold">ניהול אורחים</h3>
-            <span id="totalGuests" class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">סה"כ מגיעים: 0</span>
-          </div>
-          <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition shadow-sm">📥 הורד רשימה לאקסל</button>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-right border-collapse">
-            <thead>
-              <tr class="bg-slate-100 text-slate-600 text-xs font-bold border-b">
-                <th class="p-4">שם האורח</th><th class="p-4">סטטוס מענה</th><th class="p-4 text-center">כמות</th><th class="p-4">ברכה / קטגוריה</th><th class="p-4 text-center">פעולות</th>
-              </tr>
-            </thead>
-            <tbody id="guestsTableBody" class="text-sm"><tr><td colspan="5" class="p-6 text-center text-slate-500">טוען אורחים...</td></tr></tbody>
-          </table>
-        </div>
+      </div>
 
-        <div class="p-4 bg-slate-50 border-t space-y-4">
-          <!-- אזור שליחת וואטסאפ -->
-          <!-- שליחה דרך תוסף PLAN4ME -->
+      <!-- שליחה ב-WhatsApp — כרטיס עצמאי -->
+      <div class="bg-white rounded-2xl shadow-md overflow-hidden xl:col-span-2">
+        <div class="p-6 bg-slate-50 border-b border-slate-100"><h3 class="text-lg font-bold">שליחה ב-WhatsApp</h3></div>
+        <div class="p-6">
           <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 space-y-3">
             <div class="flex items-center justify-between gap-2 flex-wrap">
               <h4 class="font-bold text-indigo-900 text-sm">🚀 שליחה בקליק — תוסף PLAN4ME</h4>
@@ -229,7 +439,6 @@
             </div>
             <p id="p4mResultMsg" class="text-xs font-bold hidden"></p>
           </div>
-
         </div>
       </div>
     </div>
@@ -241,6 +450,13 @@
           <div class="space-y-3">
             <div><label class="block font-bold text-slate-600 mb-1">שם/מספר השולחן:</label><input type="text" id="newTableName" placeholder="למשל: שולחן 1" class="w-full border p-2 rounded-lg bg-slate-50"></div>
             <div><label class="block font-bold text-slate-600 mb-1">תכולת שולחן (כיסאות):</label><input type="number" id="newTableCapacity" value="10" min="1" class="w-full border p-2 rounded-lg bg-slate-50"></div>
+            <div><label class="block font-bold text-slate-600 mb-1">צורת השולחן:</label>
+              <select id="newTableShape" class="w-full border p-2 rounded-lg bg-slate-50">
+                <option value="round">⚪ עגול</option>
+                <option value="rect">▭ מלבני</option>
+                <option value="knights">═ אבירים (ארוך)</option>
+              </select>
+            </div>
             <button onclick="createNewTable()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition shadow-sm">🔨 צור שולחן</button>
           </div>
 
@@ -291,6 +507,7 @@
               <span id="hallBgStatus" class="text-[11px] text-slate-400"></span>
             </div>
             <div id="hallSketch" class="flex flex-wrap gap-4 justify-center bg-slate-50 border border-dashed border-slate-300 rounded-xl p-5 min-h-[120px] bg-center bg-contain bg-no-repeat"></div>
+            <p class="text-[11px] text-slate-400 mt-2 text-center">💡 גררו שולחן כדי למקם אותו על מפת האולם · דאבל-קליק על שולחן מחזיר אותו לשורה</p>
             <div class="flex flex-col sm:flex-row gap-3 mt-4 pt-4 border-t">
               <button onclick="exportSeatingToExcel()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-sm text-xs flex items-center justify-center gap-2">
                 📊 ייצוא סידורי ההושבה לאקסל
@@ -302,17 +519,33 @@
             <p class="text-[11px] text-slate-400 mt-2 text-center">מושלם להעברה למנהל האירוע או לבעלי האולם — שידעו בדיוק איך האולם צריך להיראות.</p>
           </div>
 
-          <div id="tablesContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+          <div id="tablesContainer" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"></div>
         </div>
       </div>
     </div>
 
     <div id="sectionArrived" class="space-y-6 tab-section bg-white rounded-2xl shadow-md p-6">
-      <div class="flex justify-between items-center border-b pb-3 mb-4">
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-3 border-b pb-3 mb-2">
         <div><h2 class="text-lg font-bold text-slate-800">📋 דוח נוכחות אולם (אישור מארחת)</h2></div>
         <span id="liveArrivedCount" class="bg-emerald-600 text-white font-extrabold text-xs px-3 py-2 rounded-xl shadow-sm">סה"כ באולם: 0</span>
       </div>
-      <div class="overflow-x-auto rounded-xl border border-slate-200">
+
+      <!-- פס התקדמות כניסה לאולם -->
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+        <div class="flex justify-between items-center mb-2 text-xs font-bold">
+          <span class="text-slate-600">התקדמות כניסה לאולם</span>
+          <span id="arrivalPct" class="text-emerald-700">0%</span>
+        </div>
+        <div class="h-3 bg-slate-200 rounded-full overflow-hidden">
+          <div id="arrivalBar" class="h-full rounded-full transition-all duration-700 ease-out" style="width:0%;background:linear-gradient(90deg,#34D399,#059669)"></div>
+        </div>
+        <p id="arrivalSummary" class="text-[11px] text-slate-500 mt-2">—</p>
+      </div>
+
+      <!-- חיפוש מהיר -->
+      <input type="text" id="arrivedSearch" oninput="filterArrivedRows()" placeholder="🔍 חיפוש מהיר ברשימת הנוכחים..." class="w-full border-2 border-slate-200 p-3 rounded-xl bg-slate-50 focus:outline-none focus:border-emerald-500 text-sm font-bold">
+
+      <div class="overflow-x-auto max-h-[520px] overflow-y-auto rounded-xl border border-slate-200">
         <table class="w-full text-right text-sm">
           <thead class="bg-slate-50 text-slate-700 font-bold border-b">
             <tr><th class="p-4">שם האורח</th><th class="p-4 text-center">כמות שהגיעה</th><th class="p-4 text-center">שולחן</th><th class="p-4 text-center">סטטוס כניסה</th></tr>
@@ -323,10 +556,14 @@
     </div>
 
     <div id="sectionAdmin" class="space-y-6 tab-section bg-white rounded-2xl shadow-md p-6">
-      <div class="border-b pb-3 mb-4 flex justify-between items-center">
+      <div class="border-b pb-3 mb-4 flex flex-col sm:flex-row justify-between items-center gap-3">
         <div>
           <h2 class="text-xl font-black text-purple-700">👑 פאנל ניהול עסק (סופר-אדמין)</h2>
           <p class="text-xs text-slate-500 mt-1">רשימת הלקוחות שנרשמו כעת במערכת וממתינים שתאשר את התשלום שלהם ב-Bit.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="adminPendingCount" class="bg-purple-100 text-purple-800 border border-purple-200 font-extrabold text-xs px-3 py-2 rounded-xl">0 ממתינים</span>
+          <button onclick="loadPendingUsersForAdmin()" class="bg-white hover:bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold px-3 py-2 rounded-xl transition">🔄 רענן</button>
         </div>
       </div>
       <div class="overflow-x-auto rounded-xl border border-purple-100">
@@ -426,6 +663,7 @@
       document.getElementById('hostessLink').value = window.location.origin + '/hostess.html?event=' + currentEventId + '&token=' + (event.hostess_token || '');
 
       document.getElementById('eventName').value = event.event_name || '';
+      document.getElementById('navEventTitle').innerText = event.event_name || 'האירוע שלכם';
       document.getElementById('imageUrl').value = event.image_url || '';
       applyHallBackground(event.hall_map_url || '');
       document.getElementById('eventDate').value = event.event_date ? event.event_date.split('T')[0] : '';
@@ -456,19 +694,29 @@
       const tbody = document.getElementById('adminPendingTableBody');
       const { data: pendingUsers, error } = await mySupabase.rpc('get_pending_profiles');
 
+      const cnt = document.getElementById('adminPendingCount');
       if (error || !pendingUsers || pendingUsers.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400 font-medium">אין לקוחות שממתינים לאישור כרגע. ✨</td></tr>';
+        if (cnt) cnt.innerText = '0 ממתינים';
+        tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-400 font-medium">✨ אין לקוחות שממתינים לאישור כרגע — הכל מטופל.</td></tr>';
         return;
       }
+      if (cnt) cnt.innerText = pendingUsers.length + ' ממתינים';
       tbody.innerHTML = '';
       pendingUsers.forEach(user => {
+        const rawPhone = String(user.phone || '').replace(/\D/g, '');
+        const waPhone = rawPhone.startsWith('0') ? '972' + rawPhone.slice(1) : rawPhone;
+        const waMsg = encodeURIComponent('היי ' + (user.full_name || '') + ', כאן PLAN4ME — ראיתי את ההרשמה שלך למערכת 🙂');
+        const contactBtns = rawPhone
+          ? `<a href="https://wa.me/${waPhone}?text=${waMsg}" target="_blank" rel="noopener" title="וואטסאפ ללקוח" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition">💬</a>
+             <a href="tel:${esc(user.phone)}" title="חיוג ללקוח" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition">📞</a>`
+          : '';
         tbody.innerHTML += `
           <tr class="hover:bg-purple-50/20 transition">
             <td class="p-4 font-bold text-slate-800">👤 ${esc(user.full_name || 'ללא שם')}</td>
-            <td class="p-4 font-mono text-slate-600">${esc(user.phone || '-')}</td>
+            <td class="p-4 text-slate-600"><span class="font-mono">${esc(user.phone || '-')}</span> <span class="inline-flex gap-1 ms-2 align-middle">${contactBtns}</span></td>
             <td class="p-4 text-slate-600">${esc(user.email)}</td>
             <td class="p-4 text-center">
-              <button onclick="approveUserFromDashboard('${user.id}')" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition">
+              <button onclick="approveUserFromDashboard('${user.id}')" class="text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition" style="background:linear-gradient(120deg,#A855F7,#7C3AED)">
                 🚀 אשר והפעל מערכת
               </button>
             </td>
@@ -694,10 +942,16 @@
       const removeBtn = document.getElementById('hallBgRemoveBtn');
       if (currentHallMapUrl) {
         sketch.style.backgroundImage = 'url(' + currentHallMapUrl + ')';
-        sketch.style.minHeight = '340px';
+        sketch.style.backgroundSize = 'contain';   // דורס את רשת המשבצות (26px) כשיש מפה
+        sketch.style.backgroundPosition = 'center';
+        sketch.style.backgroundRepeat = 'no-repeat';
+        sketch.style.minHeight = '360px';
         removeBtn.classList.remove('hidden');
       } else {
         sketch.style.backgroundImage = '';
+        sketch.style.backgroundSize = '';          // חזרה לרשת המשבצות
+        sketch.style.backgroundPosition = '';
+        sketch.style.backgroundRepeat = '';
         sketch.style.minHeight = '120px';
         removeBtn.classList.add('hidden');
       }
@@ -737,24 +991,134 @@
     function renderHallSketch(attendingGuests) {
       const sketch = document.getElementById('hallSketch');
       sketch.innerHTML = '';
+      sketch.style.position = 'relative';
       if (allTables.length === 0) {
         sketch.innerHTML = '<p class="text-xs text-slate-400 self-center">צרו שולחנות כדי לראות את מפת האולם.</p>';
         return;
       }
+      const anyPositioned = allTables.some(t => t.pos_x != null && t.pos_y != null);
+      if (anyPositioned || currentHallMapUrl) {
+        sketch.style.minHeight = Math.max(360, parseInt(sketch.style.minHeight) || 0) + 'px';
+      }
+
       allTables.forEach(table => {
         const seated = attendingGuests.filter(g => g.table_id === table.id)
                                       .reduce((acc, g) => acc + (g.guests_count || 0), 0);
         const cap = table.capacity || 10;
         const ratio = cap > 0 ? seated / cap : 0;
-        let color = 'bg-emerald-100 border-emerald-400 text-emerald-900';       // פנוי
-        if (ratio >= 1) color = 'bg-rose-100 border-rose-400 text-rose-900';    // מלא
-        else if (ratio >= 0.7) color = 'bg-amber-100 border-amber-400 text-amber-900'; // מתמלא
-        const circle = document.createElement('div');
-        circle.className = 'w-24 h-24 rounded-full border-4 ' + color + ' flex flex-col items-center justify-center text-center shadow-sm shrink-0' + (currentHallMapUrl ? ' bg-opacity-90 backdrop-blur-sm' : '');
-        circle.title = table.table_name + ' — תפוסה: ' + seated + '/' + cap;
-        circle.innerHTML = '<span class="font-extrabold text-xs leading-tight px-1">' + esc(table.table_name) + '</span>' +
-                           '<span class="font-black text-base leading-tight">' + seated + '/' + cap + '</span>';
-        sketch.appendChild(circle);
+        let color = 'bg-emerald-50 border-emerald-400 text-emerald-900';
+        if (ratio >= 1) color = 'bg-rose-50 border-rose-400 text-rose-900';
+        else if (ratio >= 0.7) color = 'bg-amber-50 border-amber-400 text-amber-900';
+
+        const shape = table.shape || 'round';
+        const shown = Math.min(cap, shape === 'round' ? 20 : 24);
+        const occupiedCount = Math.min(seated, shown);
+
+        // ═══ מידות לפי צורה ═══
+        let wrapW, wrapH, topStyle, chairs = [];
+        const chairW = shown <= 10 ? 16 : (shown <= 16 ? 13 : 10);
+        const chairH = shown <= 10 ? 6.5 : 6;
+
+        if (shape === 'round') {
+          wrapW = 112; wrapH = 112;
+          topStyle = 'inset:22px;border-radius:9999px';
+          const orbit = 46;
+          for (let i = 0; i < shown; i++) {
+            const ang = (i / shown) * 2 * Math.PI - Math.PI / 2;
+            chairs.push({ cx: wrapW/2 + orbit * Math.cos(ang), cy: wrapH/2 + orbit * Math.sin(ang), deg: ang * 180 / Math.PI + 90 });
+          }
+        } else {
+          // מלבני / אבירים: כיסאות בשתי שורות לאורך הצדדים הארוכים
+          const topW = shape === 'knights' ? 132 : 88;
+          const topH = shape === 'knights' ? 38 : 58;
+          wrapW = topW + 28; wrapH = topH + 42;
+          topStyle = 'inset:' + ((wrapH - topH) / 2) + 'px ' + ((wrapW - topW) / 2) + 'px;border-radius:12px';
+          const nTop = Math.ceil(shown / 2), nBot = shown - nTop;
+          const padX = 8;
+          for (let i = 0; i < nTop; i++) {
+            chairs.push({ cx: (wrapW - topW) / 2 + padX + (i + .5) * (topW - padX * 2) / nTop, cy: (wrapH - topH) / 2 - 8, deg: 0 });
+          }
+          for (let i = 0; i < nBot; i++) {
+            chairs.push({ cx: (wrapW - topW) / 2 + padX + (i + .5) * (topW - padX * 2) / nBot, cy: (wrapH + topH) / 2 + 8, deg: 0 });
+          }
+        }
+
+        const wrap = document.createElement('div');
+        wrap.className = 'p4m-table-wrap shrink-0';
+        wrap.style.width = wrapW + 'px'; wrap.style.height = wrapH + 'px';
+        wrap.title = table.table_name + ' — תפוסה: ' + seated + '/' + cap + ' · גררו למיקום על המפה · דאבל-קליק להחזרה לשורה';
+        wrap.dataset.tableId = table.id;
+
+        let chairsHtml = '';
+        chairs.forEach((c, i) => {
+          const occupied = i < occupiedCount;
+          chairsHtml += '<span class="p4m-chair' + (occupied ? ' taken' : '') + '" style="width:' + chairW + 'px;height:' + chairH + 'px;left:' + (c.cx - chairW / 2).toFixed(1) + 'px;top:' + (c.cy - chairH / 2).toFixed(1) + 'px;--rot:' + c.deg.toFixed(1) + 'deg;transition-delay:' + (i * 20) + 'ms"></span>';
+        });
+        wrap.innerHTML = chairsHtml +
+          '<div class="p4m-table-top border-[3px] ' + color + (currentHallMapUrl ? ' bg-opacity-90 backdrop-blur-sm' : '') + '" style="' + topStyle + '">' +
+            '<span class="font-extrabold text-[10px] leading-tight px-1">' + esc(table.table_name) + '</span>' +
+            '<span class="font-black text-sm leading-tight">' + seated + '/' + cap + '</span>' +
+          '</div>';
+
+        // מיקום שמור → אבסולוטי על המפה
+        if (table.pos_x != null && table.pos_y != null) {
+          wrap.style.position = 'absolute';
+          wrap.style.left = table.pos_x + '%';
+          wrap.style.top = table.pos_y + '%';
+        }
+        enableTableDrag(wrap, table);
+        sketch.appendChild(wrap);
+      });
+    }
+
+    // ═══ גרירת שולחן על המפה + שמירת מיקום ═══
+    function enableTableDrag(wrap, table) {
+      let startX, startY, startLeft, startTop, dragging = false, moved = false;
+      wrap.addEventListener('pointerdown', e => {
+        if (e.button !== 0 && e.pointerType === 'mouse') return;
+        dragging = true; moved = false;
+        const sketch = document.getElementById('hallSketch');
+        const sr = sketch.getBoundingClientRect();
+        const wr = wrap.getBoundingClientRect();
+        startX = e.clientX; startY = e.clientY;
+        startLeft = wr.left - sr.left; startTop = wr.top - sr.top;
+        wrap.setPointerCapture(e.pointerId);
+        wrap.classList.add('dragging');
+      });
+      wrap.addEventListener('pointermove', e => {
+        if (!dragging) return;
+        const dx = e.clientX - startX, dy = e.clientY - startY;
+        if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+        if (!moved) return;
+        e.preventDefault();
+        const sketch = document.getElementById('hallSketch');
+        const sr = sketch.getBoundingClientRect();
+        let px = ((startLeft + dx) / sr.width) * 100;
+        let py = ((startTop + dy) / sr.height) * 100;
+        px = Math.max(0, Math.min(px, 100 - (wrap.offsetWidth / sr.width) * 100));
+        py = Math.max(0, Math.min(py, 100 - (wrap.offsetHeight / sr.height) * 100));
+        wrap.style.position = 'absolute';
+        wrap.style.left = px + '%';
+        wrap.style.top = py + '%';
+        wrap.dataset.px = px; wrap.dataset.py = py;
+      });
+      wrap.addEventListener('pointerup', async e => {
+        if (!dragging) return;
+        dragging = false;
+        wrap.classList.remove('dragging');
+        if (!moved || wrap.dataset.px === undefined) return;
+        const px = parseFloat(wrap.dataset.px), py = parseFloat(wrap.dataset.py);
+        const { error } = await mySupabase.from('tables').update({ pos_x: px, pos_y: py }).eq('id', table.id);
+        if (error) { alert('שגיאה בשמירת המיקום: ' + error.message); return; }
+        const t = allTables.find(x => x.id === table.id);
+        if (t) { t.pos_x = px; t.pos_y = py; }
+      });
+      wrap.addEventListener('dblclick', async () => {
+        const { error } = await mySupabase.from('tables').update({ pos_x: null, pos_y: null }).eq('id', table.id);
+        if (error) { alert('שגיאה: ' + error.message); return; }
+        const t = allTables.find(x => x.id === table.id);
+        if (t) { t.pos_x = null; t.pos_y = null; }
+        renderTablesAndSeating();
       });
     }
 
@@ -790,14 +1154,33 @@
     function renderArrivedGuestsTable() {
       const tbody = document.getElementById('arrivedGuestsTableBody');
       const arrivedList = globalGuestsData.filter(g => g.arrived === true);
-      document.getElementById('liveArrivedCount').innerText = `סה"כ באולם: ${arrivedList.reduce((acc, g) => acc + (g.guests_count || 0), 0)}`;
+      const arrivedPeople = arrivedList.reduce((acc, g) => acc + (g.guests_count || 0), 0);
+      document.getElementById('liveArrivedCount').innerText = `סה"כ באולם: ${arrivedPeople}`;
+
+      // פס התקדמות: כמה מתוך המאשרים כבר נכנסו
+      const attendingPeople = globalGuestsData.filter(g => g.attending).reduce((acc, g) => acc + (g.guests_count || 0), 0);
+      const pct = attendingPeople > 0 ? Math.round((arrivedPeople / attendingPeople) * 100) : 0;
+      document.getElementById('arrivalBar').style.width = Math.min(pct, 100) + '%';
+      document.getElementById('arrivalPct').innerText = pct + '%';
+      document.getElementById('arrivalSummary').innerText =
+        attendingPeople > 0
+          ? `נכנסו ${arrivedPeople} מתוך ${attendingPeople} אורחים שאישרו הגעה · ${arrivedList.length} קבוצות/משפחות`
+          : 'עדיין אין אישורי הגעה לאירוע.';
       if (arrivedList.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-400 font-semibold">אף אורח עדיין לא נכנס לאירוע.</td></tr>'; return; }
       tbody.innerHTML = '';
       arrivedList.forEach(guest => {
         const table = allTables.find(t => t.id === guest.table_id);
         const row = document.createElement('tr'); row.className = "border-b hover:bg-emerald-50/30 transition text-sm";
+        row.dataset.searchName = (guest.guest_name || '').toLowerCase();
         row.innerHTML = `<td class="p-4 font-bold text-slate-800">👤 ${esc(guest.guest_name)}</td><td class="p-4 text-center font-extrabold text-slate-700 bg-slate-50/50">${guest.guests_count} מוזמנים</td><td class="p-4 text-center font-semibold text-blue-600">🪑 ${esc(table ? table.table_name : 'ללא')}</td><td class="p-4 text-center"><span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full font-bold text-xs">✓ באולם</span></td>`;
         tbody.appendChild(row);
+      });
+    }
+
+    function filterArrivedRows() {
+      const q = document.getElementById('arrivedSearch').value.trim().toLowerCase();
+      document.querySelectorAll('#arrivedGuestsTableBody tr[data-search-name]').forEach(row => {
+        row.style.display = !q || row.dataset.searchName.includes(q) ? '' : 'none';
       });
     }
 
@@ -902,12 +1285,24 @@
       // מניעת שולחן כפול (למשל "שולחן 2" פעמיים)
       const exists = allTables.some(t => (t.table_name || '').trim() === name);
       if (exists) { alert('⚠️ כבר קיים שולחן בשם "' + name + '" באירוע הזה. בחרו שם/מספר אחר.'); return; }
-      await mySupabase.from('tables').insert([{ event_id: currentEventId, table_name: name, capacity: cap }]);
+      const shape = document.getElementById('newTableShape').value || 'round';
+      const { error: insErr } = await mySupabase.from('tables').insert([{ event_id: currentEventId, table_name: name, capacity: cap, shape: shape }]);
+      if (insErr) { alert('שגיאה ביצירת השולחן: ' + insErr.message + '\n(אם כתוב ש-shape לא קיים — יש להריץ את סקריפט ה-SQL ב-Supabase)'); return; }
       document.getElementById('newTableName').value = '';
       loadDashboardData();
     }
     async function deleteTable(tableId) { if (confirm("למחוק את השולחן?")) { await mySupabase.from('tables').delete().eq('id', tableId); loadDashboardData(); } }
     async function deleteGuest(id) { if(confirm('למחוק אורח זה?')) { await mySupabase.from('guests').delete().eq('id', id); loadDashboardData(); } }
+    async function deleteAllGuests() {
+      const { count } = await mySupabase.from('guests').select('id', { count: 'exact', head: true }).eq('event_id', currentEventId);
+      const n = count || 0;
+      if (n === 0) { alert('הרשימה כבר ריקה.'); return; }
+      if (!confirm(`⚠️ למחוק את כל ${n} המוזמנים מהרשימה?\n\nהפעולה בלתי הפיכה — יימחקו גם אישורי ההגעה, השיבוצים והברכות שלהם.`)) return;
+      if (!confirm('בטוחים? זו ההזדמנות האחרונה לבטל.')) return;
+      const { error } = await mySupabase.from('guests').delete().eq('event_id', currentEventId);
+      if (error) { alert('שגיאה במחיקה: ' + error.message); return; }
+      loadDashboardData();
+    }
 
     function handleExcelImport() {
       const fileInput = document.getElementById('excelFileInput');
@@ -929,6 +1324,27 @@
           const data = new Uint8Array(e.target.result);
           const workbook = XLSX.read(data, { type: 'array' });
           const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+
+          // ═══ בדיקת מספרי טלפון כפולים — בתוך הקובץ ומול הרשימה הקיימת ═══
+          const normPhone = p => String(p || '').replace(/\D/g, '');
+          const seen = new Map(); const dupes = new Set();
+          for (const row of jsonData) {
+            const np = normPhone(row['טלפון'] || row['נייד']);
+            if (!np) continue;
+            if (seen.has(np)) dupes.add(np); else seen.set(np, true);
+          }
+          const { data: existingGuests } = await mySupabase.from('guests').select('phone').eq('event_id', currentEventId);
+          if (existingGuests) {
+            const existingSet = new Set(existingGuests.map(g => normPhone(g.phone)).filter(Boolean));
+            for (const np of seen.keys()) if (existingSet.has(np)) dupes.add(np);
+          }
+          if (dupes.size > 0) {
+            const list = [...dupes].slice(0, 5).join(', ') + (dupes.size > 5 ? ` ועוד ${dupes.size - 5}...` : '');
+            statusMsg.className = "text-xs font-bold text-red-600 mt-1";
+            statusMsg.innerText = `⛔ הייבוא בוטל: נמצאו מספרי טלפון כפולים (${list}). תקנו את הקובץ כך שלכל מוזמן מספר ייחודי ונסו שוב.`;
+            btn.disabled = false; btn.innerText = "🚀 קרא ועבד קובץ";
+            return;
+          }
 
           let successCount = 0;
           for (const row of jsonData) {
@@ -1293,5 +1709,55 @@
 
     window.addEventListener('DOMContentLoaded', init);
   </script>
+<script>
+  // ═══ שכבת חיות: קפיצת מונים בכל עדכון — צופה בשינויים בלבד, לא נוגע בלוגיקה ═══
+  (function(){
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    ['statAttending','statDeclined','statSeated','statArrivedCount','liveArrivedCount','unseatedCount','adminPendingCount'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (!el) return;
+      new MutationObserver(function(){
+        el.classList.remove('stat-pop');
+        void el.offsetWidth;
+        el.classList.add('stat-pop');
+      }).observe(el, { childList: true, characterData: true, subtree: true });
+    });
+  })();
+</script>
+<script>
+  // ═══ יישור עמודות ההגדרות: הרשימה מתכווצת כך שהאקסל מסתיים בקו של הטופס ═══
+  (function(){
+    function alignColumns(){
+      var box = document.getElementById('guestsScrollBox');
+      if (!box) return;
+      if (window.innerWidth < 1280) { box.style.maxHeight = ''; return; } // בנייד/טאבלט — ברירת המחדל
+      var formCard  = document.querySelector('[data-align-anchor]');
+      formCard = formCard && formCard.closest('.bg-white');
+      var guestsCard = box.closest('.bg-white');
+      var excelInput = document.getElementById('excelFileInput');
+      var excelCard  = excelInput && excelInput.closest('.bg-white');
+      if (!formCard || !guestsCard || !excelCard) return;
+      var headerH = guestsCard.firstElementChild ? guestsCard.firstElementChild.offsetHeight : 0;
+      var GAP = 32; // ה-gap של הגריד
+      var target = formCard.offsetHeight - excelCard.offsetHeight - headerH - GAP;
+      // מעגלים למספר שלם של שורות — בלי חיתוך באמצע שורה, מינימום 3 שורות תמיד
+      var thead = box.querySelector('thead');
+      var theadH = thead ? thead.offsetHeight : 46;
+      var firstRow = document.querySelector('#guestsTableBody tr td:not([colspan])');
+      firstRow = firstRow ? firstRow.parentElement : document.querySelector('#guestsTableBody tr');
+      var rowH = (firstRow && firstRow.offsetHeight) || 53;
+      var rows = Math.max(3, Math.round((target - theadH) / rowH));
+      var h = theadH + rows * rowH + 2; // +2 לגבולות
+      box.style.maxHeight = h + 'px';
+      box.style.minHeight = (theadH + 3 * rowH + 2) + 'px'; // רצפה קשיחה: 3 שורות מלאות, תמיד
+    }
+    window.addEventListener('load', function(){ alignColumns(); setTimeout(alignColumns, 600); });
+    window.addEventListener('resize', alignColumns);
+    // גם אחרי טעינת הנתונים (הטופס עשוי לשנות גובה קלות)
+    var mo = new MutationObserver(function(){ alignColumns(); });
+    var tb = document.getElementById('guestsTableBody');
+    if (tb) mo.observe(tb, { childList: true });
+  })();
+</script>
 </body>
 </html>
