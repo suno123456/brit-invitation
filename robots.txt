@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /dashboard.html
+Disallow: /admin
+Disallow: /approve
+Disallow: /approve.html
+Disallow: /hostess
+Disallow: /i/
+
+Sitemap: https://plan4me.co.il/sitemap.xml
